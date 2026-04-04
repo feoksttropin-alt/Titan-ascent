@@ -76,13 +76,50 @@ Assets/Scripts/
 | Muscle Skin | Low | Sliding, rapid grappling required |
 | Wing Membranes | Moderate | Slightly flexible |
 
+## Setup Instructions
+
+1. Clone the repository
+2. Open in Unity 2022.3.20f1 (LTS)
+3. When prompted, import TextMeshPro Essentials
+4. Allow the Input System package to restart the editor if prompted
+5. Open `Assets/Scenes/` and load the main scene
+6. Press Play
+
+### Required Unity Packages (auto-installed from manifest.json)
+- `com.unity.textmeshpro` 3.0.6
+- `com.unity.cinemachine` 2.9.7
+- `com.unity.inputsystem` 1.7.0
+- `com.unity.mathematics` 1.2.6
+- `com.unity.physics` 1.0.16
+- `com.unity.render-pipelines.universal` 14.0.9
+
+## Architecture Notes
+
+- All systems communicate through **UnityEvents** and C# events — no tight cross-system coupling except the GameManager and AudioManager singletons
+- `SurfaceProperties` uses a static registry for O(1) surface type lookups at runtime
+- `RopeSimulator` runs Verlet integration in `FixedUpdate` with 5 constraint passes per frame
+- `FallTracker` classifies falls by threshold (5/20/100/500/1500m) and emits severity-specific events consumed by `NarrationSystem`, `CameraController`, and `AudioManager`
+- `ChallengeManager` seeds daily modifiers from the current UTC date for consistent daily challenges
+- `SaveData` uses JSON serialized to PlayerPrefs with a version field for forward-compatible migration
+
+## Narration Samples
+
+The narrator is calm, philosophical, and slightly sarcastic. Lines never repeat back-to-back. Minimum 8 seconds between lines.
+
+| Trigger | Sample Lines |
+|---------|-------------|
+| Climb Start | "The titan does not notice you. Yet." / "Gravity is patient." |
+| Large Fall | "Progress is a matter of perspective." / "The titan exhales." |
+| Catastrophic Fall | "That was... considerable." / "Breathe." |
+| Major Recovery | "Remarkable." / "That should not have worked." |
+| Victory | "You stand where none have stood." / "It was always you." |
+
 ## Game Modes
 
 - **Standard Climb** — Full run from base to crown
-- **Daily Challenge** — Date-seeded random modifiers
-- **Speedrun Mode** — Built-in timer with splits
-- **Ghost Mode** — Race previous runs
+- **Daily Challenge** — Date-seeded random modifiers (LowFuel/ExtremeWind/UltraSlippery/Combined)
+- **Speedrun Mode** — Built-in timer tracked in SaveData as `speedrunPB`
 
 ## Monetization
 
-Single purchase, $6.99–$9.99. No pay-to-win. Optional cosmetic DLC post-launch.
+Single purchase, $6.99–$9.99. No pay-to-win. Cosmetics only post-launch (skins, rope colors, particle trails — all non-functional, tracked via `CosmeticItem` ScriptableObjects).
