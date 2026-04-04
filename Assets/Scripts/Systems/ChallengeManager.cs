@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using TitanAscent.Environment;
 
 namespace TitanAscent.Systems
 {
@@ -58,7 +59,7 @@ namespace TitanAscent.Systems
                 windSystem.SetGlobalWindMultiplier(windScale);
             }
 
-            Physics.SurfaceProperties.SetGlobalFrictionMultiplier(
+            SurfaceProperties.SetGlobalFrictionMultiplier(
                 modifiers.HasFlag(ChallengeModifier.UltraSlippery)
                     ? ultraSlipperyFrictionMultiplier
                     : 1f

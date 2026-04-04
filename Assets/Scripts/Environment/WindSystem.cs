@@ -144,6 +144,9 @@ namespace TitanAscent.Environment
             maxAltitudeWindStrength = 30f * multiplier;
         }
 
+        /// <summary>Alias used by ChallengeManager and DebugMenu.</summary>
+        public void SetGlobalWindMultiplier(float multiplier) => SetGlobalWindStrength(multiplier);
+
         public float GetWindStrengthAtAltitude(float altitude)
         {
             return CalculateGlobalWind(altitude).magnitude;

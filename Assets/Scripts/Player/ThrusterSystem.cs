@@ -158,6 +158,13 @@ namespace TitanAscent.Player
             currentEnergy = Mathf.Min(currentEnergy, maxEnergy);
         }
 
+        /// <summary>Scales max energy by a multiplier. Used by ChallengeManager.</summary>
+        public void SetEnergyMultiplier(float multiplier)
+        {
+            maxEnergy = Mathf.Max(1f, 100f * multiplier);
+            currentEnergy = Mathf.Min(currentEnergy, maxEnergy);
+        }
+
         /// <summary>
         /// Instantly fill energy to its current maximum. Used by the debug menu's infinite-thruster toggle.
         /// </summary>

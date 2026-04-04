@@ -53,6 +53,18 @@ namespace TitanAscent.Environment
         private static Dictionary<SurfaceType, SurfacePropertiesData> surfaceRegistry =
             new Dictionary<SurfaceType, SurfacePropertiesData>();
 
+        /// <summary>
+        /// Global friction multiplier applied on top of per-surface values.
+        /// Used by ChallengeManager for UltraSlippery modifier.
+        /// </summary>
+        public static float GlobalFrictionMultiplier { get; private set; } = 1f;
+
+        /// <summary>Sets the global friction multiplier (affects all SurfaceProperties instances).</summary>
+        public static void SetGlobalFrictionMultiplier(float multiplier)
+        {
+            GlobalFrictionMultiplier = Mathf.Max(0f, multiplier);
+        }
+
         public SurfaceType Type => useOverride ? overrideType : (propertiesData != null ? propertiesData.surfaceType : SurfaceType.ScaleArmor);
         public float FrictionCoefficient => useOverride ? overrideFriction : (propertiesData != null ? propertiesData.frictionCoefficient : 0.6f);
         public float GripMultiplier => useOverride ? overrideGripMultiplier : (propertiesData != null ? propertiesData.gripMultiplier : 1f);
