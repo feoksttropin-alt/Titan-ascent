@@ -1,0 +1,115 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace TitanAscent.Systems
+{
+    [Serializable]
+    public class SaveData
+    {
+        public int version = 1;
+        public float bestHeight = 0f;
+        public float longestFall = 0f;
+        public int totalFalls = 0;
+        public int totalClimbs = 0;
+        public float speedrunPB = 0f;
+        public List<string> unlockedCosmetics = new List<string>();
+        public List<string> completedChallenges = new List<string>();
+    }
+
+    public class SaveManager : MonoBehaviour
+    {
+        private const string SaveKey = "TitanAscent_SaveData";
+        private const int CurrentVersion = 1;
+
+        private SaveData currentData = new SaveData();
+
+        public SaveData CurrentData => currentData;
+
+        public void Load()
+        {
+            if (!PlayerPrefs.HasKey(SaveKey))
+            {
+                currentData = new SaveData();
+                return;
+            }
+
+            try
+            {
+                string json = PlayerPrefs.GetString(SaveKey);
+                currentData = JsonUtility.FromJson<SaveData>(json);
+                MigrateIfNeeded();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[SaveManager] Failed to load save: {e.Message}. Starting fresh.");
+                currentData = new SaveData();
+            }
+        }
+
+        public void Save()
+        {
+            try
+            {
+                currentData.version = CurrentVersion;
+                string json = JsonUtility.ToJson(currentData, false);
+                PlayerPrefs.SetString(SaveKey, json);
+                PlayerPrefs.Save();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[SaveManager] Failed to save: {e.Message}");
+            }
+        }
+
+        public void Reset()
+        {
+            currentData = new SaveData();
+            PlayerPrefs.DeleteKey(SaveKey);
+            PlayerPrefs.Save();
+        }
+
+        public void UnlockCosmetic(string cosmeticId)
+        {
+            if (!currentData.unlockedCosmetics.Contains(cosmeticId))
+            {
+                currentData.unlockedCosmetics.Add(cosmeticId);
+                Save();
+            }
+        }
+
+        public void CompleteChallenge(string challengeId)
+        {
+            if (!currentData.completedChallenges.Contains(challengeId))
+            {
+                currentData.completedChallenges.Add(challengeId);
+                Save();
+            }
+        }
+
+        public bool IsCosmeticUnlocked(string cosmeticId) =>
+            currentData.unlockedCosmetics.Contains(cosmeticId);
+
+        public bool IsChallengeCompleted(string challengeId) =>
+            currentData.completedChallenges.Contains(challengeId);
+
+        public void UpdateSpeedrunPB(float time)
+        {
+            if (currentData.speedrunPB <= 0f || time < currentData.speedrunPB)
+            {
+                currentData.speedrunPB = time;
+                Save();
+            }
+        }
+
+        private void MigrateIfNeeded()
+        {
+            if (currentData.version < CurrentVersion)
+            {
+                // Future migration logic goes here
+                currentData.version = CurrentVersion;
+                Save();
+            }
+        }
+    }
+}
