@@ -161,6 +161,15 @@ namespace TitanAscent.Player
                 emergencyIndicatorObject.SetActive(false);
         }
 
+        /// <summary>
+        /// Public activation entry point called by SceneBootstrapper when FallTracker.OnEmergencyWindowOpen fires.
+        /// Uses the extended window duration for a generous recovery window.
+        /// </summary>
+        public void ActivateWindow() => ActivateEmergencyWindow(extendedWindowDuration);
+
+        /// <summary>Sets the extended emergency window duration at runtime. Used by MovementTuner.</summary>
+        public void SetWindowDuration(float seconds) => extendedWindowDuration = Mathf.Max(0.1f, seconds);
+
         private void OnDrawGizmosSelected()
         {
             if (isEmergencyActive)

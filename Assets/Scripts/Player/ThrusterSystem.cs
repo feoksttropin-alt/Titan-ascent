@@ -158,6 +158,21 @@ namespace TitanAscent.Player
             currentEnergy = Mathf.Min(currentEnergy, maxEnergy);
         }
 
+        /// <summary>
+        /// Instantly fill energy to its current maximum. Used by the debug menu's infinite-thruster toggle.
+        /// </summary>
+        public void SetEnergyToMax()
+        {
+            currentEnergy = maxEnergy;
+            wasDepleted = false;
+        }
+
+        /// <summary>Sets the thrust force applied per impulse. Used by MovementTuner.</summary>
+        public void SetThrustForce(float value) => thrustForce = Mathf.Max(0.1f, value);
+
+        /// <summary>Sets the energy regeneration rate. Used by MovementTuner.</summary>
+        public void SetRegenRate(float value) => regenRate = Mathf.Max(0f, value);
+
         private bool IsAirborne()
         {
             if (playerController == null) return true;

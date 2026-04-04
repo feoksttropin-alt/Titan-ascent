@@ -129,6 +129,9 @@ namespace TitanAscent.Grapple
             return Vector3.Slerp(rawDirection, toTarget, snapStrength).normalized;
         }
 
+        /// <summary>Sets the aim assist cone angle at runtime. Used by MovementTuner.</summary>
+        public void SetConeAngle(float degrees) => coneAngle = Mathf.Clamp(degrees, 0f, 90f);
+
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(0f, 1f, 0f, 0.15f);

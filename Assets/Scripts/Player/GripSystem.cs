@@ -178,6 +178,9 @@ namespace TitanAscent.Player
             rb.AddForce(frictionForce, ForceMode.Force);
         }
 
+        /// <summary>Sets the grip drain rate at runtime. Used by MovementTuner.</summary>
+        public void SetDrainRate(float value) => gripDrainRate = Mathf.Max(0f, value);
+
         private void OnCollisionEnter(Collision collision)
         {
             EvaluateSurface(collision);

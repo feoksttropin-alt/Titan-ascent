@@ -391,6 +391,12 @@ namespace TitanAscent.Grapple
             return transform.forward;
         }
 
+        /// <summary>Sets maximum rope length at runtime. Used by MovementTuner.</summary>
+        public void SetMaxRopeLength(float value) => maxRopeLength = Mathf.Max(minRopeLength + 1f, value);
+
+        /// <summary>Sets rope retraction speed at runtime. Used by MovementTuner.</summary>
+        public void SetRetractionSpeed(float value) => retractionSpeed = Mathf.Max(0.1f, value);
+
         private void OnDrawGizmosSelected()
         {
             if (firePoint == null) return;
