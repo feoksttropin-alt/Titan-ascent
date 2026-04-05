@@ -130,7 +130,7 @@ namespace TitanAscent.Systems
             {
                 grappleActive = grappleController.IsAttached;
                 if (grappleActive)
-                    anchorPoint = grappleController.AnchorWorldPosition;
+                    anchorPoint = grappleController.AttachPoint;
             }
 
             currentRecording.frames.Add(new GhostFrame
