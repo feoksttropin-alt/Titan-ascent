@@ -69,6 +69,11 @@ namespace TitanAscent.Environment
             return angle <= maxApproachAngle;
         }
 
+        public void SetHoldStrength(float strength)
+        {
+            holdStrength = Mathf.Clamp01(strength);
+        }
+
         public void SetHighlighted(bool highlighted)
         {
             isHighlighted = highlighted;
