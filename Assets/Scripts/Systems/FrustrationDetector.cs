@@ -37,7 +37,7 @@ namespace TitanAscent.Systems
         [Header("References")]
         [SerializeField] private NarrationSystem narrationSystem;
         [SerializeField] private PlaytestLogger playtestLogger;
-        [SerializeField] private GrappleController grappleController;
+        [SerializeField] private Grapple.GrappleAimAssist grappleAimAssist;
 
         // ------------------------------------------------------------------
         // Thresholds
@@ -270,15 +270,20 @@ namespace TitanAscent.Systems
         {
             forgivenessActive = true;
 
-            if (grappleController != null)
-                grappleController.ApplyAimForgivenessBonus(GrappleForgivenessBonus);
+            // Temporarily widen aim-assist detection radius by GrappleForgivenessBonus fraction
+            float originalRadius = 0f;
+            if (grappleAimAssist != null)
+            {
+                originalRadius = grappleAimAssist.DetectionRadius;
+                grappleAimAssist.DetectionRadius = originalRadius * (1f + GrappleForgivenessBonus);
+            }
 
             Debug.Log($"[FrustrationDetector] Applying +{GrappleForgivenessBonus * 100}% grapple forgiveness for {GrappleForgivenessDuration}s.");
 
             yield return new WaitForSeconds(GrappleForgivenessDuration);
 
-            if (grappleController != null)
-                grappleController.RemoveAimForgivenessBonus(GrappleForgivenessBonus);
+            if (grappleAimAssist != null)
+                grappleAimAssist.DetectionRadius = originalRadius;
 
             forgivenessActive = false;
             Debug.Log("[FrustrationDetector] Grapple forgiveness expired.");
