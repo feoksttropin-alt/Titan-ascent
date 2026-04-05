@@ -128,6 +128,7 @@ namespace TitanAscent.Systems
             }
         }
 
+        // Internal helper — kept private; NarrationExtended uses the public wrapper below.
         private void TryNarrate(string key, string[] lines, bool ignoreCooldown = false)
         {
             if (!ignoreCooldown && Time.time - lastNarrationTime < cooldownBetweenLines)
@@ -136,6 +137,26 @@ namespace TitanAscent.Systems
             string line = PickLine(key, lines);
             Narrate(line);
         }
+
+        // ── Public extension API (used by NarrationExtended) ─────────────────────
+
+        /// <summary>
+        /// Publicly exposes the anti-repeat narration helper for sub-systems
+        /// such as <see cref="NarrationExtended"/>.
+        /// </summary>
+        public void TryNarrate(string key, string[] lines, bool ignoreCooldown)
+        {
+            if (!ignoreCooldown && Time.time - lastNarrationTime < cooldownBetweenLines)
+                return;
+            string line = PickLine(key, lines);
+            Narrate(line);
+        }
+
+        /// <summary>Convenience overload that never ignores the cooldown.</summary>
+        public void TryNarrate(string key, string[] lines) => TryNarrate(key, lines, false);
+
+        /// <summary>Directly narrates a line without anti-repeat key tracking.</summary>
+        public void NarrateRaw(string line) => Narrate(line);
 
         private string PickLine(string key, string[] lines)
         {
