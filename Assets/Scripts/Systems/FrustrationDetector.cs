@@ -247,7 +247,7 @@ namespace TitanAscent.Systems
                     TriggerNarration("LongStuck");
 
                     if (playtestLogger != null)
-                        playtestLogger.LogEvent(LogEventType.PlayerStuck, height);
+                        playtestLogger.LogEvent(LogEventType.PlayerStuck, height, 0, "FrustrationDetector");
 
                     // Reset baseline
                     stuckCheckStartTime   = now;

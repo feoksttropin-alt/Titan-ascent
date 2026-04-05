@@ -15,6 +15,8 @@ namespace TitanAscent.Systems
         public float speedrunPB = 0f;
         public List<string> unlockedCosmetics = new List<string>();
         public List<string> completedChallenges = new List<string>();
+        // Run history — populated by RunHistoryUI
+        public List<UI.RunRecord> runHistory = new List<UI.RunRecord>();
     }
 
     public class SaveManager : MonoBehaviour

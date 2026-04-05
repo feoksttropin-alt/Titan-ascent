@@ -24,6 +24,13 @@ namespace TitanAscent.Grapple
         public Vector3 BestTarget => currentBestTarget != null ? currentBestTarget.transform.position : Vector3.zero;
         public SurfaceAnchorPoint BestAnchor => currentBestTarget;
 
+        /// <summary>Exposed for temporary frustration-detection forgiveness adjustments.</summary>
+        public float DetectionRadius
+        {
+            get => detectionRadius;
+            set => detectionRadius = value;
+        }
+
         private void Awake()
         {
             mainCamera = Camera.main;
