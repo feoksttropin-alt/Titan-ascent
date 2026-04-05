@@ -1,4 +1,4 @@
-# Unity generated
+# Unity Generated Files
 Library/
 Temp/
 Obj/
@@ -8,7 +8,7 @@ Logs/
 UserSettings/
 MemoryCaptures/
 
-# Unity cache
+# Unity Cache
 .DS_Store
 .vs/
 ExportedObj/
@@ -27,39 +27,50 @@ ExportedObj/
 *.opendb
 *.VC.db
 
-# Unity3D generated meta files
+# Unity3D Meta Files
 *.pidb.meta
 *.pdb.meta
 *.mdb.meta
 
-# Unity3D generated file on crash reports
+# Crash Reports
 sysinfo.txt
+crash.log
 
-# Builds
+# Build Artifacts
 *.apk
 *.aab
 *.unitypackage
 *.app
 
-# Crashlytics generated file
+# Crashlytics
 crashlytics-build.properties
 
-# Rider
+# IDE - Rider
 .idea/
+*.sln.iml
 
-# VSCode
+# IDE - VSCode
 .vscode/
+*.code-workspace
 
-# macOS
+# IDE - Visual Studio
+.vscode-settings.json
+
+# OS - macOS
 *.DS_Store
 .AppleDouble
 .LSOverride
 
-# Windows
+# OS - Windows
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Linux
+# OS - Linux
 *~
+.directory
+
+# Additional
+.env
+.env.local
