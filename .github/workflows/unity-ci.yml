@@ -1,0 +1,89 @@
+name: Unity CI
+
+on:
+  push:
+    branches: [ "main", "claude/titan-ascent-development-ewfJA" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 1: Validate that all scripts compile (no Unity license required)
+  # ─────────────────────────────────────────────────────────────────────────────
+  validate:
+    name: Script Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Validate-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Validate-
+            Library-
+
+      - name: Run script validation
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion:     2022.3.20f1
+          targetPlatform:   StandaloneLinux64
+          buildMethod:      ""
+          allowDirtyBuild:  true
+          # runAsHostUser prevents permission issues on ubuntu runners
+          customParameters: -nographics -batchmode -logFile -
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 2: Build — Windows Standalone (only on pushes to main or dev branch)
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-windows:
+    name: Build (Windows Standalone)
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Windows-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Windows-
+            Library-
+
+      - name: Build project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion:    2022.3.20f1
+          targetPlatform:  StandaloneWindows64
+          buildsPath:      build
+          buildName:       TitanAscent
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TitanAscent-Windows-${{ github.sha }}
+          path: build/StandaloneWindows64
+          retention-days: 14
