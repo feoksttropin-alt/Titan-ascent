@@ -47,6 +47,9 @@ namespace TitanAscent.UI
         [SerializeField] private Transform leaderboardEntryContainer;
         [SerializeField] private TextMeshProUGUI leaderboardEntryPrefab;
 
+        [Header("Ghost Playback")]
+        [SerializeField] private GhostSystem ghostSystem;
+
         // -----------------------------------------------------------------------
         // Private state
         // -----------------------------------------------------------------------
@@ -64,8 +67,11 @@ namespace TitanAscent.UI
 
         private void Awake()
         {
-            _saveManager       = FindFirstObjectByType<SaveManager>();
+            _saveManager        = FindFirstObjectByType<SaveManager>();
             _leaderboardManager = FindFirstObjectByType<LeaderboardManager>();
+
+            if (ghostSystem == null)
+                ghostSystem = FindFirstObjectByType<GhostSystem>();
 
             // Hide all panels immediately
             SetInstant(mainPanel,        true);
@@ -170,6 +176,67 @@ namespace TitanAscent.UI
 #else
             Application.Quit();
 #endif
+        }
+
+        // -----------------------------------------------------------------------
+        // Ghost playback
+        // -----------------------------------------------------------------------
+
+        /// <summary>
+        /// Loads and starts playback of the last recorded ghost run.
+        /// Called from the Run History UI or any button wired to this method.
+        /// </summary>
+        public void PlayLastGhost()
+        {
+            if (ghostSystem == null)
+            {
+                Debug.LogWarning("[MainMenuController] GhostSystem reference is null; cannot play ghost.");
+                return;
+            }
+
+            string path = GhostSystem.LastGhostPath;
+            bool loaded = ghostSystem.LoadGhost(path);
+            if (!loaded)
+            {
+                Debug.LogWarning("[MainMenuController] No ghost file found at: " + path);
+                return;
+            }
+
+            ghostSystem.StartPlayback();
+        }
+
+        /// <summary>
+        /// Loads a ghost from a specific file path (e.g., a session-specific ghost
+        /// surfaced from run history) and starts playback.
+        /// </summary>
+        public void PlayGhostFromHistory(string filePath)
+        {
+            if (ghostSystem == null)
+            {
+                Debug.LogWarning("[MainMenuController] GhostSystem reference is null; cannot play ghost.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(filePath))
+            {
+                Debug.LogWarning("[MainMenuController] PlayGhostFromHistory called with empty path.");
+                return;
+            }
+
+            bool loaded = ghostSystem.LoadGhost(filePath);
+            if (!loaded)
+            {
+                Debug.LogWarning("[MainMenuController] Could not load ghost from: " + filePath);
+                return;
+            }
+
+            ghostSystem.StartPlayback();
+        }
+
+        /// <summary>Stops an active ghost playback.</summary>
+        public void StopGhostPlayback()
+        {
+            ghostSystem?.StopPlayback();
         }
 
         // -----------------------------------------------------------------------

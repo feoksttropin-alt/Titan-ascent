@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using TitanAscent.Grapple;
 
@@ -39,10 +41,19 @@ namespace TitanAscent.Systems
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// Lightweight per-run ghost recorder attached to the player.
-    /// Samples at a configurable rate (default 20 fps).
-    /// On StopRecording(), automatically hands the data to GhostSystem.SaveGhost().
-    /// Works alongside GhostSystem.cs (which handles replay/persistence).
+    /// Lightweight per-run ghost recorder.
+    /// Subscribes to GameManager.OnClimbStarted (OnEnable) to start recording,
+    /// and to GameManager.OnVictory / FallTracker.OnFallCompleted (RunEnding)
+    /// to stop recording and flush a binary ghost file.
+    ///
+    /// Binary save format per frame:
+    ///   float    timestamp
+    ///   Vector3  position  (3 × float)
+    ///   Quaternion rotation (4 × float)
+    ///   bool     isGrappling
+    ///   Vector3  grapplePoint (3 × float, written even when not grappling)
+    ///
+    /// Save path: Application.persistentDataPath + "/ghost_last.dat"
     /// </summary>
     public class GhostRecorder : MonoBehaviour
     {
@@ -54,8 +65,9 @@ namespace TitanAscent.Systems
         [SerializeField] private float recordFps = 20f;  // samples per second
 
         [Header("References (auto-found if null)")]
-        [SerializeField] private GrappleController grappleController;
-        [SerializeField] private GhostSystem       ghostSystem;
+        [SerializeField] private GrappleController       grappleController;
+        [SerializeField] private Player.PlayerController playerController;
+        [SerializeField] private FallTracker             fallTracker;
 
         // -----------------------------------------------------------------------
         // Constants
@@ -97,9 +109,8 @@ namespace TitanAscent.Systems
             _isRecording = false;
             Debug.Log($"[GhostRecorder] Recording stopped. Frames: {_frames.Count}");
 
-            // Hand off to GhostSystem for persistence
-            if (ghostSystem != null && _frames.Count > 0)
-                ghostSystem.SaveGhost("run");
+            if (_frames.Count > 0)
+                SaveBinary(_frames, GhostSystem.LastGhostPath);
         }
 
         // -----------------------------------------------------------------------
@@ -110,14 +121,69 @@ namespace TitanAscent.Systems
         {
             _rb = GetComponent<Rigidbody>();
 
-            if (grappleController == null)
-                grappleController = GetComponentInChildren<GrappleController>()
-                    ?? FindFirstObjectByType<GrappleController>();
+            if (playerController == null)
+                playerController = FindFirstObjectByType<Player.PlayerController>();
 
-            if (ghostSystem == null)
-                ghostSystem = FindFirstObjectByType<GhostSystem>();
+            if (grappleController == null)
+            {
+                grappleController = (playerController != null)
+                    ? playerController.GetComponentInChildren<GrappleController>()
+                    : null;
+
+                if (grappleController == null)
+                    grappleController = FindFirstObjectByType<GrappleController>();
+            }
+
+            if (fallTracker == null)
+                fallTracker = FindFirstObjectByType<FallTracker>();
 
             _interval = recordFps > 0f ? 1f / recordFps : 0.05f;
+        }
+
+        private void OnEnable()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnClimbStarted.AddListener(OnClimbStarted);
+                GameManager.Instance.OnVictory.AddListener(OnVictory);
+            }
+            else
+            {
+                // GameManager may not exist yet; defer binding to Start
+                Debug.LogWarning("[GhostRecorder] GameManager.Instance not available in OnEnable; will retry in Start.");
+            }
+
+            BindFallTracker();
+        }
+
+        private void Start()
+        {
+            // Re-bind GameManager events in case it wasn't available during OnEnable
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnClimbStarted.RemoveListener(OnClimbStarted);
+                GameManager.Instance.OnClimbStarted.AddListener(OnClimbStarted);
+
+                GameManager.Instance.OnVictory.RemoveListener(OnVictory);
+                GameManager.Instance.OnVictory.AddListener(OnVictory);
+            }
+
+            // Re-resolve FallTracker if it wasn't found yet
+            if (fallTracker == null)
+                fallTracker = FindFirstObjectByType<FallTracker>();
+
+            BindFallTracker();
+        }
+
+        private void OnDisable()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnClimbStarted.RemoveListener(OnClimbStarted);
+                GameManager.Instance.OnVictory.RemoveListener(OnVictory);
+            }
+
+            UnbindFallTracker();
         }
 
         private void Update()
@@ -129,6 +195,43 @@ namespace TitanAscent.Systems
             _timer -= _interval;
 
             CaptureFrame();
+        }
+
+        // -----------------------------------------------------------------------
+        // Event handlers
+        // -----------------------------------------------------------------------
+
+        private void OnClimbStarted()
+        {
+            StartRecording();
+        }
+
+        private void OnVictory()
+        {
+            StopRecording();
+        }
+
+        private void OnFallCompleted(FallData data)
+        {
+            if (data.severity == FallSeverity.RunEnding)
+                StopRecording();
+        }
+
+        // -----------------------------------------------------------------------
+        // FallTracker binding helpers
+        // -----------------------------------------------------------------------
+
+        private void BindFallTracker()
+        {
+            if (fallTracker == null) return;
+            fallTracker.OnFallCompleted.RemoveListener(OnFallCompleted);
+            fallTracker.OnFallCompleted.AddListener(OnFallCompleted);
+        }
+
+        private void UnbindFallTracker()
+        {
+            if (fallTracker == null) return;
+            fallTracker.OnFallCompleted.RemoveListener(OnFallCompleted);
         }
 
         // -----------------------------------------------------------------------
@@ -153,13 +256,16 @@ namespace TitanAscent.Systems
                 grappleAnchor = grappleController.AttachPoint;
             }
 
+            // Use the PlayerController transform if available, else fall back to this transform
+            Transform t = (playerController != null) ? playerController.transform : transform;
+
             GhostPlayerState state = DeterminePlayerState(grappleActive);
 
             _frames.Add(new RecorderFrame
             {
                 time          = Time.time,
-                position      = transform.position,
-                rotation      = transform.rotation,
+                position      = t.position,
+                rotation      = t.rotation,
                 grappleActive = grappleActive,
                 grappleAnchor = grappleAnchor,
                 playerState   = state
@@ -171,20 +277,74 @@ namespace TitanAscent.Systems
             if (grappleActive)
                 return GhostPlayerState.Swinging;
 
-            if (_rb == null)
+            Rigidbody rb = _rb;
+            if (rb == null && playerController != null)
+                rb = playerController.GetComponent<Rigidbody>();
+
+            if (rb == null)
                 return GhostPlayerState.Airborne;
 
-            float vy = _rb.velocity.y;
+            float vy = rb.velocity.y;
 
-            // Simple heuristic based on vertical velocity
             if (vy < -5f)
                 return GhostPlayerState.Falling;
 
-            // Ground check via velocity — if very slow horizontally and vertical ~0
-            if (Mathf.Abs(vy) < 0.5f && _rb.velocity.magnitude < 1f)
+            if (Mathf.Abs(vy) < 0.5f && rb.velocity.magnitude < 1f)
                 return GhostPlayerState.Grounded;
 
             return GhostPlayerState.Airborne;
+        }
+
+        // -----------------------------------------------------------------------
+        // Binary serialisation
+        // -----------------------------------------------------------------------
+
+        /// <summary>
+        /// Writes the frame list to a compact binary file.
+        /// Format per frame:
+        ///   float timestamp, float px, float py, float pz,
+        ///   float rx, float ry, float rz, float rw,
+        ///   bool isGrappling, float gx, float gy, float gz
+        /// </summary>
+        private static void SaveBinary(List<RecorderFrame> frames, string filePath)
+        {
+            try
+            {
+                string dir = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                using FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                using BinaryWriter bw = new BinaryWriter(fs);
+
+                bw.Write(frames.Count);
+
+                foreach (RecorderFrame f in frames)
+                {
+                    bw.Write(f.time);
+
+                    bw.Write(f.position.x);
+                    bw.Write(f.position.y);
+                    bw.Write(f.position.z);
+
+                    bw.Write(f.rotation.x);
+                    bw.Write(f.rotation.y);
+                    bw.Write(f.rotation.z);
+                    bw.Write(f.rotation.w);
+
+                    bw.Write(f.grappleActive);
+
+                    bw.Write(f.grappleAnchor.x);
+                    bw.Write(f.grappleAnchor.y);
+                    bw.Write(f.grappleAnchor.z);
+                }
+
+                Debug.Log($"[GhostRecorder] Binary ghost saved to '{filePath}' ({frames.Count} frames).");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[GhostRecorder] Failed to save binary ghost: {e.Message}");
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using TitanAscent.Input;
 using TitanAscent.Systems;
 
 namespace TitanAscent.UI
@@ -271,7 +272,7 @@ namespace TitanAscent.UI
                     {
                         showingRestartConfirm = false;
                         Time.timeScale = 1f;
-                        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                        SceneManager.LoadScene(SceneNames.MainGame);
                     },
                     () => showingRestartConfirm = false
                 );

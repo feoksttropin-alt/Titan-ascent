@@ -27,10 +27,11 @@ namespace TitanAscent.Systems
         [SerializeField] private GameObject splitRowPrefab;
 
         [Header("Colors")]
-        [SerializeField] private Color aheadColor   = new Color(0.2f, 0.9f, 0.2f, 1f);
-        [SerializeField] private Color behindColor  = new Color(0.9f, 0.2f, 0.2f, 1f);
-        [SerializeField] private Color noPBColor    = Color.white;
-        [SerializeField] private Color activeRowBg  = new Color(1f, 1f, 1f, 0.15f);
+        [SerializeField] private Color aheadColor    = new Color(0.2f, 0.9f, 0.2f, 1f);
+        [SerializeField] private Color behindColor   = new Color(0.9f, 0.2f, 0.2f, 1f);
+        [SerializeField] private Color noPBColor     = Color.white;
+        [SerializeField] private Color uncrossedColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+        [SerializeField] private Color activeRowBg   = new Color(1f, 1f, 1f, 0.15f);
 
         [Header("Animation")]
         [SerializeField] private float flashDuration = 0.4f;
@@ -138,16 +139,20 @@ namespace TitanAscent.Systems
                 Destroy(child.gameObject);
             _rows.Clear();
 
-            // We need split names — SpeedrunManager stores them in its private list,
-            // so we use the known default split names
-            string[] names =
+            // Prefer split count and names from the manager; fall back to the known defaults
+            int count = _manager != null ? _manager.SplitCount : 10;
+            string[] fallbackNames =
             {
                 "TailBasin", "TailSpires", "HindLegValley", "WingRoot", "SpineRidge",
                 "TheGraveyard", "UpperBackStorm", "TheNeck", "TheCrown", "Summit"
             };
 
-            for (int i = 0; i < names.Length; i++)
+            for (int i = 0; i < count; i++)
             {
+                string splitName = (_manager != null && !string.IsNullOrEmpty(_manager.GetSplitName(i)))
+                    ? _manager.GetSplitName(i)
+                    : (i < fallbackNames.Length ? fallbackNames[i] : $"Split {i + 1}");
+
                 var row = new SplitRow();
 
                 if (splitRowPrefab != null)
@@ -174,7 +179,7 @@ namespace TitanAscent.Systems
                 }
 
                 if (row.nameLabel != null)
-                    row.nameLabel.text = names[i];
+                    row.nameLabel.text = splitName;
                 if (row.timeLabel != null)
                     row.timeLabel.text = "--";
                 if (row.deltaLabel != null)
@@ -243,21 +248,40 @@ namespace TitanAscent.Systems
                 RefreshRow(i, i == nextSplit);
         }
 
+        // Alpha applied to rows that have not yet been crossed (fade-out for pending splits)
+        private const float PendingRowAlpha  = 0.35f;
+        private const float CrossedRowAlpha  = 1.0f;
+
         private void RefreshRow(int index, bool isActive)
         {
             if (index < 0 || index >= _rows.Count) return;
             SplitRow row = _rows[index];
 
-            // Highlight active row
+            bool  crossed   = _manager.IsSplitCrossed(index);
+            float rowAlpha  = (crossed || isActive) ? CrossedRowAlpha : PendingRowAlpha;
+
+            // Sync name from manager (handles any runtime name changes)
+            string splitName = _manager.GetSplitName(index);
+            if (row.nameLabel != null)
+            {
+                row.nameLabel.text = splitName;
+                Color nc = row.nameLabel.color;
+                row.nameLabel.color = new Color(nc.r, nc.g, nc.b, rowAlpha);
+            }
+
+            // Highlight active row background
             if (row.background != null)
                 row.background.color = isActive ? activeRowBg : Color.clear;
 
             // Time
             float splitTime = _manager.GetSplitTime(index);
-            bool  crossed   = _manager.IsSplitCrossed(index);
 
             if (row.timeLabel != null)
+            {
                 row.timeLabel.text = crossed ? FormatShort(splitTime) : "--";
+                Color tc = row.timeLabel.color;
+                row.timeLabel.color = new Color(tc.r, tc.g, tc.b, rowAlpha);
+            }
 
             // Delta
             float delta = _manager.GetSplitDelta(index);
@@ -268,15 +292,16 @@ namespace TitanAscent.Systems
                 if (!crossed || pb <= 0f)
                 {
                     row.deltaLabel.text  = "";
-                    row.deltaLabel.color = noPBColor;
+                    row.deltaLabel.color = new Color(noPBColor.r, noPBColor.g, noPBColor.b, rowAlpha);
                 }
                 else
                 {
                     string sign = delta <= 0f ? "-" : "+";
                     float  abs  = Mathf.Abs(delta);
+                    Color  dc   = delta <= 0f ? aheadColor : behindColor;
                     row.deltaLabel.text  = $"{sign}{abs:F1}s";
-                    row.deltaLabel.color = delta <= 0f ? aheadColor : behindColor;
-                    row.targetColor      = delta <= 0f ? aheadColor : behindColor;
+                    row.deltaLabel.color = new Color(dc.r, dc.g, dc.b, rowAlpha);
+                    row.targetColor      = dc;
                 }
             }
         }
