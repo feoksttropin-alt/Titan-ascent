@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using TitanAscent.Systems;
 
 namespace TitanAscent.Player
 {
@@ -24,6 +25,8 @@ namespace TitanAscent.Player
 
         private Rigidbody rb;
         private PlayerController playerController;
+        private TutorialSystem tutorialSystem;
+        private FrustrationDetector frustrationDetector;
 
         private float currentEnergy;
         private float lastThrustTime;
@@ -45,6 +48,9 @@ namespace TitanAscent.Player
             rb = GetComponent<Rigidbody>();
             playerController = GetComponent<PlayerController>();
             currentEnergy = maxEnergy;
+
+            tutorialSystem = FindFirstObjectByType<TutorialSystem>();
+            frustrationDetector = FindFirstObjectByType<FrustrationDetector>();
         }
 
         private void Update()
@@ -117,6 +123,9 @@ namespace TitanAscent.Player
             // Fire event
             OnThrust?.Invoke(direction);
 
+            // Notify tutorial system
+            tutorialSystem?.NotifyThrusterUsed();
+
             // Play particle burst
             if (thrusterParticles != null)
                 thrusterParticles.Emit(20);
@@ -126,6 +135,7 @@ namespace TitanAscent.Player
             {
                 wasDepleted = true;
                 OnEnergyDepleted?.Invoke();
+                frustrationDetector?.RegisterThrusterDepletion();
             }
         }
 

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
+using TitanAscent.Systems;
 
 namespace TitanAscent.Grapple
 {
@@ -51,6 +52,8 @@ namespace TitanAscent.Grapple
         private Rigidbody rb;
         private Player.PlayerController playerController;
         private Player.EmergencyRecovery emergencyRecovery;
+        private TutorialSystem tutorialSystem;
+        private FrustrationDetector frustrationDetector;
 
         private Vector3 attachPoint;
         private SurfaceAnchorPoint attachedAnchor;
@@ -85,6 +88,9 @@ namespace TitanAscent.Grapple
 
             if (ropeSimulator == null)
                 ropeSimulator = GetComponentInChildren<RopeSimulator>();
+
+            tutorialSystem = FindFirstObjectByType<TutorialSystem>();
+            frustrationDetector = FindFirstObjectByType<FrustrationDetector>();
         }
 
         private void Update()
@@ -149,6 +155,9 @@ namespace TitanAscent.Grapple
         {
             Vector3 aimDirection = GetAimDirection();
             Vector3 fireOrigin = firePoint.position;
+
+            // Notify tutorial that a shot was fired
+            tutorialSystem?.NotifyGrappleFired();
 
             // Check for valid grapple target
             float adjustedRange = maxRopeLength;
@@ -237,6 +246,10 @@ namespace TitanAscent.Grapple
 
             currentState = GrappleState.Idle;
             grappleHeadInFlight = false;
+
+            // Notify systems of the miss
+            tutorialSystem?.NotifyGrappleMiss();
+            frustrationDetector?.RegisterGrappleMiss();
         }
 
         private void AttachGrapple(Vector3 point, Vector3 normal, SurfaceAnchorPoint anchor)
@@ -334,6 +347,9 @@ namespace TitanAscent.Grapple
 
             if (ropeSimulator != null)
                 ropeSimulator.SetLength(currentRopeLength);
+
+            // Notify tutorial that the player is swinging and retracting
+            tutorialSystem?.NotifySwing();
         }
 
         private void UpdateGrappleHead()
