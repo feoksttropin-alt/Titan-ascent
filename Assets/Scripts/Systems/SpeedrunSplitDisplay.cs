@@ -42,6 +42,7 @@ namespace TitanAscent.Systems
         // -----------------------------------------------------------------------
 
         private SpeedrunManager _manager;
+        private CanvasGroup     _canvasGroup;
         private bool            _wasActive       = false;
         private int             _lastNextSplit    = 0;
 
@@ -71,6 +72,11 @@ namespace TitanAscent.Systems
         // -----------------------------------------------------------------------
         // Lifecycle
         // -----------------------------------------------------------------------
+
+        private void Awake()
+        {
+            _canvasGroup = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
+        }
 
         private void Start()
         {
@@ -104,7 +110,7 @@ namespace TitanAscent.Systems
 
             // Update total time text
             if (totalTimeText != null)
-                totalTimeText.text = "Total: " + FormatLong(_manager.GetCurrentTime());
+                totalTimeText.text = _manager.GetFormattedTime(_manager.GetCurrentTime());
 
             // Detect newly crossed splits by comparing next split index
             int nextSplit = GetNextSplitIndex();
@@ -372,10 +378,12 @@ namespace TitanAscent.Systems
 
         private void SetContainerVisible(bool visible)
         {
-            if (splitRowsContainer != null)
-                splitRowsContainer.gameObject.SetActive(visible);
-            if (totalTimeText != null)
-                totalTimeText.gameObject.SetActive(visible);
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha          = visible ? 1f : 0f;
+                _canvasGroup.interactable   = visible;
+                _canvasGroup.blocksRaycasts = visible;
+            }
         }
 
         private static string FormatShort(float seconds)

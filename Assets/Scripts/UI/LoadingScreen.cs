@@ -28,7 +28,7 @@ namespace TitanAscent.UI
 
         [Header("Tips")]
         [SerializeField] private Text       tipText;
-        [SerializeField] private float      tipRotateInterval = 3f;
+        [SerializeField] private float      tipRotateInterval = 4f;
 
         [Header("Transitions")]
         [SerializeField] private CanvasGroup canvasGroup;
@@ -45,24 +45,21 @@ namespace TitanAscent.UI
 
         private static readonly string[] Tips =
         {
-            // Mechanics
-            "Releasing the grapple at the top of your swing arc gives maximum upward velocity.",
-            "Hold SHIFT to reel in your rope and pull yourself toward the anchor point.",
-            "Right-click activates grip claws — use them to slow a dangerous slide.",
-            "The thruster system recharges passively. Use short bursts rather than holding.",
-            "Grapple anchor points glow brighter the more reliably they hold. Trust the glow.",
-            // Tips
-            "If you're falling fast, look for a nearby anchor and fire early — the rope needs time to reach.",
-            "Swing momentum compounds. A small swing can become a launch if timed perfectly.",
-            "The emergency recovery window opens automatically during catastrophic falls. Don't panic.",
-            "Watch the titan's muscle groups — they flex before a contraction. That's your warning.",
-            "Wing tremors hit zones 3 and 4 hardest. Grapple fast and hold on.",
-            // Lore
-            "The titan has been climbing toward the sun for three thousand years. It has not stopped.",
-            "No one knows what lies at the crown. The ones who reached it never came back down.",
-            "The glowing anchors were placed by the Ascent Guild a century ago. Most still hold.",
-            "Zone 8 — the Neck — pulses every six seconds. The titan is always breathing.",
-            "Your grapple hook is carved from a rib fragment of a younger titan. It remembers the weight."
+            "Zone 7 has the most catastrophic fall rate of any section.",
+            "The titan breathes once every 8 seconds. Time your climb.",
+            "Releasing your grapple at the apex of a swing launches you further.",
+            "Grip gloves are most effective on Bone Ridge surfaces.",
+            "The emergency recovery window lasts longer on larger falls — use it.",
+            "Daily challenges reset at midnight UTC.",
+            "Your ghost is saved after every run. Race yourself.",
+            "Crystal surfaces have the highest grip but the narrowest grapple zones.",
+            "Wind in Zone 7 can exceed 30 m/s. Stay low.",
+            "The narrator has over 100 unique lines. Some only appear rarely.",
+            "Speedrun splits track each zone separately. Improve one zone at a time.",
+            "Muscle skin on The Neck contracts every 8 seconds. Wait for the exhale.",
+            "The crown has been reached. Not often.",
+            "A catastrophic fall from Zone 9 is still survivable with emergency recovery.",
+            "Your best height marker persists between runs."
         };
 
         // ------------------------------------------------------------------
@@ -92,6 +89,14 @@ namespace TitanAscent.UI
                 canvasGroup = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
 
             SetAlpha(0f);
+        }
+
+        private void Start()
+        {
+            // Show a random tip immediately and start the rotation coroutine
+            currentTipIndex = Random.Range(0, Tips.Length);
+            ShowTip(currentTipIndex);
+            StartCoroutine(RotateTipsCoroutine());
         }
 
         // ------------------------------------------------------------------
@@ -180,6 +185,16 @@ namespace TitanAscent.UI
         // ------------------------------------------------------------------
         // Helpers
         // ------------------------------------------------------------------
+
+        private IEnumerator RotateTipsCoroutine()
+        {
+            while (true)
+            {
+                yield return new WaitForSecondsRealtime(tipRotateInterval);
+                currentTipIndex = (currentTipIndex + 1) % Tips.Length;
+                ShowTip(currentTipIndex);
+            }
+        }
 
         private void UpdateTipRotation()
         {
