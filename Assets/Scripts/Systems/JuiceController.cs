@@ -52,13 +52,15 @@ namespace TitanAscent.Systems
         public void TriggerGrappleImpact()
         {
             StartShake(grappleImpactShakeMag, grappleImpactShakeDuration);
-            StartCoroutine(FreezFrame(1));
+            StartCoroutine(FreezeForSeconds(0.05f));
         }
 
         public void TriggerHardLanding(float fallDistance)
         {
-            float mag = Mathf.Clamp(fallDistance * 0.002f, 0.05f, 0.8f);
-            float dur = Mathf.Clamp(fallDistance * 0.0008f, 0.3f, 0.8f);
+            // Intensity scaled by Clamp01(distance/500), duration 0.2–0.4s
+            float intensity = Mathf.Clamp01(fallDistance / 500f);
+            float mag = Mathf.Lerp(0.05f, 0.8f, intensity);
+            float dur = Mathf.Lerp(0.2f, 0.4f, intensity);
             StartShake(mag, dur);
         }
 
@@ -80,12 +82,15 @@ namespace TitanAscent.Systems
         public void TriggerNewRecord()
         {
             StartCoroutine(FlashOverlay(goldVignette, 0.1f, 0.5f, 0.55f));
+            // Brief positive FOV pulse: FOV - 3 for 0.15s then back
+            StartCoroutine(FOVNarrowPulse(3f, 0.15f));
         }
 
         public void TriggerVictory()
         {
             StartCoroutine(FlashOverlay(goldVignette, 0.2f, 1.5f, 0.8f));
-            StartCoroutine(SlowMotionRamp(0.3f, 1f, 3f));
+            // Slow-mo: 0.3x for 2s, then lerp back to 1f over 0.5s
+            StartCoroutine(SlowMotionRamp(0.3f, 1f, 2f, 0.5f));
         }
 
         public void TriggerRecovery()
@@ -109,6 +114,13 @@ namespace TitanAscent.Systems
             Time.timeScale = 0f;
             for (int i = 0; i < frames; i++)
                 yield return new WaitForEndOfFrame();
+            Time.timeScale = 1f;
+        }
+
+        private IEnumerator FreezeForSeconds(float seconds)
+        {
+            Time.timeScale = 0f;
+            yield return new WaitForSecondsRealtime(seconds);
             Time.timeScale = 1f;
         }
 
@@ -136,6 +148,18 @@ namespace TitanAscent.Systems
             mainCamera.fieldOfView = startFOV;
         }
 
+        /// <summary>Narrows FOV by <paramref name="fovReduction"/> for <paramref name="holdDuration"/> then snaps back.</summary>
+        private IEnumerator FOVNarrowPulse(float fovReduction, float holdDuration)
+        {
+            if (mainCamera == null) yield break;
+            float startFOV = mainCamera.fieldOfView;
+            float narrowFOV = startFOV - fovReduction;
+
+            mainCamera.fieldOfView = narrowFOV;
+            yield return new WaitForSecondsRealtime(holdDuration);
+            mainCamera.fieldOfView = startFOV;
+        }
+
         private IEnumerator FlashOverlay(CanvasGroup group, float fadeIn, float hold, float fadeOut)
         {
             if (group == null) yield break;
@@ -156,25 +180,25 @@ namespace TitanAscent.Systems
             group.alpha = to;
         }
 
-        private IEnumerator SlowMotionRamp(float targetScale, float fromScale, float holdDuration)
+        private IEnumerator SlowMotionRamp(float targetScale, float fromScale, float holdDuration, float rampOutDuration = 0.5f)
         {
-            float rampIn = 1f;
-            float t = 0f;
-            while (t < rampIn)
-            {
-                t += Time.unscaledDeltaTime;
-                Time.timeScale = Mathf.Lerp(fromScale, targetScale, t / rampIn);
-                yield return null;
-            }
+            // Instantly snap to slow-mo scale
+            Time.timeScale = targetScale;
+            Time.fixedDeltaTime = 0.02f * targetScale;
+
             yield return new WaitForSecondsRealtime(holdDuration);
-            t = 0f;
-            while (t < rampIn)
+
+            // Lerp back to normal over rampOutDuration
+            float t = 0f;
+            while (t < rampOutDuration)
             {
                 t += Time.unscaledDeltaTime;
-                Time.timeScale = Mathf.Lerp(targetScale, 1f, t / rampIn);
+                Time.timeScale = Mathf.Lerp(targetScale, 1f, t / rampOutDuration);
+                Time.fixedDeltaTime = 0.02f * Time.timeScale;
                 yield return null;
             }
             Time.timeScale = 1f;
+            Time.fixedDeltaTime = 0.02f;
         }
     }
 }
