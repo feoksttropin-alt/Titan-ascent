@@ -21,6 +21,11 @@ namespace TitanAscent.UI
         [SerializeField] private float maxZoomOutFOV = 95f;
         [SerializeField] private float fallZoomStartDistance = 50f;
         [SerializeField] private float fallZoomMaxDistance = 500f;
+        [SerializeField] private float landingFOVSnapSpeed = 8f;   // ~0.5s to snap back
+
+        [Header("Height Record")]
+        [SerializeField] private float recordUpwardShift = 0.4f;   // metres upward
+        [SerializeField] private float recordShiftDuration = 0.35f;
 
         [Header("Landing Shake")]
         [SerializeField] private float shakeDecaySpeed = 8f;
@@ -48,6 +53,10 @@ namespace TitanAscent.UI
 
         private Vector3 smoothVelocity;
 
+        // Height record upward shift
+        private float recordShiftAmount = 0f;
+        private bool isSnappingFOVBack = false;
+
         private void Awake()
         {
             cam = GetComponent<Camera>();
@@ -68,13 +77,19 @@ namespace TitanAscent.UI
         private void OnEnable()
         {
             if (fallTracker != null)
+            {
                 fallTracker.OnFallCompleted.AddListener(HandleFallLanding);
+                fallTracker.OnNewHeightRecord.AddListener(HandleNewHeightRecord);
+            }
         }
 
         private void OnDisable()
         {
             if (fallTracker != null)
+            {
                 fallTracker.OnFallCompleted.RemoveListener(HandleFallLanding);
+                fallTracker.OnNewHeightRecord.RemoveListener(HandleNewHeightRecord);
+            }
         }
 
         private void Update()

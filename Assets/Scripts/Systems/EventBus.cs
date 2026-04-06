@@ -62,6 +62,25 @@ namespace TitanAscent.Systems
         public float longestFall;
     }
 
+    public struct TitanShudderEvent
+    {
+        public float amplitude;
+        public float duration;
+        public int[] affectedZoneIndices;
+    }
+
+    public struct WindGustEvent
+    {
+        public float intensity;
+        public float duration;
+    }
+
+    public struct BreathingPulseEvent
+    {
+        public float amplitude;
+        public float duration;
+    }
+
     // ---------------------------------------------------------------------------
     // Event Bus
     // ---------------------------------------------------------------------------
