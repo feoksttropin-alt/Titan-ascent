@@ -12,7 +12,8 @@ namespace TitanAscent.Accessibility
         None,
         Deuteranopia,
         Protanopia,
-        Tritanopia
+        Tritanopia,
+        HighContrast
     }
 
     /// <summary>
@@ -32,7 +33,7 @@ namespace TitanAscent.Accessibility
         private const string PrefHighContrast  = PrefPrefix + "HighContrastAnchors";
         private const string PrefLargeSubs     = PrefPrefix + "LargeSubtitles";
         private const string PrefSubBackground = PrefPrefix + "SubtitleBackground";
-        private const string PrefColorBlind    = PrefPrefix + "ColorBlindMode";
+        private const string PrefColorBlind    = "AccessibilityColorBlindMode";
         private const string PrefReduceParticles = PrefPrefix + "ReduceParticles";
         private const string PrefSlowFallCam   = PrefPrefix + "SlowFallCamera";
         private const string PrefNarrationOnly = PrefPrefix + "NarrationOnly";
