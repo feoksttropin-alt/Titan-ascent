@@ -38,6 +38,10 @@ namespace TitanAscent.Systems
         private const int   MaxFrames        = 72000;   // 1 hour at 20 fps
         private const float RecordInterval   = 0.05f;   // seconds (20 fps)
 
+        /// <summary>Fixed path used for the most-recent ghost file.</summary>
+        public static string LastGhostPath =>
+            Path.Combine(Application.persistentDataPath, "ghost_last.dat");
+
         [Header("References")]
         [SerializeField] private Transform playerTransform;
         [SerializeField] private Grapple.GrappleController grappleController;
@@ -58,6 +62,13 @@ namespace TitanAscent.Systems
         private GameObject ghostInstance;
 
         private string currentSessionId;
+
+        // -----------------------------------------------------------------------
+        // Public properties
+        // -----------------------------------------------------------------------
+
+        /// <summary>True while a ghost replay is currently running.</summary>
+        public bool IsPlaybackActive => isReplaying;
 
         // -----------------------------------------------------------------------
         // Lifecycle
@@ -156,19 +167,28 @@ namespace TitanAscent.Systems
             }
 
             currentRecording.label = label;
-            string fileName = $"ghost_{currentSessionId}.dat";
-            string filePath = Path.Combine(Application.persistentDataPath, fileName);
 
+            // Always overwrite the fixed "last run" ghost file for quick replay access.
+            WriteRecordingToFile(currentRecording, LastGhostPath);
+
+            // Also persist a session-specific copy for run-history lookup.
+            string sessionFileName = $"ghost_{currentSessionId}.dat";
+            string sessionFilePath = Path.Combine(Application.persistentDataPath, sessionFileName);
+            WriteRecordingToFile(currentRecording, sessionFilePath);
+        }
+
+        private void WriteRecordingToFile(GhostRecording recording, string filePath)
+        {
             try
             {
                 using FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
                 BinaryFormatter bf  = new BinaryFormatter();
-                bf.Serialize(fs, currentRecording);
+                bf.Serialize(fs, recording);
                 Debug.Log($"[GhostSystem] Ghost saved: {filePath}");
             }
             catch (Exception e)
             {
-                Debug.LogError($"[GhostSystem] Failed to save ghost: {e.Message}");
+                Debug.LogError($"[GhostSystem] Failed to save ghost to '{filePath}': {e.Message}");
             }
         }
 
