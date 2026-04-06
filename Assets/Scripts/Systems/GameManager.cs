@@ -124,6 +124,7 @@ namespace TitanAscent.Systems
             if (currentState == GameState.Victory) return;
             SetState(GameState.Victory);
             narration?.TriggerVictory();
+            RecordCurrentRun();
             saveManager?.Save();
             OnVictory?.Invoke();
             postRunSummary?.ShowSummary(
@@ -149,6 +150,21 @@ namespace TitanAscent.Systems
                 stats.totalFalls++;
                 saveManager.Save();
             }
+
+            // A run-ending fall concludes the current session — record it
+            if (data.severity == FallSeverity.RunEnding)
+            {
+                RecordCurrentRun();
+            }
+        }
+
+        /// <summary>Writes a RunRecord for the current session to SaveManager.</summary>
+        private void RecordCurrentRun()
+        {
+            if (saveManager == null) return;
+            float height = fallTracker != null ? fallTracker.BestHeightEver : currentHeight;
+            int   falls  = fallTracker != null ? fallTracker.TotalFalls      : 0;
+            saveManager.AddRunRecord(height, SessionTime, falls);
         }
 
         private void HandleNewHeightRecord(float height)

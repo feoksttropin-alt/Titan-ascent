@@ -95,6 +95,34 @@ namespace TitanAscent.Systems
         public bool IsChallengeCompleted(string challengeId) =>
             currentData.completedChallenges.Contains(challengeId);
 
+        /// <summary>
+        /// Records a completed run to the run history list and persists it.
+        /// Keeps a maximum of 20 entries (newest first).
+        /// </summary>
+        public void AddRunRecord(float height, float time, int falls)
+        {
+            if (currentData.runHistory == null)
+                currentData.runHistory = new System.Collections.Generic.List<UI.RunRecord>();
+
+            UI.RunRecord record = new UI.RunRecord
+            {
+                runDate         = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
+                maxHeight       = height,
+                totalFalls      = falls,
+                durationSeconds = time,
+                modeType        = "Normal",
+                reached         = height >= 10000f,
+            };
+
+            currentData.runHistory.Insert(0, record);
+
+            const int maxRecords = 20;
+            if (currentData.runHistory.Count > maxRecords)
+                currentData.runHistory.RemoveRange(maxRecords, currentData.runHistory.Count - maxRecords);
+
+            Save();
+        }
+
         public void UpdateSpeedrunPB(float time)
         {
             if (currentData.speedrunPB <= 0f || time < currentData.speedrunPB)

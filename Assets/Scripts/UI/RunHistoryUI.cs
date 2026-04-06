@@ -112,6 +112,15 @@ namespace TitanAscent.UI
         // Public API
         // ------------------------------------------------------------------
 
+        /// <summary>
+        /// Re-reads run history from SaveManager and rebuilds the UI list.
+        /// Call this whenever the run history panel becomes visible.
+        /// </summary>
+        public void Refresh()
+        {
+            RefreshFromSave();
+        }
+
         /// <summary>Add a run record and persist it (called at end of each run).</summary>
         public void AddRecord(RunRecord record)
         {

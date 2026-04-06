@@ -32,6 +32,9 @@ namespace TitanAscent.Systems
 
         private CosmeticLoadout currentLoadout = new CosmeticLoadout();
 
+        /// <summary>Returns the currently active cosmetic loadout (read-only reference).</summary>
+        public CosmeticLoadout CurrentLoadout => currentLoadout;
+
         // ── Public apply methods ─────────────────────────────────────────────────
 
         /// <summary>Sets the player renderer's first material slot to item.materialOverride.</summary>
@@ -42,6 +45,7 @@ namespace TitanAscent.Systems
 
             activeSuitMaterial = item.materialOverride;
             SetFirstMaterial(playerRenderer, activeSuitMaterial);
+            currentLoadout.suitId = item.GetId();
         }
 
         /// <summary>Sets the grapple head renderer's first material slot to item.materialOverride.</summary>
@@ -52,6 +56,7 @@ namespace TitanAscent.Systems
 
             activeGrappleSkinMaterial = item.materialOverride;
             SetFirstMaterial(grappleRenderer, activeGrappleSkinMaterial);
+            currentLoadout.grappleSkinId = item.GetId();
         }
 
         /// <summary>Sets the RopeSimulator LineRenderer gradient colors to item.primaryColor.</summary>
@@ -60,6 +65,7 @@ namespace TitanAscent.Systems
             if (item == null) return;
 
             activeRopeColor = item.primaryColor;
+            currentLoadout.ropeColorId = item.GetId();
 
             if (ropeSimulator == null) return;
 
@@ -81,6 +87,9 @@ namespace TitanAscent.Systems
             }
 
             if (item == null) return;
+
+            currentLoadout.particleTrailId = item.GetId();
+
             if (item.trailParticleSystemPrefab == null) return;
 
             Transform parent = playerTransform != null ? playerTransform : transform;

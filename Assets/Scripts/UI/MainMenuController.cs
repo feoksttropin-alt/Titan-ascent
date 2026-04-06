@@ -31,6 +31,10 @@ namespace TitanAscent.UI
         [Header("Transition")]
         [SerializeField] private float fadeDuration = 0.3f;
 
+        [Header("UI Components")]
+        [SerializeField] private RunHistoryUI  runHistoryUI;
+        [SerializeField] private CosmeticMenuUI cosmeticMenuUI;
+
         // -----------------------------------------------------------------------
         // Private state
         // -----------------------------------------------------------------------
@@ -56,6 +60,12 @@ namespace TitanAscent.UI
 
             if (tutorialPromptDialog != null)
                 tutorialPromptDialog.SetActive(false);
+
+            if (runHistoryUI == null && runHistoryPanel != null)
+                runHistoryUI = runHistoryPanel.GetComponentInChildren<RunHistoryUI>(true);
+
+            if (cosmeticMenuUI == null && cosmeticsPanel != null)
+                cosmeticMenuUI = cosmeticsPanel.GetComponentInChildren<CosmeticMenuUI>(true);
         }
 
         private void Start()
@@ -78,11 +88,21 @@ namespace TitanAscent.UI
         // Public navigation methods (wire to buttons in Inspector)
         // -----------------------------------------------------------------------
 
-        public void ShowMainPanel()     => TransitionTo(mainPanel);
-        public void ShowSettings()      => TransitionTo(settingsPanel);
-        public void ShowCosmetics()     => TransitionTo(cosmeticsPanel);
-        public void ShowRunHistory()    => TransitionTo(runHistoryPanel);
-        public void ShowCredits()       => TransitionTo(creditsPanel);
+        public void ShowMainPanel()  => TransitionTo(mainPanel);
+        public void ShowSettings()   => TransitionTo(settingsPanel);
+        public void ShowCredits()    => TransitionTo(creditsPanel);
+
+        public void ShowCosmetics()
+        {
+            cosmeticMenuUI?.RefreshDisplay();
+            TransitionTo(cosmeticsPanel);
+        }
+
+        public void ShowRunHistory()
+        {
+            runHistoryUI?.Refresh();
+            TransitionTo(runHistoryPanel);
+        }
 
         public void NavigateBack()
         {

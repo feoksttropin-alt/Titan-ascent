@@ -76,6 +76,36 @@ namespace TitanAscent.UI
             SwitchTab(CosmeticType.Suit);
         }
 
+        // ── Public API ────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Syncs equipped-state from CosmeticSystem's current loadout, then
+        /// rebuilds the grid for the active tab. Call this when the panel opens.
+        /// </summary>
+        public void RefreshDisplay()
+        {
+            // Sync the equipped-per-tab dictionary from the saved loadout so
+            // badges correctly reflect what is currently equipped.
+            if (cosmeticSystem != null)
+            {
+                CosmeticLoadout loadout = cosmeticSystem.CurrentLoadout;
+                if (loadout != null)
+                {
+                    equippedIdPerTab[CosmeticType.Suit]          = loadout.suitId          ?? string.Empty;
+                    equippedIdPerTab[CosmeticType.GrappleSkin]   = loadout.grappleSkinId   ?? string.Empty;
+                    equippedIdPerTab[CosmeticType.RopeColor]     = loadout.ropeColorId     ?? string.Empty;
+                    equippedIdPerTab[CosmeticType.ParticleTrail] = loadout.particleTrailId ?? string.Empty;
+                }
+            }
+
+            // Rebuild the currently visible tab
+            ClearGrid();
+            PopulateGrid(activeTab);
+
+            if (gridScrollRect != null)
+                gridScrollRect.normalizedPosition = new Vector2(0f, 1f);
+        }
+
         // ── Tab switching ─────────────────────────────────────────────────────────
 
         private void SwitchTab(CosmeticType type)
