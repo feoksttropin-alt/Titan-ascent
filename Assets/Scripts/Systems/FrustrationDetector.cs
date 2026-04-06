@@ -314,13 +314,13 @@ namespace TitanAscent.Systems
             switch (key)
             {
                 case "RepeatedFailureSameArea":
-                    narrationSystem.TriggerLargeFall();
+                    narrationSystem.TriggerRepeatedFailureSameArea();
                     break;
                 case "GrappleMissStreak":
-                    narrationSystem.TriggerSmallFall();
+                    narrationSystem.TriggerGrappleMissStreak();
                     break;
                 case "LongStuck":
-                    narrationSystem.TriggerMediumFall();
+                    narrationSystem.TriggerLongStuck();
                     break;
             }
         }

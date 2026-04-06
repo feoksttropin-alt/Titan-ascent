@@ -101,6 +101,32 @@ namespace TitanAscent.Systems
             "There are no more meters to climb."
         };
 
+        private static readonly string[] RepeatedFailureSameAreaLines =
+        {
+            "The same stone refuses you. Find another path.",
+            "This section has beaten others. It won't beat you.",
+            "Change your approach. The surface hasn't changed — you can.",
+            "Fall here enough times and you'll memorize it.",
+            "The titan does not move. Your approach must."
+        };
+
+        private static readonly string[] GrappleMissStreakLines =
+        {
+            "Breathe. Then aim.",
+            "The anchors are there. Your timing isn't.",
+            "Slow down the throw.",
+            "One hit is all you need.",
+            "Patience is its own momentum."
+        };
+
+        private static readonly string[] LongStuckLines =
+        {
+            "You've been here long enough to know this section.",
+            "Progress is sometimes invisible.",
+            "You are not falling. That counts for something.",
+            "The summit can wait. So can you."
+        };
+
         private void Awake()
         {
             narrationUI = FindObjectOfType<UI.NarrationUI>();
@@ -115,6 +141,9 @@ namespace TitanAscent.Systems
         public void TriggerNewHeightRecord() => TryNarrate("NewHeightRecord", NewHeightRecordLines);
         public void TriggerNearSummit() => TryNarrate("NearSummit", NearSummitLines, true);
         public void TriggerVictory() => TryNarrate("Victory", VictoryLines, true);
+        public void TriggerRepeatedFailureSameArea() => TryNarrate("RepeatedFailureSameArea", RepeatedFailureSameAreaLines);
+        public void TriggerGrappleMissStreak() => TryNarrate("GrappleMissStreak", GrappleMissStreakLines);
+        public void TriggerLongStuck() => TryNarrate("LongStuck", LongStuckLines);
 
         public void TriggerForFall(FallData data)
         {
