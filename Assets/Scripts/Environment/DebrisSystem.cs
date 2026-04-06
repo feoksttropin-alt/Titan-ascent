@@ -75,7 +75,7 @@ namespace TitanAscent.Environment
 
             if (_rb != null)
             {
-                _rb.linearVelocity        = Vector3.zero;
+                _rb.velocity              = Vector3.zero;
                 _rb.angularVelocity = Vector3.zero;
             }
 

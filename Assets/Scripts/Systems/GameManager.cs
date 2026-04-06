@@ -128,7 +128,7 @@ namespace TitanAscent.Systems
                     saveManager.Save();
                 }
                 stats.totalFalls++;
-                stats.totalClimbs = stats.totalClimbs; // preserved
+                saveManager.Save();
             }
         }
 

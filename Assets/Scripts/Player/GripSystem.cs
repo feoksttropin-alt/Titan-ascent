@@ -168,8 +168,8 @@ namespace TitanAscent.Player
             float frictionCoeff = currentSurface != null ? currentSurface.FrictionCoefficient : baseSlideReduction;
 
             // Project velocity onto the surface normal to find sliding component
-            Vector3 normalVelocity = Vector3.Project(rb.linearVelocity, surfaceNormal);
-            Vector3 slideVelocity = rb.linearVelocity - normalVelocity;
+            Vector3 normalVelocity = Vector3.Project(rb.velocity, surfaceNormal);
+            Vector3 slideVelocity = rb.velocity - normalVelocity;
 
             // Reduce slide velocity based on grip and surface friction
             float reductionFactor = frictionCoeff * GripPercent * baseSlideReduction;

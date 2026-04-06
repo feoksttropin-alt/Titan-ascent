@@ -73,7 +73,7 @@ namespace TitanAscent.Physics
             if (playerRb != null)
             {
                 _lastValidPosition = playerRb.position;
-                _lastValidVelocity = playerRb.linearVelocity;
+                _lastValidVelocity = playerRb.velocity;
             }
         }
 
@@ -92,7 +92,7 @@ namespace TitanAscent.Physics
 
             // Cache valid state for next frame
             _lastValidPosition = playerRb.position;
-            _lastValidVelocity = playerRb.linearVelocity;
+            _lastValidVelocity = playerRb.velocity;
         }
 
         // ── Guard implementations ─────────────────────────────────────────────
@@ -144,10 +144,10 @@ namespace TitanAscent.Physics
         /// </summary>
         private void GuardVelocityCap()
         {
-            float speed = playerRb.linearVelocity.magnitude;
+            float speed = playerRb.velocity.magnitude;
             if (speed <= maxAllowedSpeed) return;
 
-            playerRb.linearVelocity = playerRb.linearVelocity.normalized * clampedSpeed;
+            playerRb.velocity = playerRb.velocity.normalized * clampedSpeed;
 
             LogIntervention("VelocityCap", $"speed {speed:F1} clamped to {clampedSpeed:F1} m/s");
         }
@@ -209,7 +209,7 @@ namespace TitanAscent.Physics
         private bool GuardNaN()
         {
             Vector3 pos = playerRb.position;
-            Vector3 vel = playerRb.linearVelocity;
+            Vector3 vel = playerRb.velocity;
 
             bool posNaN = float.IsNaN(pos.x) || float.IsNaN(pos.y) || float.IsNaN(pos.z);
             bool velNaN = float.IsNaN(vel.x) || float.IsNaN(vel.y) || float.IsNaN(vel.z);
@@ -221,7 +221,7 @@ namespace TitanAscent.Physics
 
             // Restore last valid state
             playerRb.position        = _lastValidPosition;
-            playerRb.linearVelocity  = Vector3.zero; // zero out to avoid immediate re-NaN
+            playerRb.velocity  = Vector3.zero; // zero out to avoid immediate re-NaN
             playerRb.angularVelocity = Vector3.zero;
 
             // Release grapple to prevent further instability

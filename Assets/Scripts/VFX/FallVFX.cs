@@ -103,7 +103,7 @@ namespace TitanAscent.VFX
             // Sample current vertical speed from Rigidbody if available
             Rigidbody rb = GetComponent<Rigidbody>();
             if (rb != null)
-                currentFallSpeed = Mathf.Abs(Mathf.Min(0f, rb.linearVelocity.y));
+                currentFallSpeed = Mathf.Abs(Mathf.Min(0f, rb.velocity.y));
 
             UpdateSpeedLines();
             UpdateCatastrophicVignette();

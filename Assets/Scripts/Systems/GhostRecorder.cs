@@ -174,14 +174,14 @@ namespace TitanAscent.Systems
             if (_rb == null)
                 return GhostPlayerState.Airborne;
 
-            float vy = _rb.linearVelocity.y;
+            float vy = _rb.velocity.y;
 
             // Simple heuristic based on vertical velocity
             if (vy < -5f)
                 return GhostPlayerState.Falling;
 
             // Ground check via velocity — if very slow horizontally and vertical ~0
-            if (Mathf.Abs(vy) < 0.5f && _rb.linearVelocity.magnitude < 1f)
+            if (Mathf.Abs(vy) < 0.5f && _rb.velocity.magnitude < 1f)
                 return GhostPlayerState.Grounded;
 
             return GhostPlayerState.Airborne;

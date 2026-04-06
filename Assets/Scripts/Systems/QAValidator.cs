@@ -288,17 +288,7 @@ namespace TitanAscent.Systems
             if (zm == null)
                 return Error(name, "ZoneManager not found in scene.");
 
-            int count = zm.CurrentZoneIndex >= 0 ? -1 : -1; // We don't have a public count; use reflection fallback
-            // ZoneManager exposes CurrentZoneIndex but not a zone count.
-            // We probe by checking max zone index reachable from height range 0–10000.
-            int maxIndex = -1;
-            for (int h = 0; h <= 10000; h += 100)
-            {
-                var zone = zm.GetZoneForHeight(h);
-                int idx  = zm.CurrentZoneIndex; // only valid after UpdateCurrentZone is called; use name-based lookup below
-                if (zone != null) maxIndex++;
-            }
-            // Deduplicate by name
+            // Probe all height positions and count unique zone names
             var seen = new System.Collections.Generic.HashSet<string>();
             for (int h = 0; h <= 10000; h += 50)
             {

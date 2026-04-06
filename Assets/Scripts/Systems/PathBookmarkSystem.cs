@@ -122,7 +122,7 @@ namespace TitanAscent.Systems
 
             Rigidbody rb = playerController.GetComponent<Rigidbody>();
             playerController.transform.position = new Vector3(0f, bm.height, 0f);
-            if (rb != null) rb.linearVelocity = Vector3.zero;
+            if (rb != null) rb.velocity = Vector3.zero;
 
             Debug.Log($"[PathBookmark] Teleported to '{bm.name}' at {bm.height:F1} m (slot {slotIndex + 1})");
         }

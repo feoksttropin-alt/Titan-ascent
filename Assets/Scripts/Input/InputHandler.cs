@@ -155,41 +155,35 @@ namespace TitanAscent.Input
 
         private void ReadGamepad()
         {
-            // Gamepad.current is null when no controller is connected — all gamepad
-            // branches below are no-ops in that case and keyboard/mouse values are preserved.
-
-            // Gamepad gamepad = Gamepad.current;
-            // if (gamepad == null) return;
+            // Gamepad.current is null when no controller is connected — keyboard/mouse values are preserved.
+            Gamepad gamepad = Gamepad.current;
+            if (gamepad == null) return;
 
             // --- Aim direction (right stick) ---
-            // Vector2 rightStick = gamepad.rightStick.ReadValue();
-            // if (rightStick.sqrMagnitude > 0.01f)
-            //     AimDirection = rightStick.normalized;
+            Vector2 rightStick = gamepad.rightStick.ReadValue();
+            if (rightStick.sqrMagnitude > 0.01f)
+                AimDirection = rightStick.normalized;
 
-            // --- Grapple (RightTrigger) ---
-            // bool triggerPressed = gamepad.rightTrigger.wasPressedThisFrame;
-            // bool triggerHeld    = gamepad.rightTrigger.isPressed;
-            // bool triggerReleased = gamepad.rightTrigger.wasReleasedThisFrame;
-            // if Gamepad is active, override keyboard values:
-            // GrappleFire    = triggerPressed;
-            // GrappleHeld    = triggerHeld;
-            // GrappleRelease = triggerReleased;
+            // --- Grapple (RightTrigger) — override keyboard/mouse values when gamepad is active ---
+            GrappleFire    = gamepad.rightTrigger.wasPressedThisFrame;
+            GrappleHeld    = gamepad.rightTrigger.isPressed;
+            GrappleRelease = gamepad.rightTrigger.wasReleasedThisFrame;
 
             // --- Thrusters (left stick) ---
-            // Vector2 leftStick = gamepad.leftStick.ReadValue();
-            // ThrusterUp    = leftStick.y >  0.2f;
-            // ThrusterDown  = leftStick.y < -0.2f;
-            // ThrusterLeft  = leftStick.x < -0.2f;
-            // ThrusterRight = leftStick.x >  0.2f;
+            Vector2 leftStick = gamepad.leftStick.ReadValue();
+            ThrusterUp    = leftStick.y >  0.2f;
+            ThrusterDown  = leftStick.y < -0.2f;
+            ThrusterLeft  = leftStick.x < -0.2f;
+            ThrusterRight = leftStick.x >  0.2f;
 
             // --- Rope length ---
-            // RetractRope = gamepad.leftBumper.isPressed;
-            // ExtendRope  = gamepad.leftTrigger.IsActuated(0.15f);  // partial press threshold
+            RetractRope = gamepad.leftBumper.isPressed;
+            ExtendRope  = gamepad.leftTrigger.IsActuated(0.15f);
 
             // --- Pause (Start / Menu button) ---
-            // bool startCurrently = gamepad.startButton.isPressed;
-            // if (startCurrently && !_pausePressedLastFrame) Pause = true;
-            // _pausePressedLastFrame updated in ReadKeyboardMouse; gamepad would share the same field.
+            bool startCurrently = gamepad.startButton.isPressed;
+            if (startCurrently && !_pausePressedLastFrame) Pause = true;
+            _pausePressedLastFrame = startCurrently || _pausePressedLastFrame;
         }
 
         // -----------------------------------------------------------------------

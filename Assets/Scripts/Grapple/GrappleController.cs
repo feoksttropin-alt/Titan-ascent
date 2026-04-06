@@ -108,7 +108,14 @@ namespace TitanAscent.Grapple
         {
             bool canFire = Time.time - lastFireTime > GetAdjustedFireRate();
 
-            if (Input.GetKeyDown(fireKey) && canFire)
+            // Route through InputHandler when available; fall back to legacy Input for editor iteration
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+
+            bool fireDown    = ih != null ? ih.GrappleFire    : Input.GetKeyDown(fireKey);
+            bool releaseDown = ih != null ? ih.GrappleRelease : Input.GetKeyDown(releaseKey);
+            bool retractHeld = ih != null ? ih.RetractRope    : Input.GetKey(retractKey);
+
+            if (fireDown && canFire)
             {
                 if (currentState == GrappleState.Idle || currentState == GrappleState.Flying)
                 {
@@ -122,12 +129,12 @@ namespace TitanAscent.Grapple
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.Q) && currentState != GrappleState.Idle)
+            if (releaseDown && currentState != GrappleState.Idle)
             {
                 ReleaseGrapple();
             }
 
-            isRetractHeld = Input.GetKey(retractKey) && currentState == GrappleState.Attached;
+            isRetractHeld = retractHeld && currentState == GrappleState.Attached;
         }
 
         private float GetAdjustedFireRate()

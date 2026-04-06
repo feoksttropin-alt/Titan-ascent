@@ -162,7 +162,7 @@ namespace TitanAscent.VFX
             if (!hasContact) return;
 
             bool nowSliding = currentSurface == SurfaceType.MuscleSkin
-                              && rb.linearVelocity.magnitude > 0.5f
+                              && rb.velocity.magnitude > 0.5f
                               && !IsGripping();
 
             if (nowSliding && !isSliding)

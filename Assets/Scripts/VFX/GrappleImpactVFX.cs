@@ -83,7 +83,7 @@ namespace TitanAscent.VFX
 
             // Keep pending data fresh so the moment Attach fires we have current velocity
             if (playerRb != null)
-                pendingImpactVelocity = playerRb.linearVelocity;
+                pendingImpactVelocity = playerRb.velocity;
 
             // If the grapple is attached, record the attach point for the release handler
             if (grappleController != null && grappleController.IsAttached)

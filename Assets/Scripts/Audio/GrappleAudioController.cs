@@ -132,7 +132,7 @@ namespace TitanAscent.Audio
         {
             // Pitch based on velocity magnitude at release
             Rigidbody rb = GetComponentInParent<Rigidbody>();
-            float speed  = rb != null ? rb.linearVelocity.magnitude : 0f;
+            float speed  = rb != null ? rb.velocity.magnitude : 0f;
             float pitch  = Mathf.Lerp(0.7f, 1.3f, Mathf.Clamp01(speed / 30f));
 
             releaseSource.clip   = releaseClip;

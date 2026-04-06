@@ -71,7 +71,7 @@ namespace TitanAscent.Player
 
         public PlayerState CurrentState => currentState;
         public float CurrentHeight => transform.position.y;
-        public Vector3 CurrentVelocity => rb.linearVelocity;
+        public Vector3 CurrentVelocity => rb.velocity;
         public bool IsGrounded => isGrounded;
         public float HighestHeight => highestHeight;
         public Vector3 VelocityLastFrame => velocityLastFrame;
@@ -80,8 +80,8 @@ namespace TitanAscent.Player
         {
             rb = GetComponent<Rigidbody>();
             rb.mass = mass;
-            rb.linearDamping = drag;
-            rb.angularDamping = angularDrag;
+            rb.drag = drag;
+            rb.angularDrag = angularDrag;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
@@ -107,7 +107,7 @@ namespace TitanAscent.Player
         private void FixedUpdate()
         {
             ApplyMovementForces();
-            velocityLastFrame = rb.linearVelocity;
+            velocityLastFrame = rb.velocity;
         }
 
         private void CheckGrounded()
@@ -136,7 +136,7 @@ namespace TitanAscent.Player
             }
             else if (wasGrounded && !isGrounded)
             {
-                velocityAtTakeoff = rb.linearVelocity;
+                velocityAtTakeoff = rb.velocity;
                 OnTookOff?.Invoke();
             }
         }
@@ -172,7 +172,7 @@ namespace TitanAscent.Player
             }
 
             // Airborne states
-            if (rb.linearVelocity.y < fallSpeedThreshold)
+            if (rb.velocity.y < fallSpeedThreshold)
                 return PlayerState.Falling;
 
             return PlayerState.Airborne;
@@ -192,7 +192,7 @@ namespace TitanAscent.Player
             {
                 // Project move direction onto ground plane
                 Vector3 projectedMove = Vector3.ProjectOnPlane(inputDirection, groundNormal).normalized;
-                Vector3 currentHorizontalVel = Vector3.ProjectOnPlane(rb.linearVelocity, groundNormal);
+                Vector3 currentHorizontalVel = Vector3.ProjectOnPlane(rb.velocity, groundNormal);
 
                 if (currentHorizontalVel.magnitude < maxGroundSpeed)
                     rb.AddForce(projectedMove * groundMoveForce, ForceMode.Force);
@@ -200,7 +200,7 @@ namespace TitanAscent.Player
             else if (currentState == PlayerState.Airborne || currentState == PlayerState.Falling)
             {
                 // Limited air control
-                Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+                Vector3 horizontalVel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
                 if (horizontalVel.magnitude < maxAirSpeed)
                     rb.AddForce(inputDirection * airControlForce, ForceMode.Force);
             }
@@ -241,9 +241,9 @@ namespace TitanAscent.Player
         /// </summary>
         public void ClampVerticalVelocity(float minY, float maxY)
         {
-            Vector3 v = rb.linearVelocity;
+            Vector3 v = rb.velocity;
             v.y = Mathf.Clamp(v.y, minY, maxY);
-            rb.linearVelocity = v;
+            rb.velocity = v;
         }
 
         private void OnCollisionEnter(Collision collision)

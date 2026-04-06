@@ -13,6 +13,7 @@ namespace TitanAscent.Scene
         [Header("Optional Overrides (auto-found if null)")]
         [SerializeField] private GameManager gameManager;
         [SerializeField] private AudioManager audioManager;
+        [SerializeField] private SaveManager saveManager;
         [SerializeField] private FallTracker fallTracker;
         [SerializeField] private NarrationSystem narration;
         [SerializeField] private JuiceController juice;
@@ -36,6 +37,7 @@ namespace TitanAscent.Scene
         {
             if (gameManager == null) gameManager = FindOrCreate<GameManager>("GameManager");
             if (audioManager == null) audioManager = FindOrCreate<AudioManager>("AudioManager");
+            if (saveManager == null) saveManager = FindOrCreate<SaveManager>("SaveManager");
             if (fallTracker == null) fallTracker = FindObjectOfType<FallTracker>();
             if (narration == null) narration = FindObjectOfType<NarrationSystem>();
             if (juice == null) juice = FindObjectOfType<JuiceController>();
@@ -53,6 +55,7 @@ namespace TitanAscent.Scene
         {
             bool ok = true;
             if (gameManager == null) { UnityEngine.Debug.LogError("[Bootstrapper] Missing: GameManager"); ok = false; }
+            if (saveManager == null) { UnityEngine.Debug.LogError("[Bootstrapper] Missing: SaveManager"); ok = false; }
             if (fallTracker == null) { UnityEngine.Debug.LogError("[Bootstrapper] Missing: FallTracker"); ok = false; }
             if (narration == null) { UnityEngine.Debug.LogWarning("[Bootstrapper] Missing: NarrationSystem (non-critical)"); }
             if (juice == null) { UnityEngine.Debug.LogWarning("[Bootstrapper] Missing: JuiceController (non-critical)"); }
@@ -62,6 +65,9 @@ namespace TitanAscent.Scene
 
         private void WireEvents()
         {
+            // Remove first to prevent duplicate listeners if Awake is called more than once
+            UnwireEvents();
+
             if (fallTracker == null) return;
 
             if (narration != null)
@@ -81,6 +87,20 @@ namespace TitanAscent.Scene
 
             if (gameManager != null && juice != null)
                 gameManager.OnVictory.AddListener(juice.TriggerVictory);
+        }
+
+        private void UnwireEvents()
+        {
+            if (fallTracker == null) return;
+            if (narration != null)
+                fallTracker.OnFallCompleted.RemoveListener(narration.TriggerForFall);
+            if (emergencyRecovery != null)
+                fallTracker.OnEmergencyWindowOpen.RemoveListener(emergencyRecovery.ActivateWindow);
+        }
+
+        private void OnDestroy()
+        {
+            UnwireEvents();
         }
 
         private IEnumerator DelayedClimbStart()
