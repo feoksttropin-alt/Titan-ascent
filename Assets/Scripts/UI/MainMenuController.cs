@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 using TitanAscent.Systems;
@@ -19,6 +21,7 @@ namespace TitanAscent.UI
         [SerializeField] private CanvasGroup mainPanel;
         [SerializeField] private CanvasGroup settingsPanel;
         [SerializeField] private CanvasGroup cosmeticsPanel;
+        [SerializeField] private CanvasGroup leaderboardPanel;
         [SerializeField] private CanvasGroup runHistoryPanel;
         [SerializeField] private CanvasGroup creditsPanel;
 
@@ -35,9 +38,21 @@ namespace TitanAscent.UI
         [SerializeField] private RunHistoryUI  runHistoryUI;
         [SerializeField] private CosmeticMenuUI cosmeticMenuUI;
 
+        [Header("Main Panel — Best Run Stats")]
+        [SerializeField] private TextMeshProUGUI bestHeightText;
+        [SerializeField] private TextMeshProUGUI totalClimbsText;
+        [SerializeField] private TextMeshProUGUI speedrunPBText;
+
+        [Header("Leaderboard Panel")]
+        [SerializeField] private Transform leaderboardEntryContainer;
+        [SerializeField] private TextMeshProUGUI leaderboardEntryPrefab;
+
         // -----------------------------------------------------------------------
         // Private state
         // -----------------------------------------------------------------------
+
+        private SaveManager       _saveManager;
+        private LeaderboardManager _leaderboardManager;
 
         private CanvasGroup _currentPanel;
         private Coroutine   _fadeCoroutine;
@@ -49,12 +64,16 @@ namespace TitanAscent.UI
 
         private void Awake()
         {
+            _saveManager       = FindFirstObjectByType<SaveManager>();
+            _leaderboardManager = FindFirstObjectByType<LeaderboardManager>();
+
             // Hide all panels immediately
-            SetInstant(mainPanel,      true);
-            SetInstant(settingsPanel,  false);
-            SetInstant(cosmeticsPanel, false);
-            SetInstant(runHistoryPanel,false);
-            SetInstant(creditsPanel,   false);
+            SetInstant(mainPanel,        true);
+            SetInstant(settingsPanel,    false);
+            SetInstant(cosmeticsPanel,   false);
+            SetInstant(leaderboardPanel, false);
+            SetInstant(runHistoryPanel,  false);
+            SetInstant(creditsPanel,     false);
 
             _currentPanel = mainPanel;
 
@@ -71,10 +90,10 @@ namespace TitanAscent.UI
         private void Start()
         {
             PopulateCredits();
+            RefreshMainPanelStats();
 
             // First-time flow: show tutorial prompt after short delay
-            SaveManager sm = FindFirstObjectByType<SaveManager>();
-            if (sm != null && sm.CurrentData.totalClimbs == 0)
+            if (_saveManager != null && _saveManager.CurrentData.totalClimbs == 0)
                 StartCoroutine(ShowTutorialPromptDelayed());
         }
 
@@ -104,10 +123,136 @@ namespace TitanAscent.UI
             TransitionTo(runHistoryPanel);
         }
 
+        public void ShowLeaderboard()
+        {
+            PopulateLeaderboard();
+            TransitionTo(leaderboardPanel);
+        }
+
+        /// <summary>Generic panel switcher by name, usable from UnityEvents.</summary>
+        public void ShowPanel(string panelName)
+        {
+            switch (panelName)
+            {
+                case "Main":        ShowMainPanel();  break;
+                case "Settings":    ShowSettings();   break;
+                case "Cosmetics":   ShowCosmetics();  break;
+                case "Leaderboard": ShowLeaderboard(); break;
+                case "RunHistory":  ShowRunHistory();  break;
+                case "Credits":     ShowCredits();     break;
+                default:
+                    Debug.LogWarning($"[MainMenuController] Unknown panel name: '{panelName}'");
+                    break;
+            }
+        }
+
         public void NavigateBack()
         {
             if (_currentPanel != mainPanel)
                 TransitionTo(mainPanel);
+        }
+
+        // -----------------------------------------------------------------------
+        // Game flow
+        // -----------------------------------------------------------------------
+
+        /// <summary>Loads the main game scene. Wire to the Play button.</summary>
+        public void StartGame()
+        {
+            SceneManager.LoadScene(SceneNames.MainGame);
+        }
+
+        /// <summary>Quits the application. Wire to the Quit button.</summary>
+        public void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
+
+        // -----------------------------------------------------------------------
+        // Main panel stats
+        // -----------------------------------------------------------------------
+
+        private void RefreshMainPanelStats()
+        {
+            if (_saveManager == null) return;
+
+            SaveData data = _saveManager.CurrentData;
+
+            if (bestHeightText != null)
+                bestHeightText.text = $"{data.bestHeight:F1} m";
+
+            if (totalClimbsText != null)
+                totalClimbsText.text = data.totalClimbs.ToString();
+
+            if (speedrunPBText != null)
+            {
+                speedrunPBText.text = data.speedrunPB > 0f
+                    ? LeaderboardManager.FormatTime(data.speedrunPB)
+                    : "--";
+            }
+        }
+
+        // -----------------------------------------------------------------------
+        // Leaderboard
+        // -----------------------------------------------------------------------
+
+        private void PopulateLeaderboard()
+        {
+            if (_leaderboardManager == null) return;
+            if (leaderboardEntryContainer == null) return;
+
+            // Clear existing entries
+            foreach (Transform child in leaderboardEntryContainer)
+                Destroy(child.gameObject);
+
+            List<LeaderboardEntry> entries = _leaderboardManager.GetTopEntries(10);
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                LeaderboardEntry entry = entries[i];
+
+                string line = $"{i + 1}. {entry.playerName}   " +
+                              $"{entry.heightReached:F1} m   " +
+                              $"{LeaderboardManager.FormatTime(entry.timeSeconds)}";
+
+                if (leaderboardEntryPrefab != null)
+                {
+                    TextMeshProUGUI label =
+                        Instantiate(leaderboardEntryPrefab, leaderboardEntryContainer);
+
+                    if (entry.isLocalPlayer)
+                    {
+                        // Bold and tinted gold to distinguish the local player's entry
+                        label.text      = $"<b>{line}</b>";
+                        label.color     = new Color(1f, 0.84f, 0f); // gold
+                    }
+                    else
+                    {
+                        label.text  = line;
+                        label.color = Color.white;
+                    }
+                }
+                else
+                {
+                    // Fallback: log if no prefab is assigned
+                    Debug.LogWarning($"[MainMenuController] leaderboardEntryPrefab is not assigned. Entry {i + 1}: {line}");
+                }
+            }
+
+            if (entries.Count == 0)
+            {
+                if (leaderboardEntryPrefab != null)
+                {
+                    TextMeshProUGUI empty =
+                        Instantiate(leaderboardEntryPrefab, leaderboardEntryContainer);
+                    empty.text  = "No runs recorded yet.";
+                    empty.color = Color.gray;
+                }
+            }
         }
 
         // -----------------------------------------------------------------------
