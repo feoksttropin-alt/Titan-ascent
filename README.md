@@ -2,16 +2,31 @@
 
 A physics-driven rage climbing game where players scale a colossal living titan 10,000 meters tall.
 
+> **Precision physics. Momentum-based movement. Punishing consequences.**
+
 ## Overview
 
-Titan Ascent is built around precision physics, momentum-based movement, and punishing consequences for mistakes. Every meter climbed feels meaningful. Every fall is devastating. Reaching the crown is an unforgettable achievement.
+Titan Ascent is built around precision physics, momentum-based movement, and punishing consequences for mistakes. Every meter climbed feels meaningful. Every fall is devastating. Reaching the crown is a personal triumph.
 
-## Engine & Tech
+### Core Pillars
 
-- **Engine:** Unity 2022.3 LTS
-- **Physics:** Rigidbody-based custom rope physics with Verlet integration
-- **Target Platform:** PC (Steam)
-- **Performance Target:** 60 FPS on mid-range hardware
+- **Precision Physics** — Every movement is deliberate and consequential
+- **Momentum Preservation** — Build speed, risk falls, or recover strategically
+- **Emotional Narrative** — A philosophical narrator guides your ascent
+- **Visual Wonder** — Climb a living, breathing titan at 10,000 meters
+
+---
+
+## Engine & Technology
+
+| Component | Details |
+|-----------|---------|
+| **Engine** | Unity 2022.3 LTS |
+| **Physics** | Rigidbody-based custom rope physics with Verlet integration |
+| **Platform** | PC (Steam) |
+| **Performance** | 60 FPS target on mid-range hardware |
+
+---
 
 ## Project Structure
 
@@ -33,7 +48,7 @@ Assets/Scripts/
 │   ├── ZoneManager.cs            — 9-zone titan climb management
 │   ├── WindSystem.cs             — Wind columns and altitude wind
 │   ├── TitanMovement.cs          — Wing tremors, breathing, contractions
-│   ├── SurfaceAnchorPoint.cs     — Grappleable surface anchor logic
+│   └── SurfaceAnchorPoint.cs     — Grappleable surface anchor logic
 ├── Systems/
 │   ├── GameManager.cs            — Central game state, singleton
 │   ├── FallTracker.cs            — Fall detection and emotional impact
@@ -52,10 +67,12 @@ Assets/Scripts/
     └── CosmeticItem.cs           — ScriptableObject cosmetic items
 ```
 
-## Nine Zones
+---
 
-| # | Zone | Height Range | Key Feature |
-|---|------|-------------|-------------|
+## The Nine Zones
+
+| Zone # | Zone Name | Height Range | Key Feature |
+|--------|-----------|-------------|-------------|
 | 1 | Tail Basin | 0–800m | Tutorial, large scale plates |
 | 2 | Tail Spires | 800–1800m | Bone spikes, precision grappling |
 | 3 | Hind Leg Valley | 1800–3000m | Terrain gaps, slippery skin |
@@ -66,45 +83,71 @@ Assets/Scripts/
 | 8 | The Neck | 7800–9000m | Breathing expansions, timing |
 | 9 | The Crown | 9000–10000m | Final ascent, hardest section |
 
-## Surface Types
+---
 
-| Surface | Grip | Notes |
-|---------|------|-------|
+## Surface Types & Properties
+
+| Surface | Grip Level | Notes |
+|---------|-----------|-------|
 | Scale Armor | Moderate | Standard climbing surface |
 | Bone Ridges | High | Reliable anchors |
 | Crystal Surfaces | Very High | Narrow anchor zones |
 | Muscle Skin | Low | Sliding, rapid grappling required |
 | Wing Membranes | Moderate | Slightly flexible |
 
-## Setup Instructions
+---
 
-1. Clone the repository
+## Installation & Setup
+
+### Prerequisites
+
+- **Unity** 2022.3.20f1 (LTS)
+- **Git** for cloning the repository
+
+### Quick Start
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/feoksttropin-alt/Titan-ascent.git
+   cd Titan-ascent
+   ```
+
 2. Open in Unity 2022.3.20f1 (LTS)
-3. When prompted, import TextMeshPro Essentials
-4. Allow the Input System package to restart the editor if prompted
-5. Open `Assets/Scenes/` and load the main scene
-6. Press Play
 
-### Required Unity Packages (auto-installed from manifest.json)
-- `com.unity.textmeshpro` 3.0.6
-- `com.unity.cinemachine` 2.9.7
-- `com.unity.inputsystem` 1.7.0
-- `com.unity.mathematics` 1.2.6
-- `com.unity.physics` 1.0.16
-- `com.unity.render-pipelines.universal` 14.0.9
+3. When prompted, import **TextMeshPro Essentials**
 
-## Architecture Notes
+4. Allow the **Input System** package to restart the editor if prompted
 
-- All systems communicate through **UnityEvents** and C# events — no tight cross-system coupling except the GameManager and AudioManager singletons
-- `SurfaceProperties` uses a static registry for O(1) surface type lookups at runtime
-- `RopeSimulator` runs Verlet integration in `FixedUpdate` with 5 constraint passes per frame
-- `FallTracker` classifies falls by threshold (5/20/100/500/1500m) and emits severity-specific events consumed by `NarrationSystem`, `CameraController`, and `AudioManager`
-- `ChallengeManager` seeds daily modifiers from the current UTC date for consistent daily challenges
-- `SaveData` uses JSON serialized to PlayerPrefs with a version field for forward-compatible migration
+5. Navigate to `Assets/Scenes/` and load the main scene
 
-## Narration Samples
+6. Press **Play** to start the game
 
-The narrator is calm, philosophical, and slightly sarcastic. Lines never repeat back-to-back. Minimum 8 seconds between lines.
+### Required Unity Packages
+
+All packages are auto-installed from `manifest.json`:
+
+- `com.unity.textmeshpro` (3.0.6)
+- `com.unity.cinemachine` (2.9.7)
+- `com.unity.inputsystem` (1.7.0)
+- `com.unity.mathematics` (1.2.6)
+- `com.unity.physics` (1.0.16)
+- `com.unity.render-pipelines.universal` (14.0.9)
+
+---
+
+## Game Modes
+
+| Mode | Description |
+|------|-------------|
+| **Standard Climb** | Full run from base to crown |
+| **Daily Challenge** | Date-seeded random modifiers (LowFuel/ExtremeWind/UltraSlippery/Combined) |
+| **Speedrun Mode** | Built-in timer tracked in SaveData as `speedrunPB` |
+
+---
+
+## Narration System
+
+The narrator is calm, philosophical, and slightly sarcastic. No lines repeat back-to-back. Minimum 8 seconds between dialogue lines.
 
 | Trigger | Sample Lines |
 |---------|-------------|
@@ -114,12 +157,62 @@ The narrator is calm, philosophical, and slightly sarcastic. Lines never repeat 
 | Major Recovery | "Remarkable." / "That should not have worked." |
 | Victory | "You stand where none have stood." / "It was always you." |
 
-## Game Modes
+---
 
-- **Standard Climb** — Full run from base to crown
-- **Daily Challenge** — Date-seeded random modifiers (LowFuel/ExtremeWind/UltraSlippery/Combined)
-- **Speedrun Mode** — Built-in timer tracked in SaveData as `speedrunPB`
+## Architecture & Design
+
+### Communication Pattern
+All systems communicate through **UnityEvents** and C# events — no tight cross-system coupling except the **GameManager** and **AudioManager** singletons.
+
+### Key Systems
+
+- **SurfaceProperties** — Uses a static registry for O(1) surface type lookups at runtime
+- **RopeSimulator** — Runs Verlet integration in `FixedUpdate` with 5 constraint passes per frame
+- **FallTracker** — Classifies falls by threshold (5/20/100/500/1500m) and emits severity-specific events
+- **ChallengeManager** — Seeds daily modifiers from current UTC date for consistent daily challenges
+- **SaveData** — JSON serialized to PlayerPrefs with version field for forward-compatible migration
+
+---
 
 ## Monetization
 
-Single purchase, $6.99–$9.99. No pay-to-win. Cosmetics only post-launch (skins, rope colors, particle trails — all non-functional, tracked via `CosmeticItem` ScriptableObjects).
+**Single Purchase:** $6.99–$9.99
+
+- **No pay-to-win mechanics**
+- **Post-launch cosmetics only** (skins, rope colors, particle trails)
+- All cosmetics tracked via `CosmeticItem` ScriptableObjects
+- Non-functional cosmetics — purely aesthetic
+
+---
+
+## Contributing
+
+We welcome contributions! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/YourFeature`)
+3. Commit your changes (`git commit -m 'Add YourFeature'`)
+4. Push to the branch (`git push origin feature/YourFeature`)
+5. Open a Pull Request
+
+---
+
+## License
+
+This project is licensed under the MIT License — see the LICENSE file for details.
+
+---
+
+## Support & Contact
+
+- **Author:** feoksttropin-alt
+- **GitHub:** [@feoksttropin-alt](https://github.com/feoksttropin-alt)
+- **Issues:** [GitHub Issues](https://github.com/feoksttropin-alt/Titan-ascent/issues)
+
+---
+
+## Acknowledgments
+
+Built with passion, physics, and the philosophy that every climb should matter.
+
+**Reach the crown. It was always you.**
