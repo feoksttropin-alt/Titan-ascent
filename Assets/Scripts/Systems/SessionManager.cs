@@ -66,9 +66,24 @@ namespace TitanAscent.Systems
 
         private bool  _sessionActive;
         private float _sessionStartTime;
+        private int   _fallCount;
+        private float _bestHeightThisSession;
 
-        public bool  IsSessionActive => _sessionActive;
-        public float SessionDuration => _sessionActive ? Time.time - _sessionStartTime : 0f;
+        // -----------------------------------------------------------------------
+        // Properties
+        // -----------------------------------------------------------------------
+
+        public bool  IsSessionActive         => _sessionActive;
+        public float SessionDuration         => _sessionActive ? Time.time - _sessionStartTime : 0f;
+
+        /// <summary>Elapsed time since the session started (alias for SessionDuration).</summary>
+        public float SessionTime             => SessionDuration;
+
+        /// <summary>Number of falls recorded in the current session.</summary>
+        public int   FallCount               => _fallCount;
+
+        /// <summary>Best height reached in the current session.</summary>
+        public float BestHeightThisSession   => _bestHeightThisSession;
 
         // -----------------------------------------------------------------------
         // Lifecycle
@@ -89,17 +104,12 @@ namespace TitanAscent.Systems
         private void Start()
         {
             ResolveReferences();
-
-            if (fallTracker != null)
-            {
-                fallTracker.OnFallCompleted.AddListener(OnFallCompleted);
-            }
+            BindFallTrackerEvents();
         }
 
         private void OnDestroy()
         {
-            if (fallTracker != null)
-                fallTracker.OnFallCompleted.RemoveListener(OnFallCompleted);
+            UnbindFallTrackerEvents();
         }
 
         // -----------------------------------------------------------------------
@@ -111,8 +121,13 @@ namespace TitanAscent.Systems
         {
             ResolveReferences();
 
-            _sessionActive   = true;
-            _sessionStartTime = Time.time;
+            _sessionActive          = true;
+            _sessionStartTime       = Time.time;
+            _fallCount              = 0;
+            _bestHeightThisSession  = 0f;
+
+            // Re-bind in case FallTracker reference was resolved after Start()
+            BindFallTrackerEvents();
 
             // Reset per-session trackers
             sessionStats?.StartSession();
@@ -141,8 +156,10 @@ namespace TitanAscent.Systems
             _sessionActive = false;
 
             float duration  = Time.time - _sessionStartTime;
-            float maxHeight = fallTracker != null ? fallTracker.BestHeightEver : 0f;
-            int   falls     = fallTracker != null ? fallTracker.TotalFalls : 0;
+            float maxHeight = _bestHeightThisSession > 0f
+                ? _bestHeightThisSession
+                : (fallTracker != null ? fallTracker.BestHeightEver : 0f);
+            int   falls     = _fallCount;
 
             // Notify achievement validator of special conditions
             if (reason == EndReason.Victory)
@@ -175,9 +192,33 @@ namespace TitanAscent.Systems
             Debug.Log($"[SessionManager] Session ended. Reason={reason}, Duration={duration:F1}s, MaxHeight={maxHeight:F1}m, Falls={falls}");
         }
 
+        /// <summary>Ends the current session. Pass true for a victorious completion.</summary>
+        public void EndSession(bool completed)
+        {
+            EndSession(completed ? EndReason.Victory : EndReason.Quit);
+        }
+
         // -----------------------------------------------------------------------
         // Private helpers
         // -----------------------------------------------------------------------
+
+        private void BindFallTrackerEvents()
+        {
+            if (fallTracker == null) return;
+            // Guard against double-subscription by removing before adding
+            fallTracker.OnFallCompleted.RemoveListener(OnFallCompleted);
+            fallTracker.OnFallCompleted.AddListener(OnFallCompleted);
+
+            fallTracker.OnNewHeightRecord.RemoveListener(OnNewHeightRecord);
+            fallTracker.OnNewHeightRecord.AddListener(OnNewHeightRecord);
+        }
+
+        private void UnbindFallTrackerEvents()
+        {
+            if (fallTracker == null) return;
+            fallTracker.OnFallCompleted.RemoveListener(OnFallCompleted);
+            fallTracker.OnNewHeightRecord.RemoveListener(OnNewHeightRecord);
+        }
 
         private void ResolveReferences()
         {
@@ -219,7 +260,14 @@ namespace TitanAscent.Systems
 
         private void OnFallCompleted(FallData data)
         {
+            _fallCount++;
             achievementValidator?.NotifyFall(data);
+        }
+
+        private void OnNewHeightRecord(float height)
+        {
+            if (height > _bestHeightThisSession)
+                _bestHeightThisSession = height;
         }
     }
 }

@@ -96,6 +96,7 @@ namespace TitanAscent.Systems
             SetState(GameState.Climbing);
             sessionStartTime = Time.time;
             nearSummitNotified = false;
+            SessionManager.Instance?.StartSession();
             sessionStatsTracker?.StartSession();
             narration?.TriggerClimbStart();
             OnClimbStarted?.Invoke();
@@ -124,6 +125,7 @@ namespace TitanAscent.Systems
             if (currentState == GameState.Victory) return;
             SetState(GameState.Victory);
             narration?.TriggerVictory();
+            SessionManager.Instance?.EndSession(true);
             RecordCurrentRun();
             saveManager?.Save();
             OnVictory?.Invoke();

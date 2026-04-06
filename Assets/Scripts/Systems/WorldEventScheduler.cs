@@ -17,6 +17,8 @@ namespace TitanAscent.Systems
 
     /// <summary>
     /// Schedules titan world events per-zone, preventing harmful overlaps.
+    /// Also drives the three periodic EventBus events (TitanShudder, WindGust,
+    /// BreathingPulse) that run on their own timers while GameState == Climbing.
     /// </summary>
     public class WorldEventScheduler : MonoBehaviour
     {
@@ -25,7 +27,29 @@ namespace TitanAscent.Systems
         [SerializeField] private WindSystem windSystem;
 
         // ------------------------------------------------------------------
-        // Internal config per event type
+        // Periodic EventBus event configuration
+        // ------------------------------------------------------------------
+
+        private struct PeriodicConfig
+        {
+            public float baseInterval;
+            public float variance;
+        }
+
+        private static readonly PeriodicConfig TitanShudderConfig  = new PeriodicConfig { baseInterval = 45f, variance = 15f };
+        private static readonly PeriodicConfig WindGustConfig       = new PeriodicConfig { baseInterval = 30f, variance = 10f };
+        private static readonly PeriodicConfig BreathingPulseConfig = new PeriodicConfig { baseInterval =  8f, variance =  2f };
+
+        // Height threshold above which BreathingPulse fires (Zones 7-9)
+        private const float BreathingPulseMinHeight = 6500f;
+
+        // Next scheduled fire times for periodic events
+        private float _nextTitanShudderTime;
+        private float _nextWindGustTime;
+        private float _nextBreathingPulseTime;
+
+        // ------------------------------------------------------------------
+        // Internal config per zone-event type
         // ------------------------------------------------------------------
 
         private class EventConfig
@@ -127,6 +151,111 @@ namespace TitanAscent.Systems
 
         // Overlap rule: if WingTremor is active, delay BreathingExpansion for 5 s
         private const float OverlapDelay = 5f;
+
+        // ------------------------------------------------------------------
+        // Lifecycle
+        // ------------------------------------------------------------------
+
+        private void OnEnable()
+        {
+            EventBus.Subscribe<ClimbStartedEvent>(OnClimbStarted);
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<ClimbStartedEvent>(OnClimbStarted);
+        }
+
+        private void Update()
+        {
+            // Only tick periodic events while the game is in the Climbing state
+            if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameState.Climbing)
+                return;
+
+            float now = Time.time;
+
+            // TitanShudder — every 45s ±15s
+            if (now >= _nextTitanShudderTime)
+            {
+                EventBus.Publish(new TitanShudderEvent
+                {
+                    amplitude           = 0.8f,
+                    duration            = 2.5f,
+                    affectedZoneIndices = null
+                });
+                Debug.Log("[WorldEventScheduler] TitanShudderEvent published.");
+                ScheduleNextTitanShudder();
+            }
+
+            // WindGust — every 30s ±10s
+            if (now >= _nextWindGustTime)
+            {
+                EventBus.Publish(new WindGustEvent
+                {
+                    intensity = UnityEngine.Random.Range(0.5f, 1f),
+                    duration  = 3f
+                });
+                Debug.Log("[WorldEventScheduler] WindGustEvent published.");
+                ScheduleNextWindGust();
+            }
+
+            // BreathingPulse — every 8s ±2s, only in Zones 7-9 (height > 6500)
+            if (now >= _nextBreathingPulseTime)
+            {
+                float playerHeight = GameManager.Instance.CurrentHeight;
+                if (playerHeight > BreathingPulseMinHeight)
+                {
+                    EventBus.Publish(new BreathingPulseEvent
+                    {
+                        amplitude = 0.3f,
+                        duration  = 4f
+                    });
+                    Debug.Log("[WorldEventScheduler] BreathingPulseEvent published.");
+                }
+                ScheduleNextBreathingPulse();
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Timer helpers
+        // ------------------------------------------------------------------
+
+        private void ResetAllTimers()
+        {
+            _nextTitanShudderTime  = Time.time + RandomInterval(TitanShudderConfig);
+            _nextWindGustTime      = Time.time + RandomInterval(WindGustConfig);
+            _nextBreathingPulseTime = Time.time + RandomInterval(BreathingPulseConfig);
+        }
+
+        private void ScheduleNextTitanShudder()
+        {
+            _nextTitanShudderTime = Time.time + RandomInterval(TitanShudderConfig);
+        }
+
+        private void ScheduleNextWindGust()
+        {
+            _nextWindGustTime = Time.time + RandomInterval(WindGustConfig);
+        }
+
+        private void ScheduleNextBreathingPulse()
+        {
+            _nextBreathingPulseTime = Time.time + RandomInterval(BreathingPulseConfig);
+        }
+
+        private static float RandomInterval(PeriodicConfig cfg)
+        {
+            return cfg.baseInterval + UnityEngine.Random.Range(-cfg.variance, cfg.variance);
+        }
+
+        // ------------------------------------------------------------------
+        // Event handlers
+        // ------------------------------------------------------------------
+
+        private void OnClimbStarted(ClimbStartedEvent evt)
+        {
+            ResetAllTimers();
+            Debug.Log("[WorldEventScheduler] Timers reset for new climb.");
+        }
 
         // ------------------------------------------------------------------
         // Public API
