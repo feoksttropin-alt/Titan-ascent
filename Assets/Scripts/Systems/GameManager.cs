@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
+using TitanAscent.UI;
 
 namespace TitanAscent.Systems
 {
@@ -21,11 +22,14 @@ namespace TitanAscent.Systems
         [SerializeField] private FallTracker fallTracker;
         [SerializeField] private NarrationSystem narration;
         [SerializeField] private SaveManager saveManager;
+        [SerializeField] private PostRunSummary postRunSummary;
+        [SerializeField] private SessionStatsTracker sessionStatsTracker;
 
         [Header("Events")]
         public UnityEvent<GameState> OnGameStateChanged;
         public UnityEvent OnClimbStarted;
         public UnityEvent OnVictory;
+        public UnityEvent<float> OnNewHeightRecord;
 
         private GameState currentState = GameState.MainMenu;
         private float sessionStartTime;
@@ -35,6 +39,9 @@ namespace TitanAscent.Systems
         public GameState CurrentState => currentState;
         public float SessionTime => Time.time - sessionStartTime;
         public float CurrentHeight => currentHeight;
+        public float BestHeightEver => fallTracker != null ? fallTracker.BestHeightEver : 0f;
+        public int TotalFalls => fallTracker != null ? fallTracker.TotalFalls : 0;
+        public float LongestFall => fallTracker != null ? fallTracker.LongestFall : 0f;
         public SaveData GlobalStats => saveManager?.CurrentData;
 
         private void Awake()
@@ -134,6 +141,7 @@ namespace TitanAscent.Systems
 
         private void HandleNewHeightRecord(float height)
         {
+            OnNewHeightRecord?.Invoke(height);
             narration?.TriggerNewHeightRecord();
             if (saveManager != null)
             {

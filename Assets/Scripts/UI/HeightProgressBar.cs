@@ -41,6 +41,12 @@ namespace TitanAscent.UI
         private List<RectTransform> skullObjects = new List<RectTransform>();
         private bool pulsing = false;
 
+        private void Awake()
+        {
+            if (fallTracker == null)
+                fallTracker = FindFirstObjectByType<Systems.FallTracker>();
+        }
+
         private void Start()
         {
             SetupZoneBands();
