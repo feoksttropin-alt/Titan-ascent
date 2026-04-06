@@ -202,7 +202,7 @@ namespace TitanAscent.Systems
 
         private void Awake()
         {
-            narrationUI = FindObjectOfType<UI.NarrationUI>();
+            narrationUI = FindFirstObjectByType<UI.NarrationUI>();
         }
 
         public void TriggerClimbStart() => TryNarrate("ClimbStart", ClimbStartLines, true);

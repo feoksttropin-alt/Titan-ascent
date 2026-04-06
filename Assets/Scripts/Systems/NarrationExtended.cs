@@ -139,24 +139,26 @@ namespace TitanAscent.Systems
         // Zone-transition proximity: track last fired state
         private bool _wasNearBoundary;
 
+        // Cached player reference — resolved once, refreshed if lost
+        private Player.PlayerController _player;
+
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
         private void Awake()
         {
             _narration = GetComponent<NarrationSystem>();
-        }
 
-        private void Start()
-        {
-            // Resolve missing references
+            // Resolve missing references early so OnEnable can subscribe
             if (swingAnalyzer == null)
                 swingAnalyzer = FindFirstObjectByType<SwingAnalyzer>();
             if (zoneManager == null)
                 zoneManager = FindFirstObjectByType<ZoneManager>();
             if (fallTracker == null)
                 fallTracker = FindFirstObjectByType<FallTracker>();
+        }
 
-            // Subscribe to events
+        private void OnEnable()
+        {
             if (swingAnalyzer != null)
             {
                 swingAnalyzer.OnSlingshotDetected.AddListener(OnSlingshot);
@@ -172,7 +174,7 @@ namespace TitanAscent.Systems
             LandmarkObject.OnPlayerNearLandmark += OnLandmarkDiscovered;
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             if (swingAnalyzer != null)
             {
@@ -248,11 +250,19 @@ namespace TitanAscent.Systems
 
         // ── Per-frame tracking ────────────────────────────────────────────────
 
+        /// <summary>Returns the cached player, refreshing the cache when needed.</summary>
+        private Player.PlayerController GetPlayer()
+        {
+            if (_player == null)
+                _player = FindFirstObjectByType<Player.PlayerController>();
+            return _player;
+        }
+
         private void TrackZoneBoundaryProximity()
         {
             if (zoneManager == null) return;
 
-            Player.PlayerController player = FindFirstObjectByType<Player.PlayerController>();
+            Player.PlayerController player = GetPlayer();
             if (player == null) return;
 
             float h = player.CurrentHeight;
@@ -272,7 +282,7 @@ namespace TitanAscent.Systems
 
         private void TrackCrownApproach()
         {
-            Player.PlayerController player = FindFirstObjectByType<Player.PlayerController>();
+            Player.PlayerController player = GetPlayer();
             if (player == null) return;
 
             float h = player.CurrentHeight;

@@ -116,9 +116,23 @@ namespace TitanAscent.UI
 
             ChallengeModifier mods = challengeManager.ActiveModifiers;
 
-            SetRow(lowFuelRow,      mods.HasFlag(ChallengeModifier.LowFuel));
-            SetRow(extremeWindRow,  mods.HasFlag(ChallengeModifier.ExtremeWind));
-            SetRow(ultraSlipperyRow,mods.HasFlag(ChallengeModifier.UltraSlippery));
+            bool hasLowFuel      = mods.HasFlag(ChallengeModifier.LowFuel);
+            bool hasExtremeWind  = mods.HasFlag(ChallengeModifier.ExtremeWind);
+            bool hasUltraSlippery = mods.HasFlag(ChallengeModifier.UltraSlippery);
+
+            SetRow(lowFuelRow,       hasLowFuel);
+            SetRow(extremeWindRow,   hasExtremeWind);
+            SetRow(ultraSlipperyRow, hasUltraSlippery);
+
+            // Populate modifier labels with name and description
+            if (hasLowFuel && lowFuelLabel != null)
+                lowFuelLabel.text = "Low Fuel — Thruster energy reduced to 35%";
+
+            if (hasExtremeWind && extremeWindLabel != null)
+                extremeWindLabel.text = "Extreme Wind — Wind force at 2.5×";
+
+            if (hasUltraSlippery && ultraSlipperyLabel != null)
+                ultraSlipperyLabel.text = "Ultra Slippery — Surface friction at 20%";
 
             // Daily badge
             bool isDaily = challengeManager.IsDaily;

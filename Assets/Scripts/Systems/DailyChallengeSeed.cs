@@ -130,6 +130,17 @@ namespace TitanAscent.Systems
 
         public string TodayFlavorText { get; private set; }
 
+        // ------------------------------------------------------------------
+        // Public API
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// Returns the deterministic seed for today (UTC).
+        /// Consistent for the entire calendar day; changes at UTC midnight.
+        /// Formula: (year*10000 + month*100 + day) XOR 0x54495441 ("TITA")
+        /// </summary>
+        public int GetTodaySeed() => TodaySeed;
+
         public bool HasCompletedToday
         {
             get
