@@ -31,6 +31,7 @@ namespace TitanAscent.Environment
 
         private TitanZone currentZone;
         private Player.PlayerController player;
+        private Systems.NarrationSystem narrationSystem;
 
         public TitanZone CurrentZone => currentZone;
         public int CurrentZoneIndex => zones.IndexOf(currentZone);
@@ -38,6 +39,7 @@ namespace TitanAscent.Environment
         private void Awake()
         {
             player = FindFirstObjectByType<Player.PlayerController>();
+            narrationSystem = FindFirstObjectByType<Systems.NarrationSystem>();
 
             if (autoPopulateDefaultZones && zones.Count == 0)
                 PopulateDefaultZones();
@@ -77,6 +79,7 @@ namespace TitanAscent.Environment
                 TitanZone previous = currentZone;
                 currentZone = newZone;
                 OnZoneChanged?.Invoke(previous, currentZone);
+                narrationSystem?.TriggerZoneEntry(CurrentZoneIndex);
             }
         }
 

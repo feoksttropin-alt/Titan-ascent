@@ -127,6 +127,79 @@ namespace TitanAscent.Systems
             "The summit can wait. So can you."
         };
 
+        // --- Zone Entry Lines ---
+        private static readonly string[] Zone1Lines =
+        {
+            "The tail is where everyone begins.",
+            "Your first steps. The titan does not react.",
+            "Low ground. Easy to forget how far you have to go.",
+            "Begin at the base. The crown will make itself known."
+        };
+
+        private static readonly string[] Zone2Lines =
+        {
+            "The spires are older than memory.",
+            "Balance here. Every surface is a razor's edge.",
+            "These formations took centuries. Respect them.",
+            "Bone like iron. This is still the easy part."
+        };
+
+        private static readonly string[] Zone3Lines =
+        {
+            "The hind leg shifts beneath you.",
+            "Muscle and sinew. Less forgiving than stone.",
+            "The titan walks in its sleep. Hold tight.",
+            "You are halfway to nowhere."
+        };
+
+        private static readonly string[] Zone4Lines =
+        {
+            "Wing root. The membrane shudders when it breathes.",
+            "Do not look down yet. There is still too far to fall.",
+            "The first moving terrain. Adjust.",
+            "A wing that could blot out your sun. You are a fleck upon it."
+        };
+
+        private static readonly string[] Zone5Lines =
+        {
+            "The spine. The longest climb you have made.",
+            "Every ridge a waypoint. Every gap a warning.",
+            "Wind finds you here as if it was searching.",
+            "This is where most stop. You have not stopped."
+        };
+
+        private static readonly string[] Zone6Lines =
+        {
+            "The Graveyard. Others have been here.",
+            "Relics of the ambitious. You are not them.",
+            "They fell. You are still rising.",
+            "What remains of those before you is a map of where not to stand."
+        };
+
+        private static readonly string[] Zone7Lines =
+        {
+            "The storm does not care who you are.",
+            "Visibility drops. Trust your grapple.",
+            "This is the crucible. Most runs end here.",
+            "The lightning is indifferent. So is the titan."
+        };
+
+        private static readonly string[] Zone8Lines =
+        {
+            "The neck. You can feel the titan breathing.",
+            "Every contraction is a trap. Every expansion is a gift.",
+            "Rhythm. Find the breathing and climb between pulses.",
+            "So close the shadow of the crown falls on you."
+        };
+
+        private static readonly string[] Zone9Lines =
+        {
+            "The Crown. You are here.",
+            "Every meter costs something now.",
+            "The summit is not luck. It is repetition.",
+            "Do not mistake proximity for certainty."
+        };
+
         private void Awake()
         {
             narrationUI = FindObjectOfType<UI.NarrationUI>();
@@ -144,6 +217,26 @@ namespace TitanAscent.Systems
         public void TriggerRepeatedFailureSameArea() => TryNarrate("RepeatedFailureSameArea", RepeatedFailureSameAreaLines);
         public void TriggerGrappleMissStreak() => TryNarrate("GrappleMissStreak", GrappleMissStreakLines);
         public void TriggerLongStuck() => TryNarrate("LongStuck", LongStuckLines);
+
+        public void TriggerZoneEntry(int zoneIndex)
+        {
+            string[] lines = zoneIndex switch
+            {
+                0 => Zone1Lines,
+                1 => Zone2Lines,
+                2 => Zone3Lines,
+                3 => Zone4Lines,
+                4 => Zone5Lines,
+                5 => Zone6Lines,
+                6 => Zone7Lines,
+                7 => Zone8Lines,
+                8 => Zone9Lines,
+                _ => null
+            };
+
+            if (lines != null)
+                TryNarrate($"Zone{zoneIndex + 1}Entry", lines, ignoreCooldown: true);
+        }
 
         public void TriggerForFall(FallData data)
         {
