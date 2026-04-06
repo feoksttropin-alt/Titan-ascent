@@ -241,7 +241,7 @@ namespace TitanAscent.UI
                     {
                         showingQuitConfirm = false;
                         Time.timeScale = 1f;
-                        SceneManager.LoadScene("MainMenu");
+                        SceneManager.LoadScene(SceneNames.MainMenu);
                     },
                     () => showingQuitConfirm = false
                 );

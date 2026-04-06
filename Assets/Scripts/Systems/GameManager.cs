@@ -53,6 +53,12 @@ namespace TitanAscent.Systems
 
         private void Start()
         {
+            if (postRunSummary == null)
+                postRunSummary = FindFirstObjectByType<TitanAscent.UI.PostRunSummary>();
+
+            if (sessionStatsTracker == null)
+                sessionStatsTracker = FindFirstObjectByType<SessionStatsTracker>();
+
             saveManager?.Load();
             BindEvents();
         }
@@ -90,6 +96,7 @@ namespace TitanAscent.Systems
             SetState(GameState.Climbing);
             sessionStartTime = Time.time;
             nearSummitNotified = false;
+            sessionStatsTracker?.StartSession();
             narration?.TriggerClimbStart();
             OnClimbStarted?.Invoke();
         }
@@ -119,6 +126,11 @@ namespace TitanAscent.Systems
             narration?.TriggerVictory();
             saveManager?.Save();
             OnVictory?.Invoke();
+            postRunSummary?.ShowSummary(
+                height:      currentHeight,
+                time:        SessionTime,
+                falls:       TotalFalls,
+                longestFall: LongestFall);
         }
 
         private void HandleFallCompleted(FallData data)

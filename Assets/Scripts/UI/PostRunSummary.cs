@@ -109,6 +109,52 @@ namespace TitanAscent.UI
         }
 
         // -----------------------------------------------------------------------
+        // Public API
+        // -----------------------------------------------------------------------
+
+        /// <summary>
+        /// Directly show the victory summary with explicit stat values.
+        /// Called by GameManager.TriggerVictory() so the panel works even when
+        /// event-subscription timing varies across scene loads.
+        /// </summary>
+        public void ShowSummary(float height, float time, int falls, float longestFall)
+        {
+            runTotalFalls  = falls;
+            runLongestFall = longestFall;
+
+            if (victoryPanel == null) return;
+
+            bool isNewRecord = gameManager?.GlobalStats != null &&
+                               height > sessionBestHeightAtStart;
+
+            if (victoryHeaderText     != null) victoryHeaderText.text     = "SUMMIT REACHED";
+            if (victoryHeightText     != null) victoryHeightText.text     = $"{height:N0}m";
+            if (victoryRunTimeText    != null) victoryRunTimeText.text    = FormatTime(time);
+            if (victoryTotalFallsText != null) victoryTotalFallsText.text = $"Falls: {falls}";
+            if (victoryLongestFallText!= null) victoryLongestFallText.text= $"Longest Fall: {longestFall:N0}m";
+
+            if (newRecordBadge != null) newRecordBadge.SetActive(isNewRecord);
+
+            string unlockedCosmetic = GetRecentUnlock();
+            if (unlockNotificationText != null)
+            {
+                if (!string.IsNullOrEmpty(unlockedCosmetic))
+                {
+                    unlockNotificationText.text = $"Unlocked: {unlockedCosmetic}";
+                    unlockNotificationText.gameObject.SetActive(true);
+                }
+                else
+                {
+                    unlockNotificationText.gameObject.SetActive(false);
+                }
+            }
+
+            victoryPanel.SetActive(true);
+            StartCoroutine(SlowMoThenNormal());
+            StartCoroutine(StaggeredReveal(victoryPanel));
+        }
+
+        // -----------------------------------------------------------------------
         // Event Handlers
         // -----------------------------------------------------------------------
 
@@ -317,7 +363,7 @@ namespace TitanAscent.UI
         private void OnMainMenuClicked()
         {
             Time.timeScale = 1f;
-            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneNames.MainMenu);
         }
 
         private void OnLeaderboardClicked()

@@ -15,8 +15,10 @@ namespace TitanAscent.Systems
         // Constants
         // -----------------------------------------------------------------------
 
-        public const string MAIN_MENU = "MainMenu";
-        public const string GAMEPLAY  = "Gameplay";
+        [System.Obsolete("Use SceneNames.MainMenu instead.")]
+        public const string MAIN_MENU = SceneNames.MainMenu;
+        [System.Obsolete("Use SceneNames.MainGame instead.")]
+        public const string GAMEPLAY  = SceneNames.MainGame;
 
         private const float FADE_DURATION = 0.3f;
 
@@ -61,18 +63,18 @@ namespace TitanAscent.Systems
         // Public API
         // -----------------------------------------------------------------------
 
-        /// <summary>Fades to black, loads the Gameplay scene, fades in.</summary>
+        /// <summary>Fades to black, loads the MainGame scene, fades in.</summary>
         public void LoadGameplay()
         {
             if (_isTransitioning) return;
-            StartCoroutine(TransitionTo(GAMEPLAY, incrementClimbs: false));
+            StartCoroutine(TransitionTo(SceneNames.MainGame, incrementClimbs: false));
         }
 
         /// <summary>Fades to black, loads the MainMenu scene, fades in.</summary>
         public void LoadMainMenu()
         {
             if (_isTransitioning) return;
-            StartCoroutine(TransitionTo(MAIN_MENU, incrementClimbs: false));
+            StartCoroutine(TransitionTo(SceneNames.MainMenu, incrementClimbs: false));
         }
 
         /// <summary>
@@ -82,7 +84,7 @@ namespace TitanAscent.Systems
         public void ReloadGameplay()
         {
             if (_isTransitioning) return;
-            StartCoroutine(TransitionTo(GAMEPLAY, incrementClimbs: true));
+            StartCoroutine(TransitionTo(SceneNames.MainGame, incrementClimbs: true));
         }
 
         /// <summary>Saves and quits the application.</summary>
