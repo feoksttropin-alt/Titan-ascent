@@ -39,10 +39,9 @@ jobs:
         with:
           unityVersion:     2022.3.20f1
           targetPlatform:   StandaloneLinux64
-          buildMethod:      ""
+          buildMethod:      ValidationBuild.Validate
           allowDirtyBuild:  true
-          # runAsHostUser prevents permission issues on ubuntu runners
-          customParameters: -nographics -batchmode -logFile -
+          customParameters: -nographics -batchmode
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2: Build — Windows Standalone (only on pushes to main or dev branch)
