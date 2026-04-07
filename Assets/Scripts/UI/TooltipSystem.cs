@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
@@ -30,17 +31,14 @@ namespace TitanAscent.UI
                 StopCoroutine(_showCoroutine);
                 _showCoroutine = null;
             }
-            TooltipSystem.Instance?.Hide();
+            TooltipSystem.Hide();
         }
 
         private IEnumerator ShowAfterDelay()
         {
             yield return new WaitForSecondsRealtime(HOVER_DELAY);
-            if (TooltipSystem.Instance != null)
-            {
-                Vector2 screenPos = Input.mousePosition;
-                TooltipSystem.Instance.Show(message, screenPos);
-            }
+            Vector2 screenPos = Input.mousePosition;
+            TooltipSystem.Instance?.Show(message, screenPos);
         }
     }
 
@@ -49,7 +47,10 @@ namespace TitanAscent.UI
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// Singleton tooltip panel. TooltipTrigger components call Show/Hide.
+    /// Singleton tooltip panel.
+    /// Static Show(string, float) / Hide() API can be called before Awake —
+    /// messages queued before initialisation are flushed once the singleton is ready.
+    /// TooltipTrigger components call the instance overload Show(string, Vector2).
     /// </summary>
     public class TooltipSystem : MonoBehaviour
     {
@@ -58,6 +59,18 @@ namespace TitanAscent.UI
         // -----------------------------------------------------------------------
 
         public static TooltipSystem Instance { get; private set; }
+
+        // -----------------------------------------------------------------------
+        // Pre-Awake queue
+        // -----------------------------------------------------------------------
+
+        private struct QueuedMessage
+        {
+            public string message;
+            public float  duration;
+        }
+
+        private static QueuedMessage? _pendingMessage = null;
 
         // -----------------------------------------------------------------------
         // Inspector
@@ -79,6 +92,7 @@ namespace TitanAscent.UI
 
         private RectTransform _panelRect;
         private Coroutine     _fadeCoroutine;
+        private Coroutine     _autoHideCoroutine;
 
         // -----------------------------------------------------------------------
         // Lifecycle
@@ -99,16 +113,54 @@ namespace TitanAscent.UI
                 tooltipPanel.alpha = 0f;
                 tooltipPanel.gameObject.SetActive(false);
             }
+
+            // Flush any message that was queued before Awake ran.
+            if (_pendingMessage.HasValue)
+            {
+                QueuedMessage q = _pendingMessage.Value;
+                _pendingMessage = null;
+                ShowWithDuration(q.message, q.duration);
+            }
         }
 
         // -----------------------------------------------------------------------
-        // Public API
+        // Static API (safe to call any time, including before Awake)
+        // -----------------------------------------------------------------------
+
+        /// <summary>
+        /// Show a timed tooltip centred on screen. Safe to call before Awake —
+        /// if the singleton is not yet initialised the message is queued and shown
+        /// as soon as the instance becomes available.
+        /// </summary>
+        public static void Show(string message, float duration = 3f)
+        {
+            if (Instance != null)
+            {
+                Instance.ShowWithDuration(message, duration);
+            }
+            else
+            {
+                // Queue the message; Awake will flush it.
+                _pendingMessage = new QueuedMessage { message = message, duration = duration };
+            }
+        }
+
+        /// <summary>Hide the tooltip immediately (static convenience wrapper).</summary>
+        public static void Hide()
+        {
+            Instance?.HideInstance();
+        }
+
+        // -----------------------------------------------------------------------
+        // Instance API (used by TooltipTrigger for cursor-positioned tooltips)
         // -----------------------------------------------------------------------
 
         /// <summary>Show tooltip with message near the given screen position.</summary>
         public void Show(string message, Vector2 screenPosition)
         {
             if (tooltipPanel == null) return;
+
+            CancelAutoHide();
 
             if (tooltipText != null)
                 tooltipText.text = message;
@@ -120,11 +172,12 @@ namespace TitanAscent.UI
             _fadeCoroutine = StartCoroutine(FadeIn());
         }
 
-        /// <summary>Hide the tooltip immediately.</summary>
-        public void Hide()
+        /// <summary>Hide the tooltip immediately (instance method).</summary>
+        public void HideInstance()
         {
             if (tooltipPanel == null) return;
 
+            CancelAutoHide();
             if (_fadeCoroutine != null) StopCoroutine(_fadeCoroutine);
             tooltipPanel.alpha = 0f;
             tooltipPanel.gameObject.SetActive(false);
@@ -133,6 +186,48 @@ namespace TitanAscent.UI
         // -----------------------------------------------------------------------
         // Private helpers
         // -----------------------------------------------------------------------
+
+        private void ShowWithDuration(string message, float duration)
+        {
+            if (tooltipPanel == null) return;
+
+            CancelAutoHide();
+
+            if (tooltipText != null)
+                tooltipText.text = message;
+
+            // Centre the panel on screen
+            if (_panelRect != null)
+            {
+                Vector2 canvasSize = GetCanvasSize();
+                _panelRect.anchoredPosition = new Vector2(
+                    (canvasSize.x - panelSize.x) * 0.5f,
+                    canvasSize.y * 0.5f);
+            }
+
+            tooltipPanel.gameObject.SetActive(true);
+
+            if (_fadeCoroutine != null) StopCoroutine(_fadeCoroutine);
+            _fadeCoroutine = StartCoroutine(FadeIn());
+
+            if (duration > 0f)
+                _autoHideCoroutine = StartCoroutine(AutoHideAfter(duration));
+        }
+
+        private void CancelAutoHide()
+        {
+            if (_autoHideCoroutine != null)
+            {
+                StopCoroutine(_autoHideCoroutine);
+                _autoHideCoroutine = null;
+            }
+        }
+
+        private IEnumerator AutoHideAfter(float delay)
+        {
+            yield return new WaitForSecondsRealtime(delay);
+            HideInstance();
+        }
 
         private void PositionNearCursor(Vector2 screenPos)
         {

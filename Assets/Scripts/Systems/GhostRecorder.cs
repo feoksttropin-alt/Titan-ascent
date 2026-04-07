@@ -1,7 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using TitanAscent.Grapple;
 
@@ -79,11 +79,11 @@ namespace TitanAscent.Systems
         // State
         // -----------------------------------------------------------------------
 
-        private bool                _isRecording  = false;
-        private float               _timer        = 0f;
-        private float               _interval;
-        private List<RecorderFrame> _frames       = new List<RecorderFrame>();
+        private bool                _isRecording     = false;
+        private List<RecorderFrame> _frames          = new List<RecorderFrame>();
         private Rigidbody           _rb;
+        private float               _interval;
+        private float               _timer;
 
         // -----------------------------------------------------------------------
         // Public API
@@ -98,7 +98,6 @@ namespace TitanAscent.Systems
         {
             _frames.Clear();
             _timer       = 0f;
-            _interval    = recordFps > 0f ? 1f / recordFps : 0.05f;
             _isRecording = true;
             Debug.Log("[GhostRecorder] Recording started.");
         }
@@ -107,7 +106,20 @@ namespace TitanAscent.Systems
         {
             if (!_isRecording) return;
             _isRecording = false;
+
             Debug.Log($"[GhostRecorder] Recording stopped. Frames: {_frames.Count}");
+
+            if (_frames.Count > 0)
+                SaveBinary(_frames, GhostSystem.LastGhostPath);
+        }
+
+        public void StopAndSave()
+        {
+            if (_isRecording)
+            {
+                _isRecording = false;
+                Debug.Log($"[GhostRecorder] StopAndSave called. Frames: {_frames.Count}");
+            }
 
             if (_frames.Count > 0)
                 SaveBinary(_frames, GhostSystem.LastGhostPath);

@@ -7,18 +7,30 @@ namespace TitanAscent.UI
 {
     /// <summary>
     /// Screenshot tool with HUD toggle.
-    ///   F12 — standard screenshot
-    ///   F11 — 4x super-resolution screenshot
-    ///   F10 — toggle HUD Canvas
+    ///   F12 (configurable) — standard screenshot with white-flash confirmation
+    ///   F11               — 4x super-resolution screenshot
+    ///   F10               — toggle HUD Canvas
     /// Only active in Editor / Development builds.
     /// </summary>
     public class ScreenshotCapturer : MonoBehaviour
     {
         // -----------------------------------------------------------------------
+        // Inspector
+        // -----------------------------------------------------------------------
+
+        [Header("Capture Key")]
+        [SerializeField] private KeyCode captureKey = KeyCode.F12;
+
+        [Header("Flash Overlay")]
+        [Tooltip("CanvasGroup on a full-screen white Image used for the capture flash.")]
+        [SerializeField] private CanvasGroup flashOverlay;
+
+        private const float FlashDuration = 0.3f;
+
+        // -----------------------------------------------------------------------
         // State
         // -----------------------------------------------------------------------
 
-        private string  _screenshotDir;
         private bool    _showToast       = false;
         private float   _toastTimer      = 0f;
         private const float ToastDuration = 1.5f;
@@ -27,6 +39,7 @@ namespace TitanAscent.UI
 
         private Canvas  _hudCanvas       = null;
         private bool    _hudHidden       = false;
+        private string  _screenshotDir;
 
         private GUIStyle _toastStyle;
 
@@ -36,15 +49,20 @@ namespace TitanAscent.UI
 
         private void Awake()
         {
-            _screenshotDir = Path.Combine(Application.persistentDataPath, "Screenshots");
-            if (!Directory.Exists(_screenshotDir))
-                Directory.CreateDirectory(_screenshotDir);
+            _screenshotDir = Application.persistentDataPath;
+
+            // Ensure flash overlay starts invisible
+            if (flashOverlay != null)
+            {
+                flashOverlay.alpha          = 0f;
+                flashOverlay.blocksRaycasts = false;
+            }
         }
 
         private void Update()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (Input.GetKeyDown(KeyCode.F12))
+            if (Input.GetKeyDown(captureKey))
                 CaptureStandard();
 
             if (Input.GetKeyDown(KeyCode.F11))
