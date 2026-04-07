@@ -50,6 +50,22 @@ namespace TitanAscent.Systems
             }
         }
 
+        /// <summary>
+        /// Returns Application.version when available, otherwise falls back to "0.1.0-dev".
+        /// Safe to call before any instance is present.
+        /// </summary>
+        public static string Version
+        {
+            get
+            {
+                string appVersion = Application.version;
+                return string.IsNullOrWhiteSpace(appVersion) ? "0.1.0-dev" : appVersion;
+            }
+        }
+
+        /// <summary>Returns true when this is a release (non-debug) build.</summary>
+        public static bool IsReleaseBuild => !Debug.isDebugBuild;
+
         public string BuildVersion => buildVersion;
         public string Branch => branch;
         public bool IsDevBuild => isDevBuild;

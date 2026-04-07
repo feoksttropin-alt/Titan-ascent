@@ -29,7 +29,6 @@ namespace TitanAscent.Systems
         [Header("Colors")]
         [SerializeField] private Color aheadColor    = new Color(0.2f, 0.9f, 0.2f, 1f);
         [SerializeField] private Color behindColor   = new Color(0.9f, 0.2f, 0.2f, 1f);
-        [SerializeField] private Color noPBColor     = Color.white;
         [SerializeField] private Color uncrossedColor = new Color(0.5f, 0.5f, 0.5f, 1f);
         [SerializeField] private Color activeRowBg   = new Color(1f, 1f, 1f, 0.15f);
 
@@ -254,39 +253,37 @@ namespace TitanAscent.Systems
                 RefreshRow(i, i == nextSplit);
         }
 
-        // Alpha applied to rows that have not yet been crossed (fade-out for pending splits)
-        private const float PendingRowAlpha  = 0.35f;
-        private const float CrossedRowAlpha  = 1.0f;
-
         private void RefreshRow(int index, bool isActive)
         {
             if (index < 0 || index >= _rows.Count) return;
             SplitRow row = _rows[index];
 
-            bool  crossed   = _manager.IsSplitCrossed(index);
-            float rowAlpha  = (crossed || isActive) ? CrossedRowAlpha : PendingRowAlpha;
+            bool  crossed  = _manager.IsSplitCrossed(index);
 
             // Sync name from manager (handles any runtime name changes)
             string splitName = _manager.GetSplitName(index);
             if (row.nameLabel != null)
-            {
                 row.nameLabel.text = splitName;
-                Color nc = row.nameLabel.color;
-                row.nameLabel.color = new Color(nc.r, nc.g, nc.b, rowAlpha);
-            }
 
             // Highlight active row background
             if (row.background != null)
                 row.background.color = isActive ? activeRowBg : Color.clear;
 
-            // Time
+            // Time — use manager's formatter for crossed splits; grey placeholder otherwise
             float splitTime = _manager.GetSplitTime(index);
 
             if (row.timeLabel != null)
             {
-                row.timeLabel.text = crossed ? FormatShort(splitTime) : "--";
-                Color tc = row.timeLabel.color;
-                row.timeLabel.color = new Color(tc.r, tc.g, tc.b, rowAlpha);
+                if (crossed)
+                {
+                    row.timeLabel.text  = _manager.GetFormattedTime(splitTime);
+                    row.timeLabel.color = Color.white;
+                }
+                else
+                {
+                    row.timeLabel.text  = "--:--.---";
+                    row.timeLabel.color = uncrossedColor;
+                }
             }
 
             // Delta
@@ -298,16 +295,16 @@ namespace TitanAscent.Systems
                 if (!crossed || pb <= 0f)
                 {
                     row.deltaLabel.text  = "";
-                    row.deltaLabel.color = new Color(noPBColor.r, noPBColor.g, noPBColor.b, rowAlpha);
+                    row.deltaLabel.color = uncrossedColor;
                 }
                 else
                 {
-                    string sign = delta <= 0f ? "-" : "+";
-                    float  abs  = Mathf.Abs(delta);
-                    Color  dc   = delta <= 0f ? aheadColor : behindColor;
+                    string sign      = delta <= 0f ? "-" : "+";
+                    float  abs       = Mathf.Abs(delta);
+                    Color  deltaColor = delta <= 0f ? aheadColor : behindColor;
                     row.deltaLabel.text  = $"{sign}{abs:F1}s";
-                    row.deltaLabel.color = new Color(dc.r, dc.g, dc.b, rowAlpha);
-                    row.targetColor      = dc;
+                    row.deltaLabel.color = deltaColor;
+                    row.targetColor      = deltaColor;
                 }
             }
         }
@@ -384,22 +381,6 @@ namespace TitanAscent.Systems
                 _canvasGroup.interactable   = visible;
                 _canvasGroup.blocksRaycasts = visible;
             }
-        }
-
-        private static string FormatShort(float seconds)
-        {
-            int m  = Mathf.FloorToInt(seconds / 60f);
-            int s  = Mathf.FloorToInt(seconds % 60f);
-            int ms = Mathf.FloorToInt((seconds % 1f) * 1000f);
-            return $"{m}:{s:00}.{ms:000}";
-        }
-
-        private static string FormatLong(float seconds)
-        {
-            int m  = Mathf.FloorToInt(seconds / 60f);
-            int s  = Mathf.FloorToInt(seconds % 60f);
-            int ms = Mathf.FloorToInt((seconds % 1f) * 1000f);
-            return $"{m:00}:{s:00}.{ms:000}";
         }
 
         private static TextMeshProUGUI FindTMP(GameObject root, string childName)
