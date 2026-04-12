@@ -34,9 +34,17 @@ namespace TitanAscent.Systems
 
         private void Start()
         {
-            // Load daily challenge based on date
-            DateTime today = DateTime.UtcNow.Date;
-            DailySeed = today.Year * 10000 + today.Month * 100 + today.Day;
+            // Prefer DailyChallengeSeed singleton for a consistent, XOR-mixed seed;
+            // fall back to the raw date integer if the singleton is not yet present.
+            if (DailyChallengeSeed.Instance != null)
+            {
+                DailySeed = DailyChallengeSeed.Instance.TodaySeed;
+            }
+            else
+            {
+                DateTime today = DateTime.UtcNow.Date;
+                DailySeed = (today.Year * 10000 + today.Month * 100 + today.Day) ^ 0x54495441;
+            }
         }
 
         public void ApplyModifiers(ChallengeModifier modifiers)

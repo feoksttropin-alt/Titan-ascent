@@ -16,12 +16,26 @@ namespace TitanAscent.Systems
         private float lastBestHeight = 0f;
         private LineRenderer markerLine;
 
+        private void Awake()
+        {
+            if (fallTracker == null)
+                fallTracker = FindFirstObjectByType<FallTracker>();
+        }
+
         private void Start()
         {
             if (fallTracker != null)
                 fallTracker.OnNewHeightRecord.AddListener(UpdateMarker);
 
             SpawnMarker(0f);
+        }
+
+        /// <summary>
+        /// Moves the best-height marker to the given world-space Y position.
+        /// </summary>
+        public void SetBestHeight(float height)
+        {
+            UpdateMarker(height);
         }
 
         private void UpdateMarker(float newHeight)

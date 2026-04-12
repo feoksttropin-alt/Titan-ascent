@@ -67,7 +67,7 @@ namespace TitanAscent.UI
 
             // Version display
             if (versionText != null)
-                versionText.text = Application.version;
+                versionText.text = BuildVersionManager.Version;
 
             // Fade in from black
             StartCoroutine(FadeIn());

@@ -33,7 +33,7 @@ namespace TitanAscent.Physics
         public float MaxFallSpeed => maxFallSpeed;
         public float MaxFallSpeedEver => maxFallSpeedEver;
         public Vector3 AverageVelocity => GetAverageVelocity();
-        public float CurrentSpeed => rb != null ? rb.linearVelocity.magnitude : 0f;
+        public float CurrentSpeed => rb != null ? rb.velocity.magnitude : 0f;
 
         private void Awake()
         {
@@ -55,14 +55,14 @@ namespace TitanAscent.Physics
             if (Time.time - lastRecordTime < velocityRecordInterval) return;
             lastRecordTime = Time.time;
 
-            velocityHistory.Enqueue(rb.linearVelocity);
+            velocityHistory.Enqueue(rb.velocity);
             if (velocityHistory.Count > velocityHistorySize)
                 velocityHistory.Dequeue();
         }
 
         private void TrackFallSpeed()
         {
-            float downwardSpeed = -rb.linearVelocity.y;
+            float downwardSpeed = -rb.velocity.y;
             if (downwardSpeed > maxFallSpeed)
             {
                 maxFallSpeed = downwardSpeed;
@@ -80,12 +80,12 @@ namespace TitanAscent.Physics
             if (isSwinging && !wasSwinging)
             {
                 // Started swinging
-                velocityAtSwingStart = rb.linearVelocity;
+                velocityAtSwingStart = rb.velocity;
             }
             else if (!isSwinging && wasSwinging)
             {
                 // Just released swing — record velocity and time
-                velocityAtSwingEnd = rb.linearVelocity;
+                velocityAtSwingEnd = rb.velocity;
                 swingEndTime = Time.time;
             }
 
@@ -94,7 +94,7 @@ namespace TitanAscent.Physics
             {
                 float t = 1f - (Time.time - swingEndTime) / swingExitBoostWindow;
                 Vector3 boostedVelocity = velocityAtSwingEnd * swingMomentumMultiplier;
-                rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, boostedVelocity, t * 0.05f);
+                rb.velocity = Vector3.Lerp(rb.velocity, boostedVelocity, t * 0.05f);
             }
 
             wasSwinging = isSwinging;

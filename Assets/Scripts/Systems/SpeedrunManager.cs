@@ -185,6 +185,32 @@ namespace TitanAscent.Systems
             return split.currentSplitTime - split.personalBestTime;
         }
 
+        public bool IsSplitCrossed(int splitIndex)
+        {
+            if (splitIndex < 0 || splitIndex >= splits.Count) return false;
+            return splits[splitIndex].crossed;
+        }
+
+        public float GetSplitTime(int splitIndex)
+        {
+            if (splitIndex < 0 || splitIndex >= splits.Count) return 0f;
+            return splits[splitIndex].currentSplitTime;
+        }
+
+        public float GetSplitPB(int splitIndex)
+        {
+            if (splitIndex < 0 || splitIndex >= splits.Count) return 0f;
+            return splits[splitIndex].personalBestTime;
+        }
+
+        public string GetSplitName(int splitIndex)
+        {
+            if (splitIndex < 0 || splitIndex >= splits.Count) return string.Empty;
+            return splits[splitIndex].zoneName;
+        }
+
+        public int SplitCount => splits.Count;
+
         public void EndSpeedrun(bool completed)
         {
             if (!isRunActive) return;

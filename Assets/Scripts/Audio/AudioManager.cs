@@ -98,6 +98,7 @@ namespace TitanAscent.Audio
 
         private void BuildOneShotPool()
         {
+            if (oneShotPoolSize <= 0) oneShotPoolSize = 8;
             for (int i = 0; i < oneShotPoolSize; i++)
             {
                 GameObject go = new GameObject($"OneShotSource_{i}");
@@ -111,6 +112,12 @@ namespace TitanAscent.Audio
 
         private void Update()
         {
+            // Reacquire references lost after scene changes or late initialization
+            if (player == null)
+                player = FindFirstObjectByType<Player.PlayerController>();
+            if (ropeSimulator == null)
+                ropeSimulator = FindFirstObjectByType<Grapple.RopeSimulator>();
+
             if (player != null)
                 UpdateAmbient(player.CurrentHeight);
 
@@ -125,7 +132,7 @@ namespace TitanAscent.Audio
             SetChannelPitch(AudioChannel.Wind, windPitchCurve.Evaluate(altitude));
 
             // Titan breathing is constant but fades slightly with altitude
-            float breathVol = Mathf.Lerp(0.6f, 0.15f, altitude / 10000f);
+            float breathVol = Mathf.Lerp(0.6f, 0.15f, Mathf.Clamp01(altitude / 10000f));
             SetChannelVolume(AudioChannel.TitanBreathing, breathVol);
         }
 
@@ -148,7 +155,7 @@ namespace TitanAscent.Audio
         {
             if (player == null) return;
 
-            float fallSpeed = -player.Velocity.y;
+            float fallSpeed = -player.CurrentVelocity.y;
             if (fallSpeed > 5f)
             {
                 float volume = Mathf.Clamp01((fallSpeed - 5f) / 40f);
@@ -167,7 +174,7 @@ namespace TitanAscent.Audio
             if (player == null) return;
 
             bool sliding = player.CurrentState == Player.PlayerState.Sliding;
-            float volume = sliding ? Mathf.Clamp01(player.Velocity.magnitude / 10f) * 0.6f : 0f;
+            float volume = sliding ? Mathf.Clamp01(player.CurrentVelocity.magnitude / 10f) * 0.6f : 0f;
             SetChannelVolume(AudioChannel.SurfaceScrape, volume);
 
             if (sliding) StartChannel(AudioChannel.SurfaceScrape);

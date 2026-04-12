@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using TitanAscent.Input;
 using TitanAscent.Systems;
 
 namespace TitanAscent.UI
@@ -39,6 +40,8 @@ namespace TitanAscent.UI
         private bool showingRestartConfirm = false;
         private bool showingQuitConfirm = false;
 
+        private bool _isPaused = false;
+
         private void Awake()
         {
             gameManager = GameManager.Instance != null
@@ -74,10 +77,45 @@ namespace TitanAscent.UI
                 gameManager.OnGameStateChanged.AddListener(HandleGameStateChanged);
         }
 
+        private void Update()
+        {
+            if (InputHandler.Instance != null && InputHandler.Instance.Pause)
+            {
+                if (_isPaused)
+                    Hide();
+                else
+                    Show();
+            }
+        }
+
         private void OnDestroy()
         {
             if (gameManager != null)
                 gameManager.OnGameStateChanged.RemoveListener(HandleGameStateChanged);
+        }
+
+        // -----------------------------------------------------------------------
+        // Public Show / Hide API
+        // -----------------------------------------------------------------------
+
+        /// <summary>Pause the game and display the pause panel.</summary>
+        public void Show()
+        {
+            if (_isPaused) return;
+            _isPaused = true;
+            gameManager?.PauseGame();
+            ShowPauseMenu();
+        }
+
+        /// <summary>Resume the game and hide the pause panel.</summary>
+        public void Hide()
+        {
+            if (!_isPaused) return;
+            _isPaused = false;
+            // Ensure timeScale is restored even if GameManager is absent
+            Time.timeScale = 1f;
+            gameManager?.ResumeGame();
+            HidePauseMenu();
         }
 
         // -----------------------------------------------------------------------
@@ -87,9 +125,15 @@ namespace TitanAscent.UI
         private void HandleGameStateChanged(GameState newState)
         {
             if (newState == GameState.Paused)
+            {
+                _isPaused = true;
                 ShowPauseMenu();
+            }
             else if (newState == GameState.Climbing || newState == GameState.MainMenu)
+            {
+                _isPaused = false;
                 HidePauseMenu();
+            }
         }
 
         public void ShowPauseMenu()
@@ -195,7 +239,7 @@ namespace TitanAscent.UI
 
         private void OnResumeClicked()
         {
-            gameManager?.ResumeGame();
+            Hide();
         }
 
         private void OnRestartClicked()
@@ -228,7 +272,7 @@ namespace TitanAscent.UI
                     {
                         showingRestartConfirm = false;
                         Time.timeScale = 1f;
-                        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                        SceneManager.LoadScene(SceneNames.MainGame);
                     },
                     () => showingRestartConfirm = false
                 );
@@ -241,7 +285,7 @@ namespace TitanAscent.UI
                     {
                         showingQuitConfirm = false;
                         Time.timeScale = 1f;
-                        SceneManager.LoadScene("MainMenu");
+                        SceneManager.LoadScene(SceneNames.MainMenu);
                     },
                     () => showingQuitConfirm = false
                 );

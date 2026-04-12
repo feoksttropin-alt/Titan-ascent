@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using TitanAscent.Audio;
+using TitanAscent.Accessibility;
 
 namespace TitanAscent.UI
 {
@@ -174,6 +175,17 @@ namespace TitanAscent.UI
             Application.targetFrameRate = TargetFrameRate;
 
             Screen.fullScreen = FullScreen;
+        }
+
+        /// <summary>
+        /// Called by UI (e.g. a color-blind mode dropdown) to forward the selection to
+        /// AccessibilityManager.  modeIndex maps directly to the ColorBlindMode enum:
+        /// 0 = None, 1 = Deuteranopia, 2 = Protanopia, 3 = Tritanopia, 4 = HighContrast.
+        /// </summary>
+        public void ApplyColorBlindMode(int modeIndex)
+        {
+            if (AccessibilityManager.Instance != null)
+                AccessibilityManager.Instance.SetColorBlindMode((ColorBlindMode)modeIndex);
         }
 
         public void ResetToDefaults()

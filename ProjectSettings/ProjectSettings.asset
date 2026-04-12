@@ -1,0 +1,447 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 23
+  productGUID: 4e6f74686572476f4461793a74697461
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  AndroidEnableSustainedPerformanceMode: 0
+  defaultScreenOrientation: 4
+  targetDevice: 2
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: DefaultCompany
+  productName: TitanAscent
+  defaultCursor: {fileID: 0}
+  cursorHotspot: {x: 0, y: 0}
+  m_SplashScreenBackgroundColor: {r: 0.13725490196078433, g: 0.12156862745098039,
+    b: 0.12549019607843137, a: 1}
+  m_ShowUnitySplashScreen: 1
+  m_ShowUnitySplashLogo: 1
+  m_SplashScreenOverlayOpacity: 1
+  m_SplashScreenAnimation: 1
+  m_SplashScreenLogoStyle: 1
+  m_SplashScreenDrawMode: 0
+  m_SplashScreenBackgroundAnimationZoom: 1
+  m_SplashScreenLogoAnimationZoom: 1
+  m_SplashScreenBackgroundLandscapeAspect: 1
+  m_SplashScreenBackgroundPortraitAspect: 1
+  m_SplashScreenBackgroundLandscapeUvs:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  m_SplashScreenBackgroundPortraitUvs:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  m_SplashScreenLogos: []
+  m_VirtualRealitySplashScreen: {fileID: 0}
+  m_HolographicTrackingLossScreen: {fileID: 0}
+  defaultScreenWidth: 1920
+  defaultScreenHeight: 1080
+  defaultScreenWidthWeb: 960
+  defaultScreenHeightWeb: 600
+  m_StereoRenderingPath: 0
+  m_ActiveColorSpace: 1
+  m_SpriteBatchVertexThreshold: 300
+  m_TransparencySortMode: 0
+  m_TransparencySortAxis: {x: 0, y: 0, z: 1}
+  m_UseLegacyIdentity: 0
+  m_BuildTargetGroup: 1
+  m_Tier1Settings:
+    serializedVersion: 4
+    standardShaderQuality: 1
+    renderingPath: 1
+    hdrMode: 1
+    realtimeGICPUUsage: 25
+    useReflectionProbeBoxProjection: 0
+    useReflectionProbeBlending: 0
+    useDetailNormalMap: 0
+    useStrongMipFiltering: 0
+    cascadeCount: 2
+    shadowDistance: 50
+    shadowNearPlaneOffset: 3
+    shadowCascade2Split: 0.33333334
+    shadowCascade4Split: {x: 0.06666667, y: 0.2, z: 0.46666667}
+    shadowProjection: 1
+    blendWeights: 2
+    useHDR: 0
+    useScreenSpaceShadows: 1
+    preferredLightmapper: 4
+    cookieAtlasSize: 1024
+    cookieAtlasFormat: 0
+    reflectionCubemapCompression: 2
+    enableLPPV: 0
+  m_Tier2Settings:
+    serializedVersion: 4
+    standardShaderQuality: 2
+    renderingPath: 1
+    hdrMode: 1
+    realtimeGICPUUsage: 25
+    useReflectionProbeBoxProjection: 1
+    useReflectionProbeBlending: 1
+    useDetailNormalMap: 1
+    useStrongMipFiltering: 0
+    cascadeCount: 2
+    shadowDistance: 50
+    shadowNearPlaneOffset: 3
+    shadowCascade2Split: 0.33333334
+    shadowCascade4Split: {x: 0.06666667, y: 0.2, z: 0.46666667}
+    shadowProjection: 1
+    blendWeights: 2
+    useHDR: 1
+    useScreenSpaceShadows: 1
+    preferredLightmapper: 4
+    cookieAtlasSize: 2048
+    cookieAtlasFormat: 0
+    reflectionCubemapCompression: 2
+    enableLPPV: 1
+  m_Tier3Settings:
+    serializedVersion: 4
+    standardShaderQuality: 2
+    renderingPath: 1
+    hdrMode: 1
+    realtimeGICPUUsage: 25
+    useReflectionProbeBoxProjection: 1
+    useReflectionProbeBlending: 1
+    useDetailNormalMap: 1
+    useStrongMipFiltering: 0
+    cascadeCount: 4
+    shadowDistance: 150
+    shadowNearPlaneOffset: 3
+    shadowCascade2Split: 0.33333334
+    shadowCascade4Split: {x: 0.06666667, y: 0.2, z: 0.46666667}
+    shadowProjection: 1
+    blendWeights: 4
+    useHDR: 1
+    useScreenSpaceShadows: 1
+    preferredLightmapper: 4
+    cookieAtlasSize: 2048
+    cookieAtlasFormat: 0
+    reflectionCubemapCompression: 2
+    enableLPPV: 1
+  m_LightmapStripping: 0
+  m_FogStripping: 0
+  m_InstancingStripping: 0
+  m_LightmapKeepPlain: 1
+  m_LightmapKeepDirCombined: 1
+  m_LightmapKeepDynamicPlain: 1
+  m_LightmapKeepDynamicDirCombined: 1
+  m_LightmapKeepShadowMask: 1
+  m_LightmapKeepSubtractive: 1
+  m_FogKeepLinear: 1
+  m_FogKeepExp: 1
+  m_FogKeepExp2: 1
+  m_AlbedoSwatchInfos: []
+  m_Shaders: {}
+  m_PreloadedShaders: []
+  m_SpritesDefaultMeshType: 1
+  m_PackageRequirements: []
+  m_BuildTargetBatching:
+  - serializedVersion: 2
+    m_BuildTarget: Standalone
+    m_StaticBatching: 1
+    m_DynamicBatching: 0
+  - serializedVersion: 2
+    m_BuildTarget: tvOS
+    m_StaticBatching: 1
+    m_DynamicBatching: 0
+  - serializedVersion: 2
+    m_BuildTarget: Android
+    m_StaticBatching: 1
+    m_DynamicBatching: 0
+  - serializedVersion: 2
+    m_BuildTarget: WebGL
+    m_StaticBatching: 0
+    m_DynamicBatching: 0
+  - serializedVersion: 2
+    m_BuildTarget: WSA
+    m_StaticBatching: 1
+    m_DynamicBatching: 0
+  - serializedVersion: 2
+    m_BuildTarget: PS4
+    m_StaticBatching: 1
+    m_DynamicBatching: 0
+  - serializedVersion: 2
+    m_BuildTarget: XboxOne
+    m_StaticBatching: 1
+    m_DynamicBatching: 0
+  - serializedVersion: 2
+    m_BuildTarget: iPhone
+    m_StaticBatching: 1
+    m_DynamicBatching: 0
+  - serializedVersion: 2
+    m_BuildTarget: Nintendo Switch
+    m_StaticBatching: 1
+    m_DynamicBatching: 0
+  m_BuildTargetGraphicsAPIs:
+  - m_BuildTarget: WindowsStandaloneSupport
+    m_APIs: 02000000
+    m_Automatic: 1
+  - m_BuildTarget: LinuxStandaloneSupport
+    m_APIs: 15000000
+    m_Automatic: 1
+  m_BuildTargetVRSettings: []
+  openGLRequireES31: 0
+  openGLRequireES31AEP: 0
+  openGLRequireES32: 0
+  m_TemplateCustomTags: {}
+  mobileMTRendering:
+    Android: 1
+    iPhone: 1
+    tvOS: 1
+  m_BuildTargetGroupLightmapEncodingQuality:
+  - serializedVersion: 2
+    m_BuildTarget: Standalone
+    m_EncodingQuality: 1
+  - serializedVersion: 2
+    m_BuildTarget: Android
+    m_EncodingQuality: 0
+  - serializedVersion: 2
+    m_BuildTarget: iPhone
+    m_EncodingQuality: 1
+  - serializedVersion: 2
+    m_BuildTarget: tvOS
+    m_EncodingQuality: 1
+  m_BuildTargetGroupHDRCubemapEncodingQuality:
+  - serializedVersion: 2
+    m_BuildTarget: Standalone
+    m_EncodingQuality: 2
+  - serializedVersion: 2
+    m_BuildTarget: Android
+    m_EncodingQuality: 0
+  - serializedVersion: 2
+    m_BuildTarget: iPhone
+    m_EncodingQuality: 2
+  - serializedVersion: 2
+    m_BuildTarget: tvOS
+    m_EncodingQuality: 2
+  m_BuildTargetNormalMapEncoding:
+  - serializedVersion: 2
+    m_BuildTarget: Standalone
+    m_Encoding: 0
+  - serializedVersion: 2
+    m_BuildTarget: Android
+    m_Encoding: 1
+  - serializedVersion: 2
+    m_BuildTarget: iPhone
+    m_Encoding: 1
+  - serializedVersion: 2
+    m_BuildTarget: tvOS
+    m_Encoding: 1
+  m_BuildTargetDefaultTextureCompressionFormat:
+  - serializedVersion: 2
+    m_BuildTarget: Android
+    m_TextureCompressionFormat: 3
+  m_StackTraceTypes: 010000000100000001000000010000000100000001000000
+  iosShowActivityIndicatorOnLoading: -1
+  androidShowActivityIndicatorOnLoading: -1
+  allowedAutorotateToPortrait: 1
+  allowedAutorotateToPortraitUpsideDown: 1
+  allowedAutorotateToLandscapeRight: 1
+  allowedAutorotateToLandscapeLeft: 1
+  useAnimatedAutorotation: 1
+  stripUnusedMeshComponents: 1
+  atlasSizeLimit: 1024
+  allowHDRDisplaySupport: 0
+  use32BitDisplayBuffer: 1
+  preserveFramebufferAlpha: 0
+  disableDepthAndStencilBuffers: 0
+  androidStartInFullscreen: 1
+  androidRenderOutsideSafeArea: 1
+  androidUseSwappy: 1
+  androidBlitType: 0
+  androidResizableWindow: 0
+  androidDefaultWindowWidth: 1920
+  androidDefaultWindowHeight: 1080
+  androidMinimumWindowWidth: 400
+  androidMinimumWindowHeight: 300
+  androidFullscreenMode: 1
+  defaultIsNativeResolution: 1
+  macRetinaSupport: 1
+  runInBackground: 1
+  captureSingleScreen: 0
+  muteOtherAudioSources: 0
+  Prepare IOS For Recording: 0
+  Force IOS Speakers When Recording: 0
+  deferSystemGesturesMode: 0
+  hideHomeButton: 0
+  submitAnalytics: 1
+  usePlayerLog: 1
+  bakeCollisionMeshes: 0
+  forceSingleInstance: 0
+  useFlipModelSwapchain: 1
+  resizableWindow: 0
+  useMacAppStoreValidation: 0
+  macAppStoreCategory: public.app-category.games
+  gpuSkinning: 1
+  xboxPIXTextureCapture: 0
+  xboxEnableAvatar: 0
+  xboxEnableKinect: 0
+  xboxEnableKinectAutoTracking: 0
+  xboxEnableFitness: 0
+  visibleInBackground: 1
+  allowFullscreenSwitch: 1
+  fullscreenMode: 1
+  xboxSpeechDB: 0
+  xboxEnableHeadOrientation: 0
+  xboxEnableGuest: 0
+  xboxEnablePIXSampling: 0
+  metalFramebufferOnly: 0
+  xboxOneResolution: 0
+  xboxOneSResolution: 0
+  xboxOneXResolution: 3
+  xboxOneMonoLoggingLevel: 0
+  xboxOneLoggingLevel: 1
+  xboxOneDisableEsram: 0
+  xboxOnePresentImmediateThreshold: 0
+  switchQueueCommandMemory: 0
+  switchQueueControlMemory: 16384
+  switchQueueComputeMemory: 262144
+  switchNVNShaderPoolsGranularity: 33554432
+  switchNVNDefaultPoolsGranularity: 16777216
+  switchNVNOtherPoolsGranularity: 16777216
+  switchGpuScratchPoolGranularity: 2097152
+  switchAllowGpuScratchShrinking: 0
+  switchNVNMaxPublicTextureIDCount: 0
+  switchNVNMaxPublicSamplerIDCount: 0
+  stadiaPresentMode: 0
+  stadiaTargetFramerate: 0
+  vulkanNumSwapchainBuffers: 3
+  vulkanEnableSetSRGBWrite: 0
+  vulkanEnablePreTransform: 0
+  vulkanEnableLateAcquireNextImage: 0
+  vulkanEnableCommandBufferRecycling: 1
+  loadStoreDebugModeEnabled: 0
+  m_SupportedAspectRatios:
+    4:3: 1
+    5:4: 1
+    16:10: 1
+    16:9: 1
+    Others: 1
+  bundleVersion: 0.3.1
+  preloadedAssets: []
+  metroInputSource: 0
+  wsaTransparentSwapchain: 0
+  m_HolographicPauseOnTrackingLoss: 1
+  xboxOneDisableKinectGpuReservation: 1
+  xboxOneEnable7thCore: 1
+  vrSettings:
+    cardboard:
+      depthFormat: 0
+      enableTransitionView: 0
+    daydream:
+      depthFormat: 0
+      useSustainedPerformanceMode: 0
+      enableVideoLayer: 0
+      useProtectedVideoMemory: 0
+      minimumSupportedHeadTracking: 0
+      maximumSupportedHeadTracking: 1
+    hololens:
+      depthFormat: 1
+      depthBufferSharingEnabled: 1
+    lumin:
+      depthFormat: 0
+      frameTiming: 0
+      enableGLCache: 0
+      glCacheMaxBlobSize: 524288
+      glCacheMaxFileSize: 8388608
+    oculus:
+      sharedDepthBuffer: 1
+      dashSupport: 1
+      lowOverheadMode: 0
+      protectedContext: 0
+      v2Signing: 1
+    openVR:
+      stereoRenderingMode: 0
+    windowsMR:
+      depthBufferFormat: 0
+      depthBufferSharingEnabled: 1
+      HolographicRemoting: 0
+      depthFormat: 0
+  cloudProjectId:
+  framebufferDepthMemorylessMode: 0
+  qualitySettingsNames: []
+  projectName:
+  organizationId:
+  cloudEnabled: 0
+  legacyClampBlendShapeWeights: 0
+  playerDataPath:
+  forceSRGBBlit: 1
+  virtualTexturingSupportEnabled: 0
+  m_VRSettings:
+    enable360StereoCapture: 0
+  insecureHttpOption: 0
+  n_ShaderPrecisionModel: 0
+  m_PreloadShadersBatchSize: 4
+  scriptingDefineSymbols:
+    1:
+  additionalCompilerArguments: {}
+  platformArchitecture: {}
+  scriptingBackend:
+    Standalone: 0
+  il2cppCompilerConfiguration:
+    Standalone: 0
+  managedStrippingLevel: {}
+  incrementalIl2cppBuild: {}
+  allowUnsafeCode: 0
+  additionalIl2CppArgs:
+  scriptingRuntimeVersion: 1
+  gcIncremental: 1
+  assemblyVersionValidation: 1
+  m_RenderingPath: 1
+  m_MobileRenderingPath: 1
+  metroPackageName: TitanAscent
+  metroPackageVersion:
+  metroCertificatePath:
+  metroCertificatePassword:
+  metroCertificateSubject:
+  metroCertificateIssuer:
+  metroCertificateNotAfter: 0000000000000000
+  metroApplicationDescription: TitanAscent
+  wsaImages: {}
+  metroTileShortName:
+  metroTileShowName: 0
+  metroMediumTileShowName: 0
+  metroLargeTileShowName: 0
+  metroWideTileShowName: 0
+  metroDefaultTileSize: 1
+  metroTileForegroundText: 2
+  metroTileBackgroundColor: {r: 0.13333334, g: 0.17254902, b: 0.21568628, a: 0}
+  metroSplashScreenBackgroundColor: {r: 0.12941177, g: 0.17254902, b: 0.21568628,
+    a: 1}
+  metroSplashScreenUseBackgroundColor: 0
+  platformCapabilities: {}
+  metroTargetDeviceFamilies: {}
+  metroFTAName:
+  metroFTAFileTypes: []
+  metroProtocolName:
+  m_IconLayersDirty: 0
+  m_ShaderLogLevel: 0
+  m_LegacyShaderVMSupported: 0
+  m_PlatformRequiresReadableAssets: 0
+  webGLMemorySize: 32
+  webGLExceptionSupport: 1
+  webGLNameFilesAsHashes: 0
+  webGLDataCaching: 1
+  webGLDebugSymbols: 0
+  webGLEmscriptenArgs:
+  webGLModulesDirectory:
+  webGLTemplate: APPLICATION:Default
+  webGLAnalyzeBuildSize: 0
+  webGLUseEmbeddedResources: 0
+  webGLCompressionFormat: 1
+  webGLWasmStreaming: 1
+  webGLPowerPreference: 2
+  scriptingDefineSymbolsDerivedFromSystemSettings: 0
+  platformRequiresReadableAssets: 0
+  m_AutoGenerateStreamingLOD: 1
+  m_BuildTargetPlatformIDs:
+  - m_BuildTarget: Standalone
+    m_PlatformID: 00000000000000000000000000000000

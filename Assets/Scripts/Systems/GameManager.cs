@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
+using TitanAscent.UI;
 
 namespace TitanAscent.Systems
 {
@@ -21,11 +22,14 @@ namespace TitanAscent.Systems
         [SerializeField] private FallTracker fallTracker;
         [SerializeField] private NarrationSystem narration;
         [SerializeField] private SaveManager saveManager;
+        [SerializeField] private PostRunSummary postRunSummary;
+        [SerializeField] private SessionStatsTracker sessionStatsTracker;
 
         [Header("Events")]
         public UnityEvent<GameState> OnGameStateChanged;
         public UnityEvent OnClimbStarted;
         public UnityEvent OnVictory;
+        public UnityEvent<float> OnNewHeightRecord;
 
         private GameState currentState = GameState.MainMenu;
         private float sessionStartTime;
@@ -35,6 +39,9 @@ namespace TitanAscent.Systems
         public GameState CurrentState => currentState;
         public float SessionTime => Time.time - sessionStartTime;
         public float CurrentHeight => currentHeight;
+        public float BestHeightEver => fallTracker != null ? fallTracker.BestHeightEver : 0f;
+        public int TotalFalls => fallTracker != null ? fallTracker.TotalFalls : 0;
+        public float LongestFall => fallTracker != null ? fallTracker.LongestFall : 0f;
         public SaveData GlobalStats => saveManager?.CurrentData;
 
         private void Awake()
@@ -46,6 +53,12 @@ namespace TitanAscent.Systems
 
         private void Start()
         {
+            if (postRunSummary == null)
+                postRunSummary = FindFirstObjectByType<TitanAscent.UI.PostRunSummary>();
+
+            if (sessionStatsTracker == null)
+                sessionStatsTracker = FindFirstObjectByType<SessionStatsTracker>();
+
             saveManager?.Load();
             BindEvents();
         }
@@ -83,6 +96,8 @@ namespace TitanAscent.Systems
             SetState(GameState.Climbing);
             sessionStartTime = Time.time;
             nearSummitNotified = false;
+            SessionManager.Instance?.StartSession();
+            sessionStatsTracker?.StartSession();
             narration?.TriggerClimbStart();
             OnClimbStarted?.Invoke();
         }
@@ -110,8 +125,15 @@ namespace TitanAscent.Systems
             if (currentState == GameState.Victory) return;
             SetState(GameState.Victory);
             narration?.TriggerVictory();
+            SessionManager.Instance?.EndSession(true);
+            RecordCurrentRun();
             saveManager?.Save();
             OnVictory?.Invoke();
+            postRunSummary?.ShowSummary(
+                height:      currentHeight,
+                time:        SessionTime,
+                falls:       TotalFalls,
+                longestFall: LongestFall);
         }
 
         private void HandleFallCompleted(FallData data)
@@ -128,12 +150,28 @@ namespace TitanAscent.Systems
                     saveManager.Save();
                 }
                 stats.totalFalls++;
-                stats.totalClimbs = stats.totalClimbs; // preserved
+                saveManager.Save();
             }
+
+            // A run-ending fall concludes the current session — record it
+            if (data.severity == FallSeverity.RunEnding)
+            {
+                RecordCurrentRun();
+            }
+        }
+
+        /// <summary>Writes a RunRecord for the current session to SaveManager.</summary>
+        private void RecordCurrentRun()
+        {
+            if (saveManager == null) return;
+            float height = fallTracker != null ? fallTracker.BestHeightEver : currentHeight;
+            int   falls  = fallTracker != null ? fallTracker.TotalFalls      : 0;
+            saveManager.AddRunRecord(height, SessionTime, falls);
         }
 
         private void HandleNewHeightRecord(float height)
         {
+            OnNewHeightRecord?.Invoke(height);
             narration?.TriggerNewHeightRecord();
             if (saveManager != null)
             {

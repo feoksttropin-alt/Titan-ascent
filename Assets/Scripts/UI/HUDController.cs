@@ -35,6 +35,9 @@ namespace TitanAscent.UI
         [SerializeField] private float bestHeightPulseDuration = 0.6f;
         [SerializeField] private Color bestHeightPulseColor = new Color(1f, 0.9f, 0.2f);
 
+        [Header("Progress Bar")]
+        [SerializeField] private HeightProgressBar heightProgressBar;
+
         private Systems.GameManager gameManager;
         private Player.ThrusterSystem thrusterSystem;
         private Systems.FallTracker fallTracker;
@@ -47,9 +50,12 @@ namespace TitanAscent.UI
 
         private void Awake()
         {
-            gameManager     = Systems.GameManager.Instance ?? FindFirstObjectByType<Systems.GameManager>();
-            thrusterSystem  = FindFirstObjectByType<Player.ThrusterSystem>();
-            fallTracker     = FindFirstObjectByType<Systems.FallTracker>();
+            gameManager      = Systems.GameManager.Instance ?? FindFirstObjectByType<Systems.GameManager>();
+            thrusterSystem   = FindFirstObjectByType<Player.ThrusterSystem>();
+            fallTracker      = FindFirstObjectByType<Systems.FallTracker>();
+
+            if (heightProgressBar == null)
+                heightProgressBar = FindFirstObjectByType<HeightProgressBar>();
 
             if (bestHeightText != null)
                 defaultBestHeightColor = bestHeightText.color;

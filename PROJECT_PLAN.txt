@@ -1,0 +1,254 @@
+================================================================================
+TITAN ASCENT — PROJECT PLAN & REMAINING WORK
+================================================================================
+Last updated: 2026-04-06
+Branch: claude/titan-ascent-development-ewfJA
+
+--------------------------------------------------------------------------------
+PROJECT OVERVIEW
+--------------------------------------------------------------------------------
+Titan Ascent is a physics-based rage climber. The player grapples up a living
+titan from tail to crown (0–10,000 m). The codebase has 157 C# scripts covering
+all major game systems. Most game logic is written; what remains is Unity scene
+assembly, inspector wiring, platform integration, QA, and polish.
+
+Engine:     Unity 2022.3.20f1 LTS
+Platform:   PC (Steam)
+Target FPS: 60 on GTX 1060 / RX 580
+
+--------------------------------------------------------------------------------
+WHAT IS ALREADY DONE (CODE)
+--------------------------------------------------------------------------------
+✓ Player movement — Rigidbody controller, state machine, momentum conservation
+✓ Grapple system — rope simulation (Verlet, 20 segments), spring joint, aim assist
+✓ Grip system — surface friction with energy drain/regen
+✓ Thruster system — mid-air boost with energy management
+✓ Emergency recovery — extended grapple range/force during large falls
+✓ Fall tracker — 5 severity tiers (5/20/100/500/1500 m thresholds)
+✓ Zone system — all 9 zones with height ranges, wind, surface types
+✓ Wind system — altitude-aware with turbulence, breathing wind (Zone 8)
+✓ Titan movement — wing tremors, breathing, muscle contractions
+✓ Surface properties — 5 types with friction/grip/grappleability registry
+✓ Narration system — cooldown, no-repeat, 15 categories, TryNarrate/NarrateRaw
+✓ Save/load — PlayerPrefs + JSON, versioned, runHistory field
+✓ Challenge manager — daily challenges seeded by UTC date (3 modifiers)
+✓ Achievement system — unlock tracking, validation
+✓ Ghost system — 20 fps recording, binary serialisation, replay
+✓ Speedrun timer — split tracking, PB persistence, formatted display
+✓ Game manager — central singleton, state machine, victory at 10,000 m
+✓ UI systems — HUD, main menu, settings, cosmetics, run history, pause, post-run
+✓ JuiceController — camera shake, FOV pulse, screen flash, freeze frames
+✓ Audio manager — altitude-aware channels, one-shot pool
+✓ Input handler — keyboard/mouse + gamepad (Unity Input System)
+✓ Tutorial system — 7 contextual steps, event-driven, PlayerPrefs persistence
+✓ ColorBlindFilter — Deuteranopia/Protanopia/Tritanopia/HighContrast modes
+✓ FrustrationDetector — 5 patterns, forgiveness mechanics, narration hooks
+✓ AmbientCreatureSystem — altitude-banded spawning, flocking, scatter on approach
+✓ LeaderboardManager — local top-10 + Steam stub (#if STEAMWORKS_NET)
+✓ Optimisation — object pool, particle pool, audio pool, LOD, rope budget
+✓ Debug menu — teleport, toggles, narration test, wind control (dev builds only)
+✓ QA tools — QAValidator, AnchorValidator, RouteValidator, PlaytestReportGenerator
+
+--------------------------------------------------------------------------------
+PHASE 1 — COMPLETE (Architecture fixes applied this session)
+--------------------------------------------------------------------------------
+✓ Fixed Unity 2022 compile blockers:
+    rb.linearVelocity  → rb.velocity
+    rb.linearDamping   → rb.drag
+    rb.angularDamping  → rb.angularDrag
+  Affected: PlayerController, GripSystem, MomentumTracker, DebugMenu,
+            DebrisSystem, GrappleAudioController, GrapplePredictor,
+            CollisionSafety, MomentumConservationSystem, SwingAnalyzer,
+            GhostRecorder, PathBookmarkSystem, FallVFX, GrappleImpactVFX,
+            SurfaceContactVFX
+
+✓ Input system unified — GrappleController routes through InputHandler.Instance
+  (falls back to legacy Input.GetKey for editor iteration)
+  Hardcoded KeyCode.Q release replaced with serialized releaseKey
+
+✓ Gamepad support enabled in InputHandler — right stick, trigger, left stick,
+  bumper and start button all wired
+
+✓ SaveManager auto-created by SceneBootstrapper (was missing)
+
+✓ SceneBootstrapper.ValidateSystems() now errors on missing SaveManager
+
+✓ SceneBootstrapper OnDestroy / UnwireEvents() added — prevents duplicate
+  listener registration on scene reloads
+
+✓ AudioManager — reacquires player + ropeSimulator if null in Update()
+  (survives scene changes), clamped altitude breathing normalisation,
+  oneShotPoolSize guarded against ≤ 0
+
+✓ AudioManager player.Velocity → player.CurrentVelocity (correct property name)
+
+✓ GameManager — removed dead-code no-op stats.totalClimbs = stats.totalClimbs
+
+✓ QAValidator CheckZoneManagerZoneCount — removed bogus always-returns-(-1) line
+
+--------------------------------------------------------------------------------
+PHASE 2 — UNITY SCENE ASSEMBLY (TODO — needs Unity Editor work)
+--------------------------------------------------------------------------------
+No .unity scene files or prefabs exist yet. All code is written but nothing is
+wired in the Unity Editor. This is the biggest remaining block.
+
+2.1  SCENES REQUIRED
+     MainMenu.unity  — title screen, settings, cosmetics, leaderboard, history
+     MainGame.unity  — the 10,000 m titan climb
+     Loading.unity   — transition scene (SceneTransitionManager.cs)
+
+2.2  PREFABS REQUIRED
+     Player          — PlayerController, GripSystem, ThrusterSystem,
+                       EmergencyRecovery, CoyoteTimeSystem, GrappleController,
+                       MultiGrappleManager, InputHandler, Rigidbody (80 kg)
+     Rope            — RopeSimulator, RopeVFX, LineRenderer (20 segments)
+     GrappleAnchor   — SurfaceAnchorPoint, collider, tagged "Anchor"
+     GhostPlayer     — ghost replay visual, GhostSystem driven
+     HUD Canvas      — HUDController, HeightProgressBar, GrappleReticle,
+                       FallDistanceOverlay, NarrationUI, ZoneNameDisplay
+     Wind Zone       — WindColumn, WindParticleSystem
+     Zone Blocks x9  — geometry placeholders for each titan zone
+
+2.3  MATERIALS REQUIRED
+     5 surface materials: ScaleArmor, BoneRidge, Crystal, MuscleSkin, WingMembrane
+     Rope material (tension color via RopeVFX)
+     Sky/atmosphere material (AtmosphereController)
+
+2.4  SCRIPTABLEOBJECTS REQUIRED
+     ZoneData x9  (ZoneData.cs already exists)
+     CosmeticItem assets  (CosmeticItem.cs already exists)
+     Surface property configs (SurfaceProperties registry)
+
+2.5  AUDIO ASSETS
+     Wind ambience per zone (9 tracks or parameterised)
+     Grapple fire / attach / detach  → GrappleAudioController.cs
+     Fall whoosh layers              → FallAudioController.cs
+     Surface impacts (5 types)       → SurfaceAudioMapper.cs
+     Thruster burst                  → ThrusterVFX.cs
+     Narrator voice lines (~100 clips matching NARRATION_SCRIPTS.md)
+     UI sounds                       → UIAudioController.cs
+     Music (calm climb / storm / summit) → MusicManager.cs
+
+2.6  VFX / PARTICLE SYSTEMS
+     Grapple impact spark    → GrappleImpactVFX.cs
+     Thruster exhaust        → ThrusterVFX.cs
+     Fall air rush           → FallVFX.cs
+     Surface contact puff    → SurfaceContactVFX.cs
+     Wind debris             → WindParticleSystem.cs
+     Summit arrival          → SummitApproachVFX.cs
+
+2.7  3D / VISUAL ASSETS
+     Titan mesh or modular segments (TitanBodySegment.cs)
+     Player character mesh + rig
+     Animator Controller: Idle / Swing / Grapple / Fall / Land states
+     Skybox cubemap (altitude-responsive via AtmosphereController)
+
+--------------------------------------------------------------------------------
+PHASE 3 — INTEGRATION & WIRING (TODO — after scene assembly)
+--------------------------------------------------------------------------------
+- Assign all [SerializeField] references in Unity Inspector for every prefab
+- Configure SceneBootstrapper initialisation order
+- Set zone height boundaries in ZoneManager (Zones 1–9, 0–10,000 m)
+- Verify EventBus subscribers register at startup without duplication
+- Test SaveManager read/write round-trip end-to-end
+- Validate ChallengeManager daily seed consistency across sessions
+- Confirm GhostSystem binary serialisation path works in builds
+- Hook FrustrationDetector → NarrationSystem.TryNarrate()
+- Hook AccessibilityManager → ColorBlindFilter.ApplyMode()
+- Replace all hardcoded scene name strings ("MainMenu", "MainGame") with
+  centralised constants or a SceneConfig ScriptableObject
+
+--------------------------------------------------------------------------------
+PHASE 4 — QA & TESTING (TODO — after integration)
+--------------------------------------------------------------------------------
+Automated:
+  Run QAValidator via TitanAscent / Run QA Validation menu item
+  Run AnchorValidator (anchor approach angles and hold strength)
+  Run RouteValidator (reachable path 0–10,000 m confirmed)
+  Run PlaytestReportGenerator after each session
+
+Manual playtest checklist:
+  [ ] Full run Zone 1 → Zone 9 without bugs
+  [ ] All 5 fall severity tiers trigger correct narration + VFX
+  [ ] Emergency recovery window fires on large falls (>100 m)
+  [ ] Daily challenge modifiers stack correctly
+  [ ] Ghost replay matches original run timing (±0.1 s)
+  [ ] Speedrun timer PB saves and reloads correctly
+  [ ] Cosmetics equip/unequip with zero gameplay impact
+  [ ] Tutorial fires on first run only and saves completion flag
+  [ ] Accessibility colorblind modes are visually distinct
+  [ ] Controller full remap via ControlsRemapUI works end-to-end
+  [ ] Achievements trigger and show popup correctly
+  [ ] Scene reload does not duplicate singleton managers
+  [ ] Pause/menu transitions work correctly
+  [ ] Debug menu disabled in release build
+
+Performance targets:
+  60 fps on GTX 1060 / RX 580
+  RopeSimulationBudget.cs caps active ropes at target frame time
+  Object pools (ObjectPooler, ParticlePoolManager, AudioSourcePool) prevent GC spikes
+  LOD system activates beyond configured distance
+
+--------------------------------------------------------------------------------
+PHASE 5 — PLATFORM INTEGRATION (TODO — after QA)
+--------------------------------------------------------------------------------
+Steam SDK (Steamworks.NET):
+  LeaderboardManager.cs — implement SubmitToSteamLeaderboard() and
+                          FetchSteamLeaderboard() stubs (marked #if STEAMWORKS_NET)
+  AchievementSystem.cs  — hook to SteamUserStats.SetAchievement()
+  Steam Cloud           — optionally sync SaveManager JSON via ISteamRemoteStorage
+  Steam Input           — confirm Unity Input System fallback for controller types
+  BuildVersionManager.cs — version string in build pipeline
+  GitHub Actions (.github/workflows/) — CI build targets
+
+--------------------------------------------------------------------------------
+PHASE 6 — POLISH PASS (TODO — final before release)
+--------------------------------------------------------------------------------
+- JuiceController: tune shake/FOV/freeze values per fall severity tier
+- Narration: verify 8 s cooldown pacing; no overlapping lines in edge cases
+- Wind audio: WindAudioLayer.cs altitude ramp should feel gradual
+- HeightMarker: visual pop + narration sync at milestone heights
+- PostRunSummary: confirm all stats display correctly
+- LoadingScreen: add zone lore/tip text per scene
+- DebugMenu: confirmed stripped in release (already wrapped in #if DEVELOPMENT_BUILD)
+- Final inspector validation pass on all prefabs and scenes
+- Remove or comment dead placeholder code
+
+--------------------------------------------------------------------------------
+KEY FILE REFERENCE
+--------------------------------------------------------------------------------
+Player         Assets/Scripts/Player/PlayerController.cs
+Grapple        Assets/Scripts/Grapple/GrappleController.cs
+               Assets/Scripts/Grapple/RopeSimulator.cs
+Zones          Assets/Scripts/Environment/ZoneManager.cs
+Game State     Assets/Scripts/Systems/GameManager.cs
+Save           Assets/Scripts/Systems/SaveManager.cs
+Narration      Assets/Scripts/Systems/NarrationSystem.cs
+HUD            Assets/Scripts/UI/HUDController.cs
+Events         Assets/Scripts/Systems/EventBus.cs
+Scene Init     Assets/Scripts/Scene/SceneBootstrapper.cs
+Input          Assets/Scripts/Input/InputHandler.cs
+Speedrun       Assets/Scripts/Systems/SpeedrunManager.cs
+Ghost          Assets/Scripts/Systems/GhostSystem.cs
+Challenges     Assets/Scripts/Systems/ChallengeManager.cs
+Tutorial       Assets/Scripts/Systems/TutorialSystem.cs
+Colorblind     Assets/Scripts/Accessibility/ColorBlindFilter.cs
+Leaderboard    Assets/Scripts/Systems/LeaderboardManager.cs  ← STEAM STUBS
+Frustration    Assets/Scripts/Systems/FrustrationDetector.cs
+Creatures      Assets/Scripts/Environment/AmbientCreatureSystem.cs
+QA             Assets/Scripts/Systems/QAValidator.cs
+               Assets/Scripts/Debug/AnchorValidator.cs
+               Assets/Scripts/Systems/RouteValidator.cs
+
+--------------------------------------------------------------------------------
+EXECUTION ORDER
+--------------------------------------------------------------------------------
+[DONE]      Phase 0 — Merge conflicts resolved + Unity 2022 API compile fixes
+[DONE]      Phase 1 — Architecture fixes (input, bootstrap, audio, events, QA)
+[NEXT]      Phase 2 — Unity scene assembly and asset creation (Editor work)
+[AFTER 2]   Phase 3 — Inspector wiring and system integration
+[AFTER 3]   Phase 4 — QA: automated validators + manual playtesting
+[AFTER 4]   Phase 5 — Steam SDK integration and build pipeline
+[LAST]      Phase 6 — Polish pass before release build
+
+================================================================================

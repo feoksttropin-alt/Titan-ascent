@@ -1,4 +1,4 @@
-# Unity Generated Files
+# Unity generated
 Library/
 Temp/
 Obj/
@@ -8,7 +8,7 @@ Logs/
 UserSettings/
 MemoryCaptures/
 
-# Unity Cache
+# Unity cache
 .DS_Store
 .vs/
 ExportedObj/
@@ -27,7 +27,7 @@ ExportedObj/
 *.opendb
 *.VC.db
 
-# Unity3D Meta Files
+# Unity3D generated meta files
 *.pidb.meta
 *.pdb.meta
 *.mdb.meta

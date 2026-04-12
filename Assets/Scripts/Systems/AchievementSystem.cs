@@ -39,6 +39,9 @@ namespace TitanAscent.Systems
 
     public class AchievementSystem : MonoBehaviour
     {
+        // ── Singleton ───────────────────────────────────────────────────────────
+        public static AchievementSystem Instance { get; private set; }
+
         // ── Pre-defined achievements ────────────────────────────────────────────
         public static readonly Achievement A_FirstSummit = new Achievement
         {
@@ -132,16 +135,52 @@ namespace TitanAscent.Systems
             isSecret = true
         };
 
+        // ── Required event-driven achievements ──────────────────────────────────
+        public static readonly Achievement A_SummitReached = new Achievement
+        {
+            id = "summit_reached", displayName = "Summit Reached",
+            description = "Complete your first ascent to the top",
+            iconName = "icon_crown"
+        };
+        public static readonly Achievement A_LongWayDown = new Achievement
+        {
+            id = "long_way_down", displayName = "Long Way Down",
+            description = "Fall more than 500m in a single drop",
+            iconName = "icon_longfall"
+        };
+        public static readonly Achievement A_HalfwayThere = new Achievement
+        {
+            id = "halfway_there", displayName = "Halfway There",
+            description = "Reach Zone 5 (4,200m)",
+            iconName = "icon_halfway"
+        };
+        public static readonly Achievement A_DailyDevotion = new Achievement
+        {
+            id = "daily_devotion", displayName = "Daily Devotion",
+            description = "Complete a Daily Challenge",
+            iconName = "icon_streak"
+        };
+        public static readonly Achievement A_Persistent = new Achievement
+        {
+            id = "persistent", displayName = "Persistent",
+            description = "Fall 10 times in a single run",
+            iconName = "icon_falls"
+        };
+
         private static readonly Achievement[] AllDefinitions =
         {
             A_FirstSummit, A_HundredFalls, A_ThousandMeters, A_FiveThousandMeters,
             A_CatastrophicFall, A_PerfectRecovery, A_NoThrusterZone1, A_SpeedrunSub2h,
             A_Daily7Streak, A_GraveyardLore, A_WindSurfer, A_LongestSwing,
-            A_FellFromCrown, A_AllSurfaces, A_ZeroFallsSummit
+            A_FellFromCrown, A_AllSurfaces, A_ZeroFallsSummit,
+            A_SummitReached, A_LongWayDown, A_HalfwayThere, A_DailyDevotion, A_Persistent
         };
 
         // ── Events ──────────────────────────────────────────────────────────────
         public UnityEvent<Achievement> OnAchievementUnlocked = new UnityEvent<Achievement>();
+
+        /// <summary>System.Action variant — subscribe when you don't need a UnityEvent.</summary>
+        public event System.Action<Achievement> OnAchievementUnlockedAction;
 
         // ── Save key ────────────────────────────────────────────────────────────
         private const string SaveKey = "TitanAscent_Achievements";
@@ -151,8 +190,19 @@ namespace TitanAscent.Systems
 
         [SerializeField] private SaveManager saveManager;
 
+        // Per-run fall counter (reset on OnClimbStarted)
+        private int runFallCount = 0;
+
         private void Awake()
         {
+            // Singleton setup
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+
             if (saveManager == null)
                 saveManager = FindFirstObjectByType<SaveManager>();
 
@@ -163,10 +213,165 @@ namespace TitanAscent.Systems
             LoadUnlockState();
         }
 
+        private void Start()
+        {
+            SubscribeToGameEvents();
+        }
+
+        private void OnEnable()
+        {
+            // Re-subscribe if the object was disabled and re-enabled
+            SubscribeToGameEvents();
+        }
+
+        private void OnDisable()
+        {
+            UnsubscribeFromGameEvents();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+            UnsubscribeFromGameEvents();
+        }
+
+        // ── Event wiring ─────────────────────────────────────────────────────────
+
+        private bool eventsSubscribed = false;
+
+        private void SubscribeToGameEvents()
+        {
+            if (eventsSubscribed) return;
+
+            GameManager gm = GameManager.Instance != null
+                ? GameManager.Instance
+                : FindFirstObjectByType<GameManager>();
+
+            if (gm != null)
+            {
+                gm.OnVictory.AddListener(HandleVictory);
+                gm.OnNewHeightRecord.AddListener(HandleNewHeightRecord);
+                gm.OnClimbStarted.AddListener(HandleClimbStarted);
+            }
+
+            FallTracker ft = FindFirstObjectByType<FallTracker>();
+            if (ft != null)
+            {
+                ft.OnFallCompleted.AddListener(HandleFallCompleted);
+            }
+
+            eventsSubscribed = (gm != null || ft != null);
+        }
+
+        private void UnsubscribeFromGameEvents()
+        {
+            if (!eventsSubscribed) return;
+
+            GameManager gm = GameManager.Instance != null
+                ? GameManager.Instance
+                : FindFirstObjectByType<GameManager>();
+
+            if (gm != null)
+            {
+                gm.OnVictory.RemoveListener(HandleVictory);
+                gm.OnNewHeightRecord.RemoveListener(HandleNewHeightRecord);
+                gm.OnClimbStarted.RemoveListener(HandleClimbStarted);
+            }
+
+            FallTracker ft = FindFirstObjectByType<FallTracker>();
+            if (ft != null)
+            {
+                ft.OnFallCompleted.RemoveListener(HandleFallCompleted);
+            }
+
+            eventsSubscribed = false;
+        }
+
+        // ── GameManager event handlers ───────────────────────────────────────────
+
+        private void HandleClimbStarted()
+        {
+            runFallCount = 0;
+        }
+
+        private void HandleVictory()
+        {
+            // First victory (any completion)
+            UnlockAchievement("summit_reached");
+            // Also unlock the legacy first summit id
+            UnlockAchievement("first_summit");
+
+            // Ghost run: victory with zero falls this run
+            if (runFallCount == 0)
+                UnlockAchievement("zero_falls_summit");
+
+            // Daily challenge completion tracked via SaveManager
+            CheckDailyDevotion();
+        }
+
+        private void HandleNewHeightRecord(float height)
+        {
+            // Zone 5 check: height >= 4200m → "Halfway There"
+            if (height >= 4200f)
+                UnlockAchievement("halfway_there");
+
+            // Height milestone achievements
+            if (height >= 1000f)
+                UnlockAchievement("thousand_meters");
+
+            if (height >= 5000f)
+                UnlockAchievement("five_thousand_meters");
+        }
+
+        // ── FallTracker event handler ─────────────────────────────────────────────
+
+        private void HandleFallCompleted(FallData data)
+        {
+            runFallCount++;
+
+            // Fall > 500m → "Long Way Down"
+            if (data.distance > 500f)
+                UnlockAchievement("long_way_down");
+
+            // Legacy catastrophic fall id as well
+            if (data.distance >= 500f)
+                UnlockAchievement("catastrophic_fall");
+
+            // 10 falls in one run → "Persistent"
+            if (runFallCount >= 10)
+                UnlockAchievement("persistent");
+
+            // Fell from above 9000m
+            if (data.startHeight >= 9000f)
+                UnlockAchievement("fell_from_crown");
+        }
+
+        // ── Daily challenge helper ────────────────────────────────────────────────
+
+        /// <summary>
+        /// Call this whenever a daily challenge is completed to trigger the
+        /// "Daily Devotion" achievement. Also used internally on victory.
+        /// </summary>
+        public void NotifyDailyChallengeCompleted()
+        {
+            UnlockAchievement("daily_devotion");
+        }
+
+        private void CheckDailyDevotion()
+        {
+            if (saveManager == null) return;
+            SaveData data = saveManager.CurrentData;
+            if (data != null && data.completedChallenges != null && data.completedChallenges.Count >= 1)
+                UnlockAchievement("daily_devotion");
+        }
+
         // ── Public API ──────────────────────────────────────────────────────────
 
-        /// <summary>Unlocks the achievement with the given id. Fires event and saves.</summary>
-        public void Unlock(string id)
+        /// <summary>
+        /// Unlocks the achievement with the given id. Fires events and saves.
+        /// Silently ignores unknown or already-unlocked ids.
+        /// </summary>
+        public void UnlockAchievement(string id)
         {
             if (!achievements.TryGetValue(id, out Achievement a)) return;
             if (a.isUnlocked) return;
@@ -177,7 +382,11 @@ namespace TitanAscent.Systems
 
             SaveUnlockState();
             OnAchievementUnlocked?.Invoke(a);
+            OnAchievementUnlockedAction?.Invoke(a);
         }
+
+        /// <summary>Backwards-compatible alias for UnlockAchievement.</summary>
+        public void Unlock(string id) => UnlockAchievement(id);
 
         /// <summary>Returns true if the achievement with the given id is unlocked.</summary>
         public bool IsUnlocked(string id)
@@ -202,25 +411,31 @@ namespace TitanAscent.Systems
         {
             // Height milestones
             if (snapshot.currentHeight >= 1000f)
-                Unlock("thousand_meters");
+                UnlockAchievement("thousand_meters");
+
+            if (snapshot.currentHeight >= 4200f)
+                UnlockAchievement("halfway_there");
 
             if (snapshot.currentHeight >= 5000f)
-                Unlock("five_thousand_meters");
+                UnlockAchievement("five_thousand_meters");
 
             if (snapshot.currentHeight >= 9000f)
-                Unlock("fell_from_crown");   // We just track reaching this height; the fall itself triggers separately
+                UnlockAchievement("fell_from_crown");
 
             // Fall count
             if (snapshot.totalFalls >= 100)
-                Unlock("hundred_falls");
+                UnlockAchievement("hundred_falls");
 
             // Catastrophic single fall
             if (snapshot.longestFall > 500f)
-                Unlock("catastrophic_fall");
+            {
+                UnlockAchievement("catastrophic_fall");
+                UnlockAchievement("long_way_down");
+            }
 
             // No thruster in zone 1
             if (!snapshot.thrusterUsedInZone1 && snapshot.zonesVisited != null && snapshot.zonesVisited.Count > 1)
-                Unlock("no_thruster_zone1");
+                UnlockAchievement("no_thruster_zone1");
 
             // All surface types grappled
             if (snapshot.surfacesGrappled != null)
@@ -231,7 +446,7 @@ namespace TitanAscent.Systems
                     if (!snapshot.surfacesGrappled.Contains(st)) { hasAll = false; break; }
                 }
                 if (hasAll)
-                    Unlock("all_surfaces");
+                    UnlockAchievement("all_surfaces");
             }
         }
 
