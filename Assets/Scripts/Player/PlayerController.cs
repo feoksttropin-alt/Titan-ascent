@@ -71,7 +71,7 @@ namespace TitanAscent.Player
 
         public PlayerState CurrentState => currentState;
         public float CurrentHeight => transform.position.y;
-        public Vector3 CurrentVelocity => rb.velocity;
+        public Vector3 CurrentVelocity => rb.linearVelocity;
         public bool IsGrounded => isGrounded;
         public float HighestHeight => highestHeight;
         public Vector3 VelocityLastFrame => velocityLastFrame;
@@ -80,8 +80,8 @@ namespace TitanAscent.Player
         {
             rb = GetComponent<Rigidbody>();
             rb.mass = mass;
-            rb.drag = drag;
-            rb.angularDrag = angularDrag;
+            rb.linearDamping = drag;
+            rb.angularDamping = angularDrag;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
@@ -107,7 +107,7 @@ namespace TitanAscent.Player
         private void FixedUpdate()
         {
             ApplyMovementForces();
-            velocityLastFrame = rb.velocity;
+            velocityLastFrame = rb.linearVelocity;
         }
 
         private void CheckGrounded()
@@ -136,7 +136,7 @@ namespace TitanAscent.Player
             }
             else if (wasGrounded && !isGrounded)
             {
-                velocityAtTakeoff = rb.velocity;
+                velocityAtTakeoff = rb.linearVelocity;
                 OnTookOff?.Invoke();
             }
         }
@@ -172,7 +172,7 @@ namespace TitanAscent.Player
             }
 
             // Airborne states
-            if (rb.velocity.y < fallSpeedThreshold)
+            if (rb.linearVelocity.y < fallSpeedThreshold)
                 return PlayerState.Falling;
 
             return PlayerState.Airborne;
@@ -192,7 +192,7 @@ namespace TitanAscent.Player
             {
                 // Project move direction onto ground plane
                 Vector3 projectedMove = Vector3.ProjectOnPlane(inputDirection, groundNormal).normalized;
-                Vector3 currentHorizontalVel = Vector3.ProjectOnPlane(rb.velocity, groundNormal);
+                Vector3 currentHorizontalVel = Vector3.ProjectOnPlane(rb.linearVelocity, groundNormal);
 
                 if (currentHorizontalVel.magnitude < maxGroundSpeed)
                     rb.AddForce(projectedMove * groundMoveForce, ForceMode.Force);
@@ -200,7 +200,7 @@ namespace TitanAscent.Player
             else if (currentState == PlayerState.Airborne || currentState == PlayerState.Falling)
             {
                 // Limited air control
-                Vector3 horizontalVel = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+                Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
                 if (horizontalVel.magnitude < maxAirSpeed)
                     rb.AddForce(inputDirection * airControlForce, ForceMode.Force);
             }
@@ -214,8 +214,19 @@ namespace TitanAscent.Player
 
         private Vector3 GetInputDirection()
         {
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
+            // Route through InputHandler (New Input System); fall back to legacy axes if not available.
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+            float h, v;
+            if (ih != null)
+            {
+                h = ih.ThrusterInput.x;
+                v = ih.ThrusterInput.y;
+            }
+            else
+            {
+                h = Input.GetAxis("Horizontal");
+                v = Input.GetAxis("Vertical");
+            }
 
             Vector3 camForward = Camera.main != null
                 ? Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up).normalized
@@ -241,9 +252,9 @@ namespace TitanAscent.Player
         /// </summary>
         public void ClampVerticalVelocity(float minY, float maxY)
         {
-            Vector3 v = rb.velocity;
+            Vector3 v = rb.linearVelocity;
             v.y = Mathf.Clamp(v.y, minY, maxY);
-            rb.velocity = v;
+            rb.linearVelocity = v;
         }
 
         private void OnCollisionEnter(Collision collision)

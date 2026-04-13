@@ -76,11 +76,16 @@ namespace TitanAscent.Player
 
         private void HandleInput()
         {
-            if (Input.GetKeyDown(gripKey) && isOnClimbableSurface && currentGrip > gripActivationCost)
+            // Prefer InputHandler (New Input System); fall back to legacy [SerializeField] gripKey.
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+            bool gripDown     = ih != null ? ih.GripDown     : Input.GetKeyDown(gripKey);
+            bool gripReleased = ih != null ? ih.GripReleased : Input.GetKeyUp(gripKey);
+
+            if (gripDown && isOnClimbableSurface && currentGrip > gripActivationCost)
             {
                 ActivateGrip();
             }
-            else if (Input.GetKeyUp(gripKey) && IsGripping)
+            else if (gripReleased && IsGripping)
             {
                 ReleaseGrip();
             }
@@ -168,8 +173,8 @@ namespace TitanAscent.Player
             float frictionCoeff = currentSurface != null ? currentSurface.FrictionCoefficient : baseSlideReduction;
 
             // Project velocity onto the surface normal to find sliding component
-            Vector3 normalVelocity = Vector3.Project(rb.velocity, surfaceNormal);
-            Vector3 slideVelocity = rb.velocity - normalVelocity;
+            Vector3 normalVelocity = Vector3.Project(rb.linearVelocity, surfaceNormal);
+            Vector3 slideVelocity = rb.linearVelocity - normalVelocity;
 
             // Reduce slide velocity based on grip and surface friction
             float reductionFactor = frictionCoeff * GripPercent * baseSlideReduction;

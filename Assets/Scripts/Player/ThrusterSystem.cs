@@ -65,20 +65,34 @@ namespace TitanAscent.Player
 
             Vector3 direction = Vector3.zero;
 
-            if (Input.GetKey(KeyCode.Space))
-                direction += Vector3.up;
-            if (Input.GetKey(KeyCode.LeftShift))
-                direction += Vector3.down;
-
-            // Directional thrusters from movement input
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
-
-            if (Camera.main != null)
+            // Route through InputHandler (New Input System).
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+            if (ih != null)
             {
-                Vector3 camForward = Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up).normalized;
-                Vector3 camRight = Vector3.ProjectOnPlane(Camera.main.transform.right, Vector3.up).normalized;
-                direction += camForward * v + camRight * h;
+                if (ih.ThrusterUp)   direction += Vector3.up;
+                if (ih.ThrusterDown) direction += Vector3.down;
+
+                Vector2 lateral = ih.ThrusterInput;
+                if (Camera.main != null)
+                {
+                    Vector3 camForward = Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up).normalized;
+                    Vector3 camRight   = Vector3.ProjectOnPlane(Camera.main.transform.right,   Vector3.up).normalized;
+                    direction += camForward * lateral.y + camRight * lateral.x;
+                }
+            }
+            else
+            {
+                // Fallback for editor without InputHandler present
+                if (Input.GetKey(KeyCode.Space))     direction += Vector3.up;
+                if (Input.GetKey(KeyCode.LeftShift)) direction += Vector3.down;
+                float h = Input.GetAxis("Horizontal");
+                float v = Input.GetAxis("Vertical");
+                if (Camera.main != null)
+                {
+                    Vector3 camForward = Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up).normalized;
+                    Vector3 camRight   = Vector3.ProjectOnPlane(Camera.main.transform.right,   Vector3.up).normalized;
+                    direction += camForward * v + camRight * h;
+                }
             }
 
             if (direction.sqrMagnitude > 0.01f)

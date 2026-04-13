@@ -203,7 +203,7 @@ namespace TitanAscent.Accessibility
         {
             // Resolve JuiceController lazily if not assigned in Inspector
             if (juiceController == null)
-                juiceController = FindObjectOfType<JuiceController>();
+                juiceController = FindFirstObjectByType<JuiceController>();
 
             if (juiceController != null)
                 juiceController.SetReduceMotionEnabled(value);
@@ -219,7 +219,7 @@ namespace TitanAscent.Accessibility
         private void ApplyLargeSubtitles(bool value)
         {
             if (narrationUI == null)
-                narrationUI = FindObjectOfType<NarrationUI>();
+                narrationUI = FindFirstObjectByType<NarrationUI>();
 
             if (narrationUI != null)
                 narrationUI.SetFontSize(value ? LargeFontSize : NormalFontSize);
@@ -228,7 +228,7 @@ namespace TitanAscent.Accessibility
         private void ApplySubtitleBackground(bool value)
         {
             if (narrationUI == null)
-                narrationUI = FindObjectOfType<NarrationUI>();
+                narrationUI = FindFirstObjectByType<NarrationUI>();
 
             if (narrationUI != null)
                 narrationUI.SetBackgroundVisible(value);
@@ -237,7 +237,7 @@ namespace TitanAscent.Accessibility
         private void ApplyColorBlindMode(ColorBlindMode mode)
         {
             if (colorBlindFilter == null)
-                colorBlindFilter = FindObjectOfType<ColorBlindFilter>();
+                colorBlindFilter = FindFirstObjectByType<ColorBlindFilter>();
 
             if (colorBlindFilter != null)
                 colorBlindFilter.ApplyMode(mode);

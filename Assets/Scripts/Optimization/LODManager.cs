@@ -75,10 +75,10 @@ namespace TitanAscent.Optimization
         private void Awake()
         {
             if (playerController == null)
-                playerController = FindObjectOfType<Player.PlayerController>();
+                playerController = FindFirstObjectByType<Player.PlayerController>();
 
             if (ambientCreatureSystem == null)
-                ambientCreatureSystem = FindObjectOfType<AmbientCreatureSystem>();
+                ambientCreatureSystem = FindFirstObjectByType<AmbientCreatureSystem>();
         }
 
         private void OnEnable()

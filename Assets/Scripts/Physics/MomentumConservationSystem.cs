@@ -127,13 +127,13 @@ namespace TitanAscent.Physics
         private void HandleGrappleReleased()
         {
             // Cache velocity on the exact release frame
-            _lastReleaseVelocity = _rb.velocity;
+            _lastReleaseVelocity = _rb.linearVelocity;
 
             // Release accumulated slingshot tension as an impulse
             if (_slingshotAccumulation > 0.1f)
             {
-                Vector3 releaseDir = _rb.velocity.sqrMagnitude > 0.01f
-                    ? _rb.velocity.normalized
+                Vector3 releaseDir = _rb.linearVelocity.sqrMagnitude > 0.01f
+                    ? _rb.linearVelocity.normalized
                     : transform.forward;
 
                 _rb.AddForce(releaseDir * _slingshotAccumulation, ForceMode.VelocityChange);
@@ -197,7 +197,7 @@ namespace TitanAscent.Physics
             if (!_wasAirborne && isAirborne)
             {
                 // Just left the ground (or grapple) — cache horizontal velocity
-                Vector3 vel = _rb.velocity;
+                Vector3 vel = _rb.linearVelocity;
                 _horizontalVelocityAtLiftoff = new Vector3(vel.x, 0f, vel.z);
             }
 
@@ -206,7 +206,7 @@ namespace TitanAscent.Physics
                 // Desired preserved horizontal speed
                 float preservedSpeed = _horizontalVelocityAtLiftoff.magnitude * airMomentumPreservation;
 
-                Vector3 currentHorizontal = new Vector3(_rb.velocity.x, 0f, _rb.velocity.z);
+                Vector3 currentHorizontal = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
                 float   currentSpeed      = currentHorizontal.magnitude;
 
                 // Only apply if current speed has dropped below the preserved target
@@ -242,7 +242,7 @@ namespace TitanAscent.Physics
                 return;
             }
 
-            float currentSpeed = _rb.velocity.magnitude;
+            float currentSpeed = _rb.linearVelocity.magnitude;
             _currentMomentumPreservation = Mathf.Clamp01(currentSpeed / releaseSpeed);
         }
 

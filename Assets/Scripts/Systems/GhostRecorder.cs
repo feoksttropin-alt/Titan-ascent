@@ -296,12 +296,12 @@ namespace TitanAscent.Systems
             if (rb == null)
                 return GhostPlayerState.Airborne;
 
-            float vy = rb.velocity.y;
+            float vy = rb.linearVelocity.y;
 
             if (vy < -5f)
                 return GhostPlayerState.Falling;
 
-            if (Mathf.Abs(vy) < 0.5f && rb.velocity.magnitude < 1f)
+            if (Mathf.Abs(vy) < 0.5f && rb.linearVelocity.magnitude < 1f)
                 return GhostPlayerState.Grounded;
 
             return GhostPlayerState.Airborne;

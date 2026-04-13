@@ -364,7 +364,7 @@ namespace TitanAscent.Scene
 
         private static VerticalSliceSetup FindOrCreateHelper()
         {
-            VerticalSliceSetup existing = FindObjectOfType<VerticalSliceSetup>();
+            VerticalSliceSetup existing = FindFirstObjectByType<VerticalSliceSetup>();
             if (existing != null) return existing;
 
             GameObject go = new GameObject("VerticalSliceSetup");
@@ -378,7 +378,7 @@ namespace TitanAscent.Scene
 
         private static void CheckRequired<T>(List<string> missingList, string label) where T : Component
         {
-            if (FindObjectOfType<T>() == null)
+            if (FindFirstObjectByType<T>() == null)
                 missingList.Add(label);
         }
     }

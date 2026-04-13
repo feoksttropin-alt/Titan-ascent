@@ -151,10 +151,10 @@ namespace TitanAscent.Systems
         private void Awake()
         {
             if (saveManager == null)
-                saveManager = FindObjectOfType<SaveManager>();
+                saveManager = FindFirstObjectByType<SaveManager>();
 
             if (checkpointlessStats == null)
-                checkpointlessStats = FindObjectOfType<CheckpointlessStats>();
+                checkpointlessStats = FindFirstObjectByType<CheckpointlessStats>();
         }
 
         private void Start()

@@ -129,8 +129,13 @@ namespace TitanAscent.UI
 
         private void HandleMouseLook()
         {
-            float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
-            float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+            // Use InputHandler.MouseDelta (New Input System pixel delta) scaled to match
+            // legacy Input.GetAxis("Mouse X/Y") magnitude (~pixels / 20).
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+            Vector2 delta = ih != null ? ih.MouseDelta * 0.05f : Vector2.zero;
+
+            float mouseX = delta.x * mouseSensitivity;
+            float mouseY = delta.y * mouseSensitivity;
 
             yaw += mouseX;
             pitch -= mouseY;

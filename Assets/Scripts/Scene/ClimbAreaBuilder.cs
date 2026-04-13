@@ -17,7 +17,7 @@ namespace TitanAscent.Scene
         [MenuItem("TitanAscent/Validate All Anchors")]
         public static void ValidateAllAnchors()
         {
-            var validator = Object.FindObjectOfType<Debug.AnchorValidator>();
+            var validator = Object.FindFirstObjectByType<Debug.AnchorValidator>();
             if (validator == null)
             {
                 EditorUtility.DisplayDialog("Validate Anchors", "No AnchorValidator found in scene.\nAdd one to a GameObject first.", "OK");

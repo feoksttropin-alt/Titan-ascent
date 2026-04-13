@@ -69,7 +69,7 @@ namespace TitanAscent.Systems
         [MenuItem("TitanAscent/Run QA Validation")]
         public static void RunFromMenu()
         {
-            var validator = FindObjectOfType<QAValidator>();
+            var validator = FindFirstObjectByType<QAValidator>();
             if (validator == null)
             {
                 // Create a temporary instance for editor-only execution
@@ -158,7 +158,7 @@ namespace TitanAscent.Systems
         private QAResult CheckSceneBootstrapper()
         {
             const string name = "SceneBootstrapper present";
-            var obj = FindObjectOfType<Scene.SceneBootstrapper>();
+            var obj = FindFirstObjectByType<Scene.SceneBootstrapper>();
             return obj != null
                 ? Pass(name, "Found in scene.")
                 : Error(name, "No SceneBootstrapper found in scene. Add one to a root GameObject.");
@@ -175,7 +175,7 @@ namespace TitanAscent.Systems
         private QAResult CheckFallTrackerRigidbody()
         {
             const string name = "FallTracker Rigidbody reference";
-            var ft = FindObjectOfType<FallTracker>();
+            var ft = FindFirstObjectByType<FallTracker>();
             if (ft == null) return Error(name, "FallTracker not found in scene.");
 
             var rb = ft.GetComponent<Rigidbody>();
@@ -187,7 +187,7 @@ namespace TitanAscent.Systems
         private QAResult CheckGrappleController()
         {
             const string name = "GrappleController on player";
-            var gc = FindObjectOfType<GrappleController>();
+            var gc = FindFirstObjectByType<GrappleController>();
             return gc != null
                 ? Pass(name, "GrappleController found.")
                 : Error(name, "No GrappleController found. Ensure it is on the player GameObject.");
@@ -196,7 +196,7 @@ namespace TitanAscent.Systems
         private QAResult CheckRopeSimulator()
         {
             const string name = "RopeSimulator present";
-            var rs = FindObjectOfType<RopeSimulator>();
+            var rs = FindFirstObjectByType<RopeSimulator>();
             return rs != null
                 ? Pass(name, "RopeSimulator found.")
                 : Error(name, "No RopeSimulator found in scene.");
@@ -205,7 +205,7 @@ namespace TitanAscent.Systems
         private QAResult CheckAudioManager()
         {
             const string name = "AudioManager instance";
-            var am = FindObjectOfType<Audio.AudioManager>();
+            var am = FindFirstObjectByType<Audio.AudioManager>();
             return am != null
                 ? Pass(name, "AudioManager found.")
                 : Warn(name, "AudioManager not found. Audio will be silent.");
@@ -214,7 +214,7 @@ namespace TitanAscent.Systems
         private QAResult CheckNarrationSystem()
         {
             const string name = "NarrationSystem present";
-            var ns = FindObjectOfType<NarrationSystem>();
+            var ns = FindFirstObjectByType<NarrationSystem>();
             return ns != null
                 ? Pass(name, "NarrationSystem found.")
                 : Warn(name, "NarrationSystem not found. Narration lines will not play.");
@@ -223,7 +223,7 @@ namespace TitanAscent.Systems
         private QAResult CheckHUDController()
         {
             const string name = "HUDController present";
-            var hud = FindObjectOfType<HUDController>();
+            var hud = FindFirstObjectByType<HUDController>();
             return hud != null
                 ? Pass(name, "HUDController found.")
                 : Warn(name, "HUDController not found. HUD elements will not update.");
@@ -284,7 +284,7 @@ namespace TitanAscent.Systems
             const string name = "ZoneManager zone count";
             const int    expectedZones = 9;
 
-            var zm = FindObjectOfType<ZoneManager>();
+            var zm = FindFirstObjectByType<ZoneManager>();
             if (zm == null)
                 return Error(name, "ZoneManager not found in scene.");
 
