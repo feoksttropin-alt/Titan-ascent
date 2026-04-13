@@ -41,7 +41,7 @@ namespace TitanAscent.Debug
 
         private void Awake()
         {
-            anchorValidator = FindObjectOfType<AnchorValidator>();
+            anchorValidator = FindFirstObjectByType<AnchorValidator>();
         }
 
         private void Update()
@@ -94,7 +94,7 @@ namespace TitanAscent.Debug
                 Rigidbody rb = playerController.GetComponent<Rigidbody>();
                 GUILayout.Label($"Height:   {playerController.transform.position.y:F1} m");
                 if (rb != null)
-                    GUILayout.Label($"Velocity: {rb.velocity.magnitude:F1} m/s  (Y: {rb.velocity.y:F1})");
+                    GUILayout.Label($"Velocity: {rb.linearVelocity.magnitude:F1} m/s  (Y: {rb.linearVelocity.y:F1})");
             }
 
             if (fallTracker != null)
@@ -110,7 +110,7 @@ namespace TitanAscent.Debug
                 GUILayout.Label($"Grip:     {gripSystem.CurrentGrip:F0} / {gripSystem.MaxGrip:F0}");
 
             // Current zone
-            ZoneManager zm = FindObjectOfType<ZoneManager>();
+            ZoneManager zm = FindFirstObjectByType<ZoneManager>();
             if (zm != null && zm.CurrentZone != null)
                 GUILayout.Label($"Zone:     {zm.CurrentZone.name}");
         }
@@ -166,7 +166,7 @@ namespace TitanAscent.Debug
                 showAnchors = newAnchors;
                 if (anchorValidator == null)
                 {
-                    anchorValidator = FindObjectOfType<AnchorValidator>();
+                    anchorValidator = FindFirstObjectByType<AnchorValidator>();
                     if (anchorValidator == null)
                     {
                         GameObject go = new GameObject("AnchorValidator");
@@ -239,7 +239,7 @@ namespace TitanAscent.Debug
             if (playerController == null) return;
             Rigidbody rb = playerController.GetComponent<Rigidbody>();
             playerController.transform.position = new Vector3(0f, height, 0f);
-            if (rb != null) rb.velocity = Vector3.zero;
+            if (rb != null) rb.linearVelocity = Vector3.zero;
         }
     }
 }

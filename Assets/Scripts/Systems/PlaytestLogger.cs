@@ -98,11 +98,11 @@ namespace TitanAscent.Systems
         private void Start()
         {
             // Auto-hook into existing systems
-            _fallTracker = FindObjectOfType<FallTracker>();
+            _fallTracker = FindFirstObjectByType<FallTracker>();
             if (_fallTracker != null)
                 _fallTracker.OnFallCompleted.AddListener(OnFallCompleted);
 
-            _zoneManager = FindObjectOfType<ZoneManager>();
+            _zoneManager = FindFirstObjectByType<ZoneManager>();
             if (_zoneManager != null)
                 _zoneManager.OnZoneChanged.AddListener(OnZoneChanged);
 
@@ -324,7 +324,7 @@ namespace TitanAscent.Systems
         private float GetCurrentPlayerHeight()
         {
             if (_fallTracker != null) return _fallTracker.transform.position.y;
-            var player = FindObjectOfType<Player.PlayerController>();
+            var player = FindFirstObjectByType<Player.PlayerController>();
             return player != null ? player.transform.position.y : 0f;
         }
 

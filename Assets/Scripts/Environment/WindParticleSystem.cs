@@ -84,7 +84,7 @@ namespace TitanAscent.Environment
 
         private void Awake()
         {
-            _windSystem = FindObjectOfType<WindSystem>();
+            _windSystem = FindFirstObjectByType<WindSystem>();
         }
 
         private void Update()
@@ -177,7 +177,7 @@ namespace TitanAscent.Environment
 
         private float GetPlayerAltitude()
         {
-            var player = FindObjectOfType<Player.PlayerController>();
+            var player = FindFirstObjectByType<Player.PlayerController>();
             return player != null ? player.CurrentHeight : 0f;
         }
 

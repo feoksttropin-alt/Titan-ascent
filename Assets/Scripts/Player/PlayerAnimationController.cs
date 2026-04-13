@@ -93,13 +93,13 @@ namespace TitanAscent.Player
         private void Awake()
         {
             if (playerController == null)
-                playerController = GetComponentInParent<PlayerController>() ?? FindObjectOfType<PlayerController>();
+                playerController = GetComponentInParent<PlayerController>() ?? FindFirstObjectByType<PlayerController>();
 
             if (grappleController == null)
-                grappleController = GetComponentInParent<GrappleController>() ?? FindObjectOfType<GrappleController>();
+                grappleController = GetComponentInParent<GrappleController>() ?? FindFirstObjectByType<GrappleController>();
 
             if (thrusterSystem == null)
-                thrusterSystem = GetComponentInParent<ThrusterSystem>() ?? FindObjectOfType<ThrusterSystem>();
+                thrusterSystem = GetComponentInParent<ThrusterSystem>() ?? FindFirstObjectByType<ThrusterSystem>();
 
             if (bodyRoot != null)
                 _bodyRootBaseScale = bodyRoot.localScale;

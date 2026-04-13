@@ -75,7 +75,7 @@ namespace TitanAscent.UI
 
         private void Start()
         {
-            _zoneManager = FindObjectOfType<ZoneManager>();
+            _zoneManager = FindFirstObjectByType<ZoneManager>();
             if (_zoneManager != null)
                 _zoneManager.OnZoneChanged.AddListener(OnZoneChanged);
         }

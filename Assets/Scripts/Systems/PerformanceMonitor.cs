@@ -75,7 +75,7 @@ namespace TitanAscent.Systems
 
         private void Awake()
         {
-            _ropeSimulator = FindObjectOfType<RopeSimulator>();
+            _ropeSimulator = FindFirstObjectByType<RopeSimulator>();
         }
 
         private void Update()

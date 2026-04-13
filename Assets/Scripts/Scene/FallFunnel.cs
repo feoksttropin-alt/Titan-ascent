@@ -53,7 +53,7 @@ namespace TitanAscent.Scene
             var col = GetComponent<Collider>();
             col.isTrigger = true;
 
-            _logger = FindObjectOfType<PlaytestLogger>();
+            _logger = FindFirstObjectByType<PlaytestLogger>();
         }
 
         // -----------------------------------------------------------------------
@@ -69,7 +69,7 @@ namespace TitanAscent.Scene
             if (rb == null) return;
 
             // Only activate for downward falls above the threshold
-            if (rb.velocity.y < -downwardVelocityThreshold)
+            if (rb.linearVelocity.y < -downwardVelocityThreshold)
             {
                 _playerRb = rb;
                 _isActive = true;
@@ -82,7 +82,7 @@ namespace TitanAscent.Scene
             if (!other.CompareTag("Player")) return;
 
             // Deactivate if player gains upward velocity (recovered via grapple etc.)
-            if (_playerRb.velocity.y > 0f)
+            if (_playerRb.linearVelocity.y > 0f)
             {
                 _isActive = false;
                 _playerRb = null;
@@ -116,7 +116,7 @@ namespace TitanAscent.Scene
             if (!_isActive || _playerRb == null) return;
 
             // Sanity: stop if player is rising
-            if (_playerRb.velocity.y > 0f)
+            if (_playerRb.linearVelocity.y > 0f)
             {
                 _isActive = false;
                 _playerRb = null;
@@ -139,7 +139,7 @@ namespace TitanAscent.Scene
             if (toCenter.sqrMagnitude < 0.001f) return;
 
             // Current horizontal velocity
-            Vector3 hVel = new Vector3(_playerRb.velocity.x, 0f, _playerRb.velocity.z);
+            Vector3 hVel = new Vector3(_playerRb.linearVelocity.x, 0f, _playerRb.linearVelocity.z);
 
             // Only nudge if we're not already moving fast enough horizontally in the right direction
             float speed = hVel.magnitude;

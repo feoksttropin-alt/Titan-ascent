@@ -67,9 +67,9 @@ namespace TitanAscent.Environment
 
         private void Awake()
         {
-            _zoneManager = FindObjectOfType<ZoneManager>();
-            _windSystem  = FindObjectOfType<WindSystem>();
-            _narration   = FindObjectOfType<NarrationSystem>();
+            _zoneManager = FindFirstObjectByType<ZoneManager>();
+            _windSystem  = FindFirstObjectByType<WindSystem>();
+            _narration   = FindFirstObjectByType<NarrationSystem>();
 
             if (_zoneManager != null)
                 _zoneManager.OnZoneChanged.AddListener(OnZoneChanged);
@@ -140,7 +140,7 @@ namespace TitanAscent.Environment
 
         private void TrackAltitude()
         {
-            var player = FindObjectOfType<Player.PlayerController>();
+            var player = FindFirstObjectByType<Player.PlayerController>();
             if (player != null)
                 _currentAltitude = player.CurrentHeight;
         }

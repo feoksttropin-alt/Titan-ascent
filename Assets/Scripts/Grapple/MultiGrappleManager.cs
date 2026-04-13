@@ -116,8 +116,13 @@ namespace TitanAscent.Grapple
 
         private void HandleInput()
         {
-            // Fire / release secondary grapple
-            if (Input.GetKeyDown(secondaryFireKey))
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+
+            // Fire / release secondary grapple — InputHandler (Mouse2 / LeftShoulder) or legacy key
+            bool secondaryFireDown = (ih != null && ih.SecondaryGrappleFire)
+                || Input.GetKeyDown(secondaryFireKey);
+
+            if (secondaryFireDown)
             {
                 if (secondaryAttached || secondaryInFlight)
                     ReleaseSecondaryGrapple();
@@ -125,7 +130,7 @@ namespace TitanAscent.Grapple
                     FireSecondaryGrapple();
             }
 
-            // Double-tap Q to release both grapples at once
+            // Double-tap Q to release both grapples at once (legacy key retained; configurable)
             if (Input.GetKeyDown(secondaryReleaseKey))
             {
                 float now = Time.time;
@@ -137,15 +142,6 @@ namespace TitanAscent.Grapple
                         primaryGrapple.ReleaseGrapple();
                 }
                 lastReleaseTapTime = now;
-            }
-
-            // Also support Left Shoulder (Joystick Button4)
-            if (Input.GetKeyDown(KeyCode.JoystickButton4))
-            {
-                if (secondaryAttached || secondaryInFlight)
-                    ReleaseSecondaryGrapple();
-                else
-                    FireSecondaryGrapple();
             }
         }
 

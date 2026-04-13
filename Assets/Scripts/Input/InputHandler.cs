@@ -52,6 +52,27 @@ namespace TitanAscent.Input
         /// <summary>Fires once per press — Escape / Start button.</summary>
         public bool Pause { get; private set; }
 
+        /// <summary>
+        /// True on the frame the secondary grapple button is first pressed
+        /// (Mouse2 / LeftShoulder on gamepad).
+        /// </summary>
+        public bool SecondaryGrappleFire { get; private set; }
+
+        /// <summary>True on the frame the grip button is first pressed (Mouse1 / RightBumper).</summary>
+        public bool GripDown { get; private set; }
+
+        /// <summary>True while the grip button is held.</summary>
+        public bool GripHeld { get; private set; }
+
+        /// <summary>True on the frame the grip button is released.</summary>
+        public bool GripReleased { get; private set; }
+
+        /// <summary>
+        /// Raw mouse delta in screen pixels per frame, suitable for camera look.
+        /// On gamepad this stays zero — use AimDirection for analogue look instead.
+        /// </summary>
+        public Vector2 MouseDelta { get; private set; }
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         /// <summary>Backtick key — editor / dev builds only.</summary>
         public bool DebugToggle { get; private set; }
@@ -110,6 +131,9 @@ namespace TitanAscent.Input
                 Vector2 mousePos = mouse.position.ReadValue();
                 Vector2 rawDelta = mousePos - screenCenter;
                 AimDirection = rawDelta.sqrMagnitude > 0.001f ? rawDelta.normalized : Vector2.up;
+
+                // Raw frame delta for camera look
+                MouseDelta = mouse.delta.ReadValue();
             }
 
             if (kb == null) return;
@@ -126,6 +150,17 @@ namespace TitanAscent.Input
 
             GrappleFire = grapplePressed;
             GrappleHeld = grappleHeld;
+
+            // --- Secondary grapple (Mouse2 / middle button) ---
+            SecondaryGrappleFire = mouse != null && mouse.middleButton.wasPressedThisFrame;
+
+            // --- Grip (Mouse1) ---
+            if (mouse != null)
+            {
+                GripDown     = mouse.rightButton.wasPressedThisFrame;
+                GripHeld     = mouse.rightButton.isPressed;
+                GripReleased = mouse.rightButton.wasReleasedThisFrame;
+            }
 
             // --- Thrusters (WASD) ---
             ThrusterUp    = kb.wKey.isPressed;
@@ -175,6 +210,14 @@ namespace TitanAscent.Input
             ThrusterDown  = leftStick.y < -0.2f;
             ThrusterLeft  = leftStick.x < -0.2f;
             ThrusterRight = leftStick.x >  0.2f;
+
+            // --- Secondary grapple (LeftShoulder on gamepad) ---
+            SecondaryGrappleFire = SecondaryGrappleFire || gamepad.leftShoulder.wasPressedThisFrame;
+
+            // --- Grip (RightBumper) ---
+            GripDown     = GripDown     || gamepad.rightBumper.wasPressedThisFrame;
+            GripHeld     = GripHeld     || gamepad.rightBumper.isPressed;
+            GripReleased = GripReleased || gamepad.rightBumper.wasReleasedThisFrame;
 
             // --- Rope length ---
             RetractRope = gamepad.leftBumper.isPressed;

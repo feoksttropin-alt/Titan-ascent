@@ -38,9 +38,9 @@ namespace TitanAscent.Scene
             if (gameManager == null) gameManager = FindOrCreate<GameManager>("GameManager");
             if (audioManager == null) audioManager = FindOrCreate<AudioManager>("AudioManager");
             if (saveManager == null) saveManager = FindOrCreate<SaveManager>("SaveManager");
-            if (fallTracker == null) fallTracker = FindObjectOfType<FallTracker>();
-            if (narration == null) narration = FindObjectOfType<NarrationSystem>();
-            if (juice == null) juice = FindObjectOfType<JuiceController>();
+            if (fallTracker == null) fallTracker = FindFirstObjectByType<FallTracker>();
+            if (narration == null) narration = FindFirstObjectByType<NarrationSystem>();
+            if (juice == null) juice = FindFirstObjectByType<JuiceController>();
 
             GameObject playerGO = GameObject.FindWithTag("Player");
             if (playerGO != null)
@@ -111,7 +111,7 @@ namespace TitanAscent.Scene
 
         private T FindOrCreate<T>(string goName) where T : Component
         {
-            T existing = FindObjectOfType<T>();
+            T existing = FindFirstObjectByType<T>();
             if (existing != null) return existing;
 
             GameObject go = new GameObject(goName);

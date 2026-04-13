@@ -115,7 +115,7 @@ namespace TitanAscent.Physics
             if (!_isAttached) return;
 
             float currentY = transform.position.y;
-            float speed    = _rb.velocity.magnitude;
+            float speed    = _rb.linearVelocity.magnitude;
 
             // Track apex (highest y point while attached)
             if (currentY > _currentSwingApex)
@@ -170,7 +170,7 @@ namespace TitanAscent.Physics
             _attachHeight        = currentY;
             _currentSwingApex    = currentY;
             _apexTime            = now;
-            _swingStartSpeed     = _rb.velocity.magnitude;
+            _swingStartSpeed     = _rb.linearVelocity.magnitude;
             _maxSwingSpeed       = _swingStartSpeed;
             _rapidRetractDetected = false;
             _lastRopeLength      = grappleController.CurrentRopeLength;
@@ -185,7 +185,7 @@ namespace TitanAscent.Physics
 
             float now        = Time.time;
             float releaseY   = transform.position.y;
-            float speed      = _rb.velocity.magnitude;
+            float speed      = _rb.linearVelocity.magnitude;
 
             _isAttached      = false;
             _lastReleaseTime = now;
@@ -228,7 +228,7 @@ namespace TitanAscent.Physics
             if (_rapidRetractDetected && speed >= slingshotSpeedThreshold)
             {
                 // Apply 10 % velocity bonus
-                _rb.velocity = _rb.velocity * (1f + slingshotVelocityBonus);
+                _rb.linearVelocity = _rb.linearVelocity * (1f + slingshotVelocityBonus);
 
                 OnSlingshotDetected?.Invoke();
 

@@ -79,11 +79,11 @@ namespace TitanAscent.Player
         {
             if (playerController == null)
                 playerController = GetComponentInParent<PlayerController>()
-                    ?? FindObjectOfType<PlayerController>();
+                    ?? FindFirstObjectByType<PlayerController>();
 
             if (grappleController == null)
                 grappleController = GetComponentInParent<GrappleController>()
-                    ?? FindObjectOfType<GrappleController>();
+                    ?? FindFirstObjectByType<GrappleController>();
         }
 
         private void OnEnable()

@@ -36,9 +36,9 @@ namespace TitanAscent.Scene
             player.tag = "Player";
 
             Rigidbody rb = player.AddComponent<Rigidbody>();
-            rb.mass        = 75f;
-            rb.drag        = 0.08f;
-            rb.angularDrag = 0.5f;
+            rb.mass             = 75f;
+            rb.linearDamping    = 0.08f;
+            rb.angularDamping   = 0.5f;
 
             player.AddComponent<CapsuleCollider>();
             player.AddComponent<PlayerController>();

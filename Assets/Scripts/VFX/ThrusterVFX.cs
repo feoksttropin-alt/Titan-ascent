@@ -175,8 +175,14 @@ namespace TitanAscent.VFX
 
         private bool IsThrusterHeld()
         {
-            // Mirror the input logic from ThrusterSystem without duplicating energy checks
+            // Mirror the input logic from ThrusterSystem without duplicating energy checks.
             if (thrusterSystem == null || !thrusterSystem.HasEnergy) return false;
+
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+            if (ih != null)
+                return ih.ThrusterUp || ih.ThrusterDown || ih.ThrusterLeft || ih.ThrusterRight;
+
+            // Fallback for editor without InputHandler
             return Input.GetKey(KeyCode.Space)
                 || Input.GetKey(KeyCode.LeftShift)
                 || Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f
