@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 
 // NOTE: InputHandler.LoadBindings() should be called during InputHandler.Awake() after
@@ -83,6 +85,7 @@ namespace TitanAscent.UI
         private InputBindingMap liveBindings = new InputBindingMap();
         private bool isListening  = false;
         private string listeningAction = "";
+        private IDisposable _listenDisposable;
 
         // Maps action name → the TMP label on that row's key button
         private readonly Dictionary<string, TMP_Text> keyLabelMap = new Dictionary<string, TMP_Text>();
@@ -128,26 +131,10 @@ namespace TitanAscent.UI
         {
             if (!isListening) return;
 
-            // Cancel on Escape
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Escape))
-            {
+            // Cancel on Escape — poll here for fast response independent of the subscription
+            Keyboard kb = Keyboard.current;
+            if (kb != null && kb.escapeKey.wasPressedThisFrame)
                 StopListening();
-                return;
-            }
-
-            // Scan all KeyCodes for a press
-            foreach (KeyCode kc in System.Enum.GetValues(typeof(KeyCode)))
-            {
-                // Skip modifier-only keys and joystick axes — only capture bindable keys
-                if (kc == KeyCode.Escape) continue;
-                if (kc >= KeyCode.JoystickButton0) continue; // gamepad handled separately
-
-                if (UnityEngine.Input.GetKeyDown(kc))
-                {
-                    CommitBinding(listeningAction, kc);
-                    return;
-                }
-            }
         }
 
         // ── Public API ─────────────────────────────────────────────────────────────
@@ -244,17 +231,61 @@ namespace TitanAscent.UI
 
         private void StartListening(string actionName)
         {
+            // Dispose any previous subscription before starting a new one
+            _listenDisposable?.Dispose();
+            _listenDisposable = null;
+
             isListening     = true;
             listeningAction = actionName;
 
             if (listenOverlay != null) listenOverlay.SetActive(true);
             if (listenLabel   != null) listenLabel.text = $"Rebinding: {GetDisplayName(actionName)}\n\nPress any key...\n\n[Escape] to cancel";
+
+            // Subscribe to any button press via New Input System
+            _listenDisposable = InputSystem.onAnyButtonPress.Call(OnAnyButtonPressed);
+        }
+
+        private void OnAnyButtonPressed(InputControl control)
+        {
+            if (!isListening) return;
+
+            // Escape — cancel (also handled in Update for responsiveness)
+            if (control is KeyControl esc && esc.keyCode == Key.Escape)
+            {
+                StopListening();
+                return;
+            }
+
+            // Mouse buttons
+            Mouse mouse = Mouse.current;
+            if (mouse != null)
+            {
+                if (control == mouse.leftButton)   { CommitBinding(listeningAction, KeyCode.Mouse0); return; }
+                if (control == mouse.rightButton)  { CommitBinding(listeningAction, KeyCode.Mouse1); return; }
+                if (control == mouse.middleButton) { CommitBinding(listeningAction, KeyCode.Mouse2); return; }
+            }
+
+            // Keyboard keys
+            if (control is KeyControl keyCtrl)
+            {
+                KeyCode kc = NewKeyToKeyCode(keyCtrl.keyCode);
+                if (kc != KeyCode.None)
+                {
+                    CommitBinding(listeningAction, kc);
+                    return;
+                }
+            }
+
+            // Unrecognised control — dismiss without committing
+            StopListening();
         }
 
         private void StopListening()
         {
             isListening     = false;
             listeningAction = "";
+            _listenDisposable?.Dispose();
+            _listenDisposable = null;
             if (listenOverlay != null) listenOverlay.SetActive(false);
         }
 
@@ -318,6 +349,78 @@ namespace TitanAscent.UI
             foreach (var (a, d) in Actions)
                 if (a == actionName) return d;
             return actionName;
+        }
+
+        // ── New Input System Key → legacy KeyCode mapping ─────────────────────────
+
+        private static KeyCode NewKeyToKeyCode(Key key)
+        {
+            switch (key)
+            {
+                // Letters
+                case Key.A: return KeyCode.A; case Key.B: return KeyCode.B;
+                case Key.C: return KeyCode.C; case Key.D: return KeyCode.D;
+                case Key.E: return KeyCode.E; case Key.F: return KeyCode.F;
+                case Key.G: return KeyCode.G; case Key.H: return KeyCode.H;
+                case Key.I: return KeyCode.I; case Key.J: return KeyCode.J;
+                case Key.K: return KeyCode.K; case Key.L: return KeyCode.L;
+                case Key.M: return KeyCode.M; case Key.N: return KeyCode.N;
+                case Key.O: return KeyCode.O; case Key.P: return KeyCode.P;
+                case Key.Q: return KeyCode.Q; case Key.R: return KeyCode.R;
+                case Key.S: return KeyCode.S; case Key.T: return KeyCode.T;
+                case Key.U: return KeyCode.U; case Key.V: return KeyCode.V;
+                case Key.W: return KeyCode.W; case Key.X: return KeyCode.X;
+                case Key.Y: return KeyCode.Y; case Key.Z: return KeyCode.Z;
+                // Digits
+                case Key.Digit0: return KeyCode.Alpha0; case Key.Digit1: return KeyCode.Alpha1;
+                case Key.Digit2: return KeyCode.Alpha2; case Key.Digit3: return KeyCode.Alpha3;
+                case Key.Digit4: return KeyCode.Alpha4; case Key.Digit5: return KeyCode.Alpha5;
+                case Key.Digit6: return KeyCode.Alpha6; case Key.Digit7: return KeyCode.Alpha7;
+                case Key.Digit8: return KeyCode.Alpha8; case Key.Digit9: return KeyCode.Alpha9;
+                // Function keys
+                case Key.F1:  return KeyCode.F1;  case Key.F2:  return KeyCode.F2;
+                case Key.F3:  return KeyCode.F3;  case Key.F4:  return KeyCode.F4;
+                case Key.F5:  return KeyCode.F5;  case Key.F6:  return KeyCode.F6;
+                case Key.F7:  return KeyCode.F7;  case Key.F8:  return KeyCode.F8;
+                case Key.F9:  return KeyCode.F9;  case Key.F10: return KeyCode.F10;
+                case Key.F11: return KeyCode.F11; case Key.F12: return KeyCode.F12;
+                // Modifiers
+                case Key.LeftShift:   return KeyCode.LeftShift;
+                case Key.RightShift:  return KeyCode.RightShift;
+                case Key.LeftCtrl:    return KeyCode.LeftControl;
+                case Key.RightCtrl:   return KeyCode.RightControl;
+                case Key.LeftAlt:     return KeyCode.LeftAlt;
+                case Key.RightAlt:    return KeyCode.RightAlt;
+                // Common keys
+                case Key.Space:       return KeyCode.Space;
+                case Key.Enter:       return KeyCode.Return;
+                case Key.NumpadEnter: return KeyCode.KeypadEnter;
+                case Key.Backspace:   return KeyCode.Backspace;
+                case Key.Delete:      return KeyCode.Delete;
+                case Key.Tab:         return KeyCode.Tab;
+                case Key.Escape:      return KeyCode.Escape;
+                case Key.UpArrow:     return KeyCode.UpArrow;
+                case Key.DownArrow:   return KeyCode.DownArrow;
+                case Key.LeftArrow:   return KeyCode.LeftArrow;
+                case Key.RightArrow:  return KeyCode.RightArrow;
+                case Key.Home:        return KeyCode.Home;
+                case Key.End:         return KeyCode.End;
+                case Key.PageUp:      return KeyCode.PageUp;
+                case Key.PageDown:    return KeyCode.PageDown;
+                case Key.Insert:      return KeyCode.Insert;
+                // Numpad
+                case Key.Numpad0: return KeyCode.Keypad0; case Key.Numpad1: return KeyCode.Keypad1;
+                case Key.Numpad2: return KeyCode.Keypad2; case Key.Numpad3: return KeyCode.Keypad3;
+                case Key.Numpad4: return KeyCode.Keypad4; case Key.Numpad5: return KeyCode.Keypad5;
+                case Key.Numpad6: return KeyCode.Keypad6; case Key.Numpad7: return KeyCode.Keypad7;
+                case Key.Numpad8: return KeyCode.Keypad8; case Key.Numpad9: return KeyCode.Keypad9;
+                case Key.NumpadPlus:     return KeyCode.KeypadPlus;
+                case Key.NumpadMinus:    return KeyCode.KeypadMinus;
+                case Key.NumpadMultiply: return KeyCode.KeypadMultiply;
+                case Key.NumpadDivide:   return KeyCode.KeypadDivide;
+                case Key.NumpadPeriod:   return KeyCode.KeypadPeriod;
+                default: return KeyCode.None;
+            }
         }
 
         // ── Reset to defaults ──────────────────────────────────────────────────────

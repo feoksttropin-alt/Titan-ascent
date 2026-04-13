@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TitanAscent.Player;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -59,11 +60,11 @@ namespace TitanAscent.Systems
         private string[] _editNameBuffers = new string[MaxBookmarks];
         private List<GameObject> _pinMarkers = new List<GameObject>();
 
-        // Keyboard codes for 1–0 in order
-        private static readonly KeyCode[] DigitKeys =
+        // New Input System digit keys 1–0 in order
+        private static readonly Key[] DigitKeys =
         {
-            KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4, KeyCode.Alpha5,
-            KeyCode.Alpha6, KeyCode.Alpha7, KeyCode.Alpha8, KeyCode.Alpha9, KeyCode.Alpha0
+            Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5,
+            Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9, Key.Digit0
         };
 
         // -----------------------------------------------------------------------
@@ -92,14 +93,17 @@ namespace TitanAscent.Systems
 
         private void HandleKeyboardShortcuts()
         {
-            bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            Keyboard kb = Keyboard.current;
+            if (kb == null) return;
+
+            bool ctrl  = kb.leftCtrlKey.isPressed  || kb.rightCtrlKey.isPressed;
+            bool shift = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
 
             if (!ctrl) return;
 
             for (int i = 0; i < MaxBookmarks; i++)
             {
-                if (!Input.GetKeyDown(DigitKeys[i])) continue;
+                if (!kb[DigitKeys[i]].wasPressedThisFrame) continue;
 
                 if (shift)
                     SaveCurrentHeightAsBookmark(i);

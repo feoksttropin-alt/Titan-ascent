@@ -1,5 +1,6 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace TitanAscent.Debug
 {
@@ -76,7 +77,7 @@ namespace TitanAscent.Debug
         private void Update()
         {
             // Toggle
-            if (Input.GetKeyDown(KeyCode.F4))
+            if (Keyboard.current != null && Keyboard.current.f4Key.wasPressedThisFrame)
                 _visible = !_visible;
 
             // Record frame time (ms)

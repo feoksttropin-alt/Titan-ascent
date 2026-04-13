@@ -1,5 +1,6 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TitanAscent.Player;
 using TitanAscent.Systems;
 using TitanAscent.Environment;
@@ -46,7 +47,10 @@ namespace TitanAscent.Debug
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.BackQuote))
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+            bool toggleDebug = ih != null ? ih.DebugToggle
+                : Keyboard.current != null && Keyboard.current.backquoteKey.wasPressedThisFrame;
+            if (toggleDebug)
                 isVisible = !isVisible;
 
             // Infinite thruster: force energy to max every frame while toggle is on

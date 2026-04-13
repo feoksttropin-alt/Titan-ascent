@@ -105,7 +105,9 @@ namespace TitanAscent.UI
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
+            TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
+            bool backPressed = ih != null ? ih.Pause : Input.GetKeyDown(KeyCode.Escape);
+            if (backPressed)
                 NavigateBack();
         }
 
@@ -387,7 +389,7 @@ namespace TitanAscent.UI
             creditsText.text =
                 "<b>TITAN ASCENT</b>\n\n" +
                 $"Version {version}\n" +
-                "Built with Unity 2022.3\n\n" +
+                "Built with Unity 6\n\n" +
                 "Thank you for playing.\n" +
                 "Every fall is a lesson.\n" +
                 "Every climb a story.";

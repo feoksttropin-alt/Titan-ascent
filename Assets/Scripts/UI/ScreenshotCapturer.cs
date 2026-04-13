@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace TitanAscent.UI
 {
@@ -62,13 +63,13 @@ namespace TitanAscent.UI
         private void Update()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (Input.GetKeyDown(captureKey))
+            if (IsKeyDownNIS(captureKey))
                 CaptureStandard();
 
-            if (Input.GetKeyDown(KeyCode.F11))
+            if (Keyboard.current != null && Keyboard.current.f11Key.wasPressedThisFrame)
                 StartCoroutine(CaptureSuper(4));
 
-            if (Input.GetKeyDown(KeyCode.F10))
+            if (Keyboard.current != null && Keyboard.current.f10Key.wasPressedThisFrame)
                 ToggleHUD();
 
             // Toast countdown
@@ -164,6 +165,29 @@ namespace TitanAscent.UI
         // -----------------------------------------------------------------------
         // Helpers
         // -----------------------------------------------------------------------
+
+        // Maps a legacy KeyCode (F1–F12 range) to the New Input System Keyboard property.
+        private static bool IsKeyDownNIS(KeyCode kc)
+        {
+            Keyboard kb = Keyboard.current;
+            if (kb == null) return false;
+            switch (kc)
+            {
+                case KeyCode.F1:  return kb.f1Key.wasPressedThisFrame;
+                case KeyCode.F2:  return kb.f2Key.wasPressedThisFrame;
+                case KeyCode.F3:  return kb.f3Key.wasPressedThisFrame;
+                case KeyCode.F4:  return kb.f4Key.wasPressedThisFrame;
+                case KeyCode.F5:  return kb.f5Key.wasPressedThisFrame;
+                case KeyCode.F6:  return kb.f6Key.wasPressedThisFrame;
+                case KeyCode.F7:  return kb.f7Key.wasPressedThisFrame;
+                case KeyCode.F8:  return kb.f8Key.wasPressedThisFrame;
+                case KeyCode.F9:  return kb.f9Key.wasPressedThisFrame;
+                case KeyCode.F10: return kb.f10Key.wasPressedThisFrame;
+                case KeyCode.F11: return kb.f11Key.wasPressedThisFrame;
+                case KeyCode.F12: return kb.f12Key.wasPressedThisFrame;
+                default:          return false;
+            }
+        }
 
         private string BuildPath()
         {

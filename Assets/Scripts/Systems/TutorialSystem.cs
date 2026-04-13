@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace TitanAscent.Systems
@@ -194,6 +195,22 @@ namespace TitanAscent.Systems
             SetPanelVisible(true);
         }
 
+        private bool IsDismissKeyDown()
+        {
+            Keyboard kb = Keyboard.current;
+            if (kb == null) return false;
+            // Map the most common dismiss keys; fall back gracefully for others
+            switch (dismissKey)
+            {
+                case KeyCode.Return:      return kb.enterKey.wasPressedThisFrame;
+                case KeyCode.KeypadEnter: return kb.numpadEnterKey.wasPressedThisFrame;
+                case KeyCode.Space:       return kb.spaceKey.wasPressedThisFrame;
+                case KeyCode.Escape:      return kb.escapeKey.wasPressedThisFrame;
+                case KeyCode.Tab:         return kb.tabKey.wasPressedThisFrame;
+                default:                  return false;
+            }
+        }
+
         private void DismissCurrentStep()
         {
             if (!stepActive) return;
@@ -272,7 +289,7 @@ namespace TitanAscent.Systems
             }
 
             // Allow keyboard dismiss at any time
-            if (Input.GetKeyDown(dismissKey))
+            if (IsDismissKeyDown())
                 DismissCurrentStep();
         }
 

@@ -1,6 +1,7 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System.Text;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TitanAscent.Player;
 using TitanAscent.Grapple;
 
@@ -31,7 +32,7 @@ namespace TitanAscent.Debug
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F2))
+            if (Keyboard.current != null && Keyboard.current.f2Key.wasPressedThisFrame)
                 isVisible = !isVisible;
         }
 

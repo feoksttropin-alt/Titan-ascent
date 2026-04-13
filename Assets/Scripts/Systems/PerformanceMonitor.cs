@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TitanAscent.Grapple;
 
 namespace TitanAscent.Systems
@@ -116,7 +117,7 @@ namespace TitanAscent.Systems
 
         private void HandleOverlayToggle()
         {
-            if (UnityEngine.Input.GetKeyDown(KeyCode.F3))
+            if (Keyboard.current != null && Keyboard.current.f3Key.wasPressedThisFrame)
                 _showOverlay = !_showOverlay;
         }
 
