@@ -21,7 +21,7 @@ Titan Ascent is built around precision physics, momentum-based movement, and pun
 
 | Component | Details |
 |-----------|---------|
-| **Engine** | Unity 2022.3 LTS |
+| **Engine** | Unity 6 LTS |
 | **Physics** | Rigidbody-based custom rope physics with Verlet integration |
 | **Platform** | PC (Steam) |
 | **Performance** | 60 FPS target on mid-range hardware |
@@ -101,7 +101,7 @@ Assets/Scripts/
 
 ### Prerequisites
 
-- **Unity** 2022.3.20f1 (LTS)
+- **Unity** 6000.0.26f1 (LTS)
 - **Git** for cloning the repository
 
 ### Quick Start
@@ -112,7 +112,7 @@ Assets/Scripts/
    cd Titan-ascent
    ```
 
-2. Open in Unity 2022.3.20f1 (LTS)
+2. Open in Unity 6000.0.26f1 (LTS)
 
 3. When prompted, import **TextMeshPro Essentials**
 

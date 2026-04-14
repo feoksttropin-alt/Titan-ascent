@@ -387,7 +387,7 @@ namespace TitanAscent.UI
             creditsText.text =
                 "<b>TITAN ASCENT</b>\n\n" +
                 $"Version {version}\n" +
-                "Built with Unity 2022.3\n\n" +
+                "Built with Unity 6\n\n" +
                 "Thank you for playing.\n" +
                 "Every fall is a lesson.\n" +
                 "Every climb a story.";
