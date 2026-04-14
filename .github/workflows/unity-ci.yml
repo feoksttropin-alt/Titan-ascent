@@ -46,7 +46,6 @@ jobs:
           targetPlatform:   StandaloneLinux64
           buildMethod:      ValidationBuild.Validate
           allowDirtyBuild:  true
-          customParameters: -nographics -batchmode
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2: Build — Windows Standalone (only on pushes to main or dev branches)
