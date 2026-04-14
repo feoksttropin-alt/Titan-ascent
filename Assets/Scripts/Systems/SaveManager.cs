@@ -7,7 +7,7 @@ namespace TitanAscent.Systems
     [Serializable]
     public class SaveData
     {
-        public int version = 1;
+        public int version = 2;
         public float bestHeight = 0f;
         public float longestFall = 0f;
         public int totalFalls = 0;
@@ -17,12 +17,15 @@ namespace TitanAscent.Systems
         public List<string> completedChallenges = new List<string>();
         // Run history — populated by RunHistoryUI
         public List<UI.RunRecord> runHistory = new List<UI.RunRecord>();
+        // Checkpoint state
+        public float checkpointHeight = 0f;
+        public float checkpointHealth = 100f;
     }
 
     public class SaveManager : MonoBehaviour
     {
         private const string SaveKey = "TitanAscent_SaveData";
-        private const int CurrentVersion = 1;
+        private const int CurrentVersion = 2;
 
         private SaveData currentData = new SaveData();
 
@@ -132,11 +135,19 @@ namespace TitanAscent.Systems
             }
         }
 
+        /// <summary>Clears the persisted checkpoint so the next run starts from scratch.</summary>
+        public void ClearCheckpoint()
+        {
+            currentData.checkpointHeight = 0f;
+            currentData.checkpointHealth = 100f;
+            Save();
+        }
+
         private void MigrateIfNeeded()
         {
             if (currentData.version < CurrentVersion)
             {
-                // Future migration logic goes here
+                // v1 → v2: add checkpoint fields (defaults are fine)
                 currentData.version = CurrentVersion;
                 Save();
             }

@@ -11,6 +11,8 @@ namespace TitanAscent.Systems
         Climbing,
         Paused,
         Falling,
+        Dead,
+        Respawning,
         Victory
     }
 
@@ -19,11 +21,13 @@ namespace TitanAscent.Systems
         public static GameManager Instance { get; private set; }
 
         [Header("Systems")]
-        [SerializeField] private FallTracker fallTracker;
-        [SerializeField] private NarrationSystem narration;
-        [SerializeField] private SaveManager saveManager;
-        [SerializeField] private PostRunSummary postRunSummary;
+        [SerializeField] private FallTracker      fallTracker;
+        [SerializeField] private NarrationSystem  narration;
+        [SerializeField] private SaveManager      saveManager;
+        [SerializeField] private PostRunSummary   postRunSummary;
         [SerializeField] private SessionStatsTracker sessionStatsTracker;
+        [SerializeField] private Player.PlayerHealth  playerHealth;
+        [SerializeField] private CheckpointManager    checkpointManager;
 
         [Header("Events")]
         public UnityEvent<GameState> OnGameStateChanged;
@@ -59,6 +63,12 @@ namespace TitanAscent.Systems
             if (sessionStatsTracker == null)
                 sessionStatsTracker = FindFirstObjectByType<SessionStatsTracker>();
 
+            if (playerHealth == null)
+                playerHealth = FindFirstObjectByType<Player.PlayerHealth>();
+
+            if (checkpointManager == null)
+                checkpointManager = FindFirstObjectByType<CheckpointManager>();
+
             saveManager?.Load();
             BindEvents();
         }
@@ -69,6 +79,18 @@ namespace TitanAscent.Systems
             {
                 fallTracker.OnFallCompleted.AddListener(HandleFallCompleted);
                 fallTracker.OnNewHeightRecord.AddListener(HandleNewHeightRecord);
+            }
+
+            if (playerHealth != null)
+            {
+                playerHealth.OnDeath.AddListener(HandlePlayerDeath);
+                playerHealth.OnRevived.AddListener(HandlePlayerRevived);
+            }
+
+            if (checkpointManager != null)
+            {
+                checkpointManager.OnRespawnStarted.AddListener(HandleRespawnStarted);
+                checkpointManager.OnRespawnComplete.AddListener(HandleRespawnComplete);
             }
         }
 
@@ -118,6 +140,38 @@ namespace TitanAscent.Systems
                 SetState(GameState.Climbing);
                 Time.timeScale = 1f;
             }
+        }
+
+        // ── Death / Respawn ───────────────────────────────────────────────────
+
+        private void HandlePlayerDeath()
+        {
+            SetState(GameState.Dead);
+
+            bool hasCheckpoint = checkpointManager != null && checkpointManager.HasCheckpoint;
+
+            if (!hasCheckpoint)
+            {
+                // No checkpoint yet — treat like a run-ending fall
+                RecordCurrentRun();
+                saveManager?.ClearCheckpoint();
+            }
+            // If checkpoint exists, CheckpointManager's respawn coroutine fires next
+        }
+
+        private void HandleRespawnStarted()
+        {
+            SetState(GameState.Respawning);
+        }
+
+        private void HandleRespawnComplete()
+        {
+            SetState(GameState.Climbing);
+        }
+
+        private void HandlePlayerRevived()
+        {
+            // Health has been restored; state transition already handled by respawn flow
         }
 
         public void TriggerVictory()
