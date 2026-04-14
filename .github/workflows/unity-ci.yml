@@ -47,21 +47,21 @@ jobs:
           allowDirtyBuild:  true
           customParameters: -logFile /github/workspace/unity-editor.log
 
-      - name: Upload Unity editor log
+      - name: Read Unity log
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unity-editor-log-${{ github.sha }}
-          path: unity-editor.log
-          if-no-files-found: warn
-          retention-days: 3
+        run: |
+          echo "=== Unity Editor Log ==="
+          sudo chmod 644 unity-editor.log 2>/dev/null || true
+          if [ -f unity-editor.log ]; then
+            cat unity-editor.log
+          else
+            echo "Log file not found at unity-editor.log"
+            sudo find / -name "Editor.log" 2>/dev/null | head -5
+          fi
 
       - name: Fail if Unity step failed
         if: steps.unity.outcome == 'failure'
-        run: |
-          echo "=== Unity Editor Log (last 100 lines) ==="
-          tail -100 unity-editor.log 2>/dev/null || echo "Log file not found"
-          exit 1
+        run: exit 1
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2: Build — Windows Standalone (only on pushes to main or dev branches)
