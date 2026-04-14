@@ -79,7 +79,7 @@ namespace TitanAscent.Systems
 
             if (playerRb == null) return;
 
-            float verticalVelocity = playerRb.velocity.y;
+            float verticalVelocity = playerRb.linearVelocity.y;
 
             // Detect fall start
             if (!isFalling && verticalVelocity < fallStartVelocityThreshold)
