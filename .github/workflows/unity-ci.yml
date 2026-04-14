@@ -33,6 +33,8 @@ jobs:
             Library-
 
       - name: Run script validation
+        id: unity
+        continue-on-error: true
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
@@ -45,6 +47,22 @@ jobs:
           buildMethod:      ValidationBuild.Validate
           allowDirtyBuild:  true
           customParameters: -nographics -batchmode
+
+      - name: Upload Unity editor log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-editor-log-${{ github.sha }}
+          path: |
+            /root/.config/unity3d/Unity/Editor.log
+            /github/home/.config/unity3d/Unity/Editor.log
+            /home/runner/.config/unity3d/Unity/Editor.log
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Fail if Unity step failed
+        if: steps.unity.outcome == 'failure'
+        run: exit 1
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2: Build — Windows Standalone (only on pushes to main or dev branches)
