@@ -52,7 +52,7 @@ WHAT IS ALREADY DONE (CODE)
 --------------------------------------------------------------------------------
 PHASE 1 — COMPLETE (Architecture fixes applied this session)
 --------------------------------------------------------------------------------
-✓ Fixed Unity 2022 compile blockers:
+✓ Fixed Unity 6 compile blockers:
     rb.linearVelocity  → rb.velocity
     rb.linearDamping   → rb.drag
     rb.angularDamping  → rb.angularDrag
@@ -243,7 +243,7 @@ QA             Assets/Scripts/Systems/QAValidator.cs
 --------------------------------------------------------------------------------
 EXECUTION ORDER
 --------------------------------------------------------------------------------
-[DONE]      Phase 0 — Merge conflicts resolved + Unity 2022 API compile fixes
+[DONE]      Phase 0 — Merge conflicts resolved + Unity 6 API compile fixes
 [DONE]      Phase 1 — Architecture fixes (input, bootstrap, audio, events, QA)
 [NEXT]      Phase 2 — Unity scene assembly and asset creation (Editor work)
 [AFTER 2]   Phase 3 — Inspector wiring and system integration
