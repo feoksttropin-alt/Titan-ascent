@@ -46,23 +46,23 @@ jobs:
           targetPlatform:   StandaloneLinux64
           buildMethod:      ValidationBuild.Validate
           allowDirtyBuild:  true
-          customParameters: -nographics -batchmode
+          customParameters: -logFile /github/workspace/unity-editor.log
 
       - name: Upload Unity editor log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unity-editor-log-${{ github.sha }}
-          path: |
-            /root/.config/unity3d/Unity/Editor.log
-            /github/home/.config/unity3d/Unity/Editor.log
-            /home/runner/.config/unity3d/Unity/Editor.log
+          path: unity-editor.log
           if-no-files-found: warn
           retention-days: 3
 
       - name: Fail if Unity step failed
         if: steps.unity.outcome == 'failure'
-        run: exit 1
+        run: |
+          echo "=== Unity Editor Log (last 100 lines) ==="
+          tail -100 unity-editor.log 2>/dev/null || echo "Log file not found"
+          exit 1
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2: Build — Windows Standalone (only on pushes to main or dev branches)
