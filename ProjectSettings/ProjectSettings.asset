@@ -328,6 +328,7 @@ PlayerSettings:
   bundleVersion: 0.3.1
   preloadedAssets: []
   metroInputSource: 0
+  activeInputHandler: 2
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
   xboxOneDisableKinectGpuReservation: 1
