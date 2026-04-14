@@ -8,7 +8,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-# Opt in to the Node 24 runner now so the deprecation warning never fires
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -39,9 +38,9 @@ jobs:
       - name: Run script validation
         uses: game-ci/unity-builder@v4
         env:
+          UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL:   ${{ secrets.UNITY_SERIAL }}
         with:
           unityVersion:     6000.0.26f1
           targetPlatform:   StandaloneLinux64
@@ -77,9 +76,9 @@ jobs:
       - name: Build project
         uses: game-ci/unity-builder@v4
         env:
+          UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL:   ${{ secrets.UNITY_SERIAL }}
         with:
           unityVersion:     6000.0.26f1
           targetPlatform:   StandaloneWindows64
