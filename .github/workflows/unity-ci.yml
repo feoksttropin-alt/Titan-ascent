@@ -33,35 +33,16 @@ jobs:
             Library-
 
       - name: Run script validation
-        id: unity
-        continue-on-error: true
         uses: game-ci/unity-builder@v4
         env:
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL:   ${{ secrets.UNITY_SERIAL }}
         with:
-          unityVersion:     auto
-          targetPlatform:   StandaloneLinux64
-          buildMethod:      ValidationBuild.Validate
-          allowDirtyBuild:  true
-          customParameters: -logFile /github/workspace/unity-editor.log
-
-      - name: Read Unity log
-        if: always()
-        run: |
-          echo "=== Unity Editor Log ==="
-          sudo chmod 644 unity-editor.log 2>/dev/null || true
-          if [ -f unity-editor.log ]; then
-            cat unity-editor.log
-          else
-            echo "Log file not found at unity-editor.log"
-            sudo find / -name "Editor.log" 2>/dev/null | head -5
-          fi
-
-      - name: Fail if Unity step failed
-        if: steps.unity.outcome == 'failure'
-        run: exit 1
+          unityVersion:    auto
+          targetPlatform:  StandaloneLinux64
+          buildMethod:     ValidationBuild.Validate
+          allowDirtyBuild: true
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2: Build — Windows Standalone (only on pushes to main or dev branches)
