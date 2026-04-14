@@ -232,7 +232,7 @@ namespace TitanAscent.Systems
         private List<QAResult> CheckSurfaceAnchorPoints()
         {
             var results = new List<QAResult>();
-            var anchors = FindObjectsOfType<SurfaceAnchorPoint>();
+            var anchors = FindObjectsByType<SurfaceAnchorPoint>(FindObjectsSortMode.None);
 
             if (anchors.Length == 0)
             {

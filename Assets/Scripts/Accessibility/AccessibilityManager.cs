@@ -211,7 +211,7 @@ namespace TitanAscent.Accessibility
 
         private void ApplyHighContrastAnchors(bool value)
         {
-            SurfaceAnchorPoint[] anchors = FindObjectsOfType<SurfaceAnchorPoint>();
+            SurfaceAnchorPoint[] anchors = FindObjectsByType<SurfaceAnchorPoint>(FindObjectsSortMode.None);
             foreach (SurfaceAnchorPoint anchor in anchors)
                 anchor.SetHighContrastMode(value);
         }
@@ -246,7 +246,7 @@ namespace TitanAscent.Accessibility
         private void ApplyReduceParticles(bool value)
         {
             // Find all ParticleSystems and scale their emission rates
-            ParticleSystem[] systems = FindObjectsOfType<ParticleSystem>();
+            ParticleSystem[] systems = FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None);
             foreach (ParticleSystem ps in systems)
             {
                 var emission = ps.emission;

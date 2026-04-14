@@ -34,7 +34,7 @@ namespace TitanAscent.Scene
                 "This will destroy all SurfaceAnchorPoint GameObjects. Undo is supported.", "Clear", "Cancel"))
                 return;
 
-            var anchors = Object.FindObjectsOfType<SurfaceAnchorPoint>();
+            var anchors = Object.FindObjectsByType<SurfaceAnchorPoint>(FindObjectsSortMode.None);
             foreach (var a in anchors)
             {
                 Undo.DestroyObjectImmediate(a.gameObject);
