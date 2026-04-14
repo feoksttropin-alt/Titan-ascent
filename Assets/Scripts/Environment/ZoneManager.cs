@@ -83,17 +83,31 @@ namespace TitanAscent.Environment
             }
         }
 
+        /// <summary>
+        /// Binary-searches sorted zones by height. Zones must be ordered by minHeight ascending
+        /// (which PopulateDefaultZones guarantees; Inspector-configured zones should match).
+        /// Falls back to linear scan if ordering is not maintained.
+        /// </summary>
         public TitanZone GetZoneForHeight(float height)
         {
-            foreach (TitanZone zone in zones)
+            if (zones.Count == 0) return null;
+            if (height < zones[0].minHeight)  return zones[0];
+            if (height >= zones[zones.Count - 1].maxHeight) return zones[zones.Count - 1];
+
+            int lo = 0, hi = zones.Count - 1;
+            while (lo <= hi)
             {
-                if (zone.ContainsHeight(height))
-                    return zone;
+                int mid = (lo + hi) >> 1;
+                TitanZone z = zones[mid];
+                if (height < z.minHeight)
+                    hi = mid - 1;
+                else if (height >= z.maxHeight)
+                    lo = mid + 1;
+                else
+                    return z;
             }
 
-            // Clamp to first/last zone if out of range
-            if (zones.Count == 0) return null;
-            if (height < zones[0].minHeight) return zones[0];
+            // Fallback: last zone covers to the top
             return zones[zones.Count - 1];
         }
 

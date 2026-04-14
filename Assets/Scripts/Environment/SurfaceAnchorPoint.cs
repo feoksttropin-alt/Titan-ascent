@@ -26,20 +26,18 @@ namespace TitanAscent.Environment
 
         private AnchorVisualState visualState = AnchorVisualState.Idle;
         private MaterialPropertyBlock propBlock;
+        private SurfaceProperties surfaceProperties;   // cached in Awake
         private bool isHighlighted;
         private bool isAttached;
 
         public SurfaceType AnchorSurfaceType => surfaceType;
         public float HoldStrength => holdStrength;
-        public bool IsGrappleable
-        {
-            get
-            {
-                SurfaceProperties surfProps = GetComponent<SurfaceProperties>();
-                if (surfProps != null) return surfProps.IsGrappleable;
-                return holdStrength > 0f;
-            }
-        }
+        /// <summary>
+        /// Whether this anchor can accept a grapple. Reads from the co-located
+        /// <see cref="SurfaceProperties"/> component (cached at Awake) when present;
+        /// otherwise falls back to <see cref="holdStrength"/>.
+        /// </summary>
+        public bool IsGrappleable => surfaceProperties != null ? surfaceProperties.IsGrappleable : holdStrength > 0f;
         public AnchorVisualState VisualState => visualState;
 
         private void Awake()
@@ -47,6 +45,7 @@ namespace TitanAscent.Environment
             propBlock = new MaterialPropertyBlock();
             if (anchorRenderer == null)
                 anchorRenderer = GetComponent<Renderer>();
+            surfaceProperties = GetComponent<SurfaceProperties>();
         }
 
         private void Start()

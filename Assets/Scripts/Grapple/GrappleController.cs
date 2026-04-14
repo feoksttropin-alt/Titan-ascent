@@ -16,6 +16,18 @@ namespace TitanAscent.Grapple
     [RequireComponent(typeof(LineRenderer))]
     public class GrappleController : MonoBehaviour
     {
+        // ── Constants ─────────────────────────────────────────────────────────────
+        /// <summary>Distance within which the grapple attaches instantly rather than animating in flight.</summary>
+        private const float ImmediateAttachDistance = 15f;
+        /// <summary>Distance threshold for considering the grapple head "arrived" at the target.</summary>
+        private const float ArrivalThreshold = 0.5f;
+        /// <summary>Duration (seconds) of the miss animation before returning to Idle.</summary>
+        private const float MissAnimationDuration = 0.3f;
+        // Spring joint tuning — exposed as constants for readability and single-source editing.
+        private const float SpringJointSpring    = 8f;
+        private const float SpringJointDamper    = 4f;
+        private const float SpringJointMassScale = 4.5f;
+
         [Header("Grapple Configuration")]
         [SerializeField] private float maxRopeLength = 50f;
         [SerializeField] private float minRopeLength = 2f;
@@ -185,7 +197,7 @@ namespace TitanAscent.Grapple
                 grappleHeadInFlight = true;
 
                 // For responsiveness, attach immediately if within short range
-                if (distance < 15f)
+                if (distance < ImmediateAttachDistance)
                 {
                     AttachGrapple(hit.point, hit.normal, anchor);
                 }
@@ -211,7 +223,7 @@ namespace TitanAscent.Grapple
             {
                 grappleHeadPosition = Vector3.MoveTowards(grappleHeadPosition, targetPoint, projectileSpeed * Time.deltaTime);
 
-                if (Vector3.Distance(grappleHeadPosition, targetPoint) < 0.5f)
+                if (Vector3.Distance(grappleHeadPosition, targetPoint) < ArrivalThreshold)
                 {
                     AttachGrapple(targetPoint, surfaceNormal, anchor);
                     yield break;
@@ -235,7 +247,7 @@ namespace TitanAscent.Grapple
             grappleHeadPosition = from;
             grappleHeadInFlight = true;
             float t = 0f;
-            float missTime = 0.3f;
+            float missTime = MissAnimationDuration;
 
             while (t < missTime)
             {
@@ -273,9 +285,9 @@ namespace TitanAscent.Grapple
             ropeJoint.connectedAnchor = attachPoint;
             ropeJoint.maxDistance = currentRopeLength;
             ropeJoint.minDistance = minRopeLength;
-            ropeJoint.spring = 8f;
-            ropeJoint.damper = 4f;
-            ropeJoint.massScale = 4.5f;
+            ropeJoint.spring    = SpringJointSpring;
+            ropeJoint.damper    = SpringJointDamper;
+            ropeJoint.massScale = SpringJointMassScale;
             ropeJoint.enableCollision = false;
 
             // Notify rope simulator
@@ -412,6 +424,19 @@ namespace TitanAscent.Grapple
                 return cam.transform.forward;
 
             return transform.forward;
+        }
+
+        /// <summary>
+        /// Fires the grapple programmatically (e.g. from CoyoteTimeSystem's input buffer).
+        /// Respects the same fire-rate and state rules as player input.
+        /// </summary>
+        public void FireGrapple()
+        {
+            bool canFire = Time.time - lastFireTime > GetAdjustedFireRate();
+            if (!canFire) return;
+
+            if (currentState == GrappleState.Idle || currentState == GrappleState.Flying)
+                TryFireGrapple();
         }
 
         /// <summary>Sets maximum rope length at runtime. Used by MovementTuner.</summary>

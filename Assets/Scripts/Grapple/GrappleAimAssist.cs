@@ -9,16 +9,19 @@ namespace TitanAscent.Grapple
         [SerializeField] private float detectionRadius = 25f;
         [SerializeField] private float coneAngle = 30f;
         [SerializeField] private float snapStrength = 0.3f;
-        [SerializeField] private float highlightUpdateRate = 0.05f;
+        [SerializeField] private float updateInterval = 0.05f;  // renamed from highlightUpdateRate; governs both scan and highlight
 
         [Header("Layers")]
         [SerializeField] private LayerMask anchorLayerMask = ~0;
 
+        // Reusable buffer — avoids per-frame allocation from Physics.OverlapSphere
+        private static readonly Collider[] _overlapBuffer = new Collider[64];
+
         private Camera mainCamera;
         private SurfaceAnchorPoint currentBestTarget;
         private SurfaceAnchorPoint lastHighlightedTarget;
-        private List<SurfaceAnchorPoint> candidateTargets = new List<SurfaceAnchorPoint>();
-        private float lastHighlightUpdateTime;
+        private readonly List<SurfaceAnchorPoint> candidateTargets = new List<SurfaceAnchorPoint>();
+        private float lastUpdateTime;
 
         public bool HasTarget => currentBestTarget != null;
         public Vector3 BestTarget => currentBestTarget != null ? currentBestTarget.transform.position : Vector3.zero;
@@ -41,36 +44,35 @@ namespace TitanAscent.Grapple
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
-            FindBestTarget();
-
-            if (Time.time - lastHighlightUpdateTime > highlightUpdateRate)
+            // Throttle the expensive OverlapSphere scan and highlight update together
+            if (Time.time - lastUpdateTime >= updateInterval)
             {
+                FindBestTarget();
                 UpdateHighlight();
-                lastHighlightUpdateTime = Time.time;
+                lastUpdateTime = Time.time;
             }
         }
 
         private void FindBestTarget()
         {
-            Vector3 aimOrigin = transform.position;
+            Vector3 aimOrigin    = transform.position;
             Vector3 aimDirection = mainCamera != null ? mainCamera.transform.forward : transform.forward;
 
             candidateTargets.Clear();
 
-            // Find all anchor points in range
-            Collider[] nearbyColliders = Physics.OverlapSphere(aimOrigin, detectionRadius, anchorLayerMask);
-            foreach (Collider col in nearbyColliders)
+            // Non-allocating overlap using static buffer
+            int count = Physics.OverlapSphereNonAlloc(aimOrigin, detectionRadius, _overlapBuffer, anchorLayerMask);
+            for (int i = 0; i < count; i++)
             {
-                SurfaceAnchorPoint anchor = col.GetComponent<SurfaceAnchorPoint>();
-                if (anchor == null) continue;
-                if (!anchor.IsGrappleable) continue;
+                SurfaceAnchorPoint anchor = _overlapBuffer[i].GetComponent<SurfaceAnchorPoint>();
+                if (anchor == null || !anchor.IsGrappleable) continue;
 
                 Vector3 toAnchor = (anchor.transform.position - aimOrigin).normalized;
                 float angle = Vector3.Angle(aimDirection, toAnchor);
 
                 if (angle <= coneAngle)
                 {
-                    // Check line of sight
+                    // Line-of-sight check
                     if (!Physics.Linecast(aimOrigin, anchor.transform.position, out RaycastHit hit, anchorLayerMask)
                         || hit.collider.gameObject == anchor.gameObject)
                     {
@@ -92,10 +94,10 @@ namespace TitanAscent.Grapple
             foreach (SurfaceAnchorPoint anchor in candidateTargets)
             {
                 Vector3 toAnchor = anchor.transform.position - aimOrigin;
-                float angle = Vector3.Angle(aimDirection, toAnchor.normalized);
+                float angle    = Vector3.Angle(aimDirection, toAnchor.normalized);
                 float distance = toAnchor.magnitude;
 
-                // Weight angle heavily over distance for aim assist feel
+                // Weight angle heavily over distance for aim-assist feel
                 float score = angle * 2f + distance * 0.1f;
 
                 if (score < bestScore)
@@ -110,13 +112,9 @@ namespace TitanAscent.Grapple
 
         private void UpdateHighlight()
         {
-            // Unhighlight the previous target
             if (lastHighlightedTarget != null && lastHighlightedTarget != currentBestTarget)
-            {
                 lastHighlightedTarget.SetHighlighted(false);
-            }
 
-            // Highlight the new best target
             if (currentBestTarget != null)
             {
                 currentBestTarget.SetHighlighted(true);

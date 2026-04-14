@@ -109,19 +109,25 @@ namespace TitanAscent.Player
         {
             if (!IsAirborne())
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.Log("[ThrusterSystem] Cannot thrust: player is not airborne.");
+#endif
                 return;
             }
 
             if (!HasEnergy)
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.Log("[ThrusterSystem] Cannot thrust: energy depleted.");
+#endif
                 return;
             }
 
             if (IsOnCooldown)
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.Log("[ThrusterSystem] Cannot thrust: on cooldown.");
+#endif
                 return;
             }
 

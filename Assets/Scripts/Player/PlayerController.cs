@@ -16,6 +16,9 @@ namespace TitanAscent.Player
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerController : MonoBehaviour
     {
+        private const float SlideSlopeForce    = 5f;   // Force (N) applied down-slope when sliding
+        private const float GroundCheckRadius  = 0.25f; // SphereCast radius for ground detection
+
         [Header("Rigidbody Settings")]
         [SerializeField] private float mass = 80f;
         [SerializeField] private float drag = 0.5f;
@@ -115,7 +118,7 @@ namespace TitanAscent.Player
             Vector3 origin = groundCheckOrigin != null ? groundCheckOrigin.position : transform.position;
             bool wasGrounded = isGrounded;
 
-            if (Physics.SphereCast(origin, 0.25f, Vector3.down, out RaycastHit hit, groundCheckDistance, groundLayerMask))
+            if (Physics.SphereCast(origin, GroundCheckRadius, Vector3.down, out RaycastHit hit, groundCheckDistance, groundLayerMask))
             {
                 isGrounded = true;
                 groundNormal = hit.normal;
@@ -208,7 +211,7 @@ namespace TitanAscent.Player
             {
                 // Apply slide acceleration down slope
                 Vector3 slideDir = Vector3.ProjectOnPlane(Vector3.down, groundNormal).normalized;
-                rb.AddForce(slideDir * 5f, ForceMode.Force);
+                rb.AddForce(slideDir * SlideSlopeForce, ForceMode.Force);
             }
         }
 
@@ -259,13 +262,8 @@ namespace TitanAscent.Player
 
         private void OnCollisionEnter(Collision collision)
         {
-            // Preserve lateral momentum on surface collision; dampen only the normal component
-            Vector3 normal = collision.contacts[0].normal;
-            Vector3 normalVel = Vector3.Project(velocityLastFrame, -normal);
-            Vector3 tangentVel = velocityLastFrame - normalVel;
-
-            // Allow rigidbody physics to handle the response naturally;
-            // grip system handles additional friction modifications
+            // Rigidbody physics handles the collision response naturally.
+            // GripSystem applies additional surface friction via OnCollisionStay.
         }
     }
 }

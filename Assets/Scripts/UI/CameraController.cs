@@ -56,6 +56,7 @@ namespace TitanAscent.UI
         // Height record upward shift
         private float recordShiftAmount = 0f;
         private bool isSnappingFOVBack = false;
+        private Coroutine snapFOVCoroutine;
 
         // Fall speed tracking
         private float _prevFallDistance = 0f;
@@ -240,8 +241,8 @@ namespace TitanAscent.UI
             shakeTime = 0f;
 
             // Snap FOV back to baseFOV over ~0.5s
-            StopCoroutine("SnapFOVBackCoroutine");
-            StartCoroutine(SnapFOVBackCoroutine());
+            if (snapFOVCoroutine != null) StopCoroutine(snapFOVCoroutine);
+            snapFOVCoroutine = StartCoroutine(SnapFOVBackCoroutine());
         }
 
         private void HandleNewHeightRecord(float newRecord)
@@ -278,6 +279,7 @@ namespace TitanAscent.UI
             currentFOV = baseFOV;
             cam.fieldOfView = baseFOV;
             isSnappingFOVBack = false;
+            snapFOVCoroutine = null;
         }
     }
 }

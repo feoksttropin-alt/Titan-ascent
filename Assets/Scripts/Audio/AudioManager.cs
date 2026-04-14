@@ -27,14 +27,25 @@ namespace TitanAscent.Audio
 
     public class AudioManager : MonoBehaviour
     {
-        // --- Singleton ---
+        // ── Singleton ─────────────────────────────────────────────────────────────
         private static AudioManager _instance;
+
+        /// <summary>
+        /// Returns the AudioManager singleton. Logs a warning (dev builds) if not yet in scene —
+        /// audio calls made before the AudioManager is instantiated are silently ignored.
+        /// </summary>
         public static AudioManager Instance
         {
             get
             {
                 if (_instance == null)
+                {
                     _instance = FindFirstObjectByType<AudioManager>();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    if (_instance == null)
+                        Debug.LogWarning("[AudioManager] No AudioManager found in scene. Audio will be silent.");
+#endif
+                }
                 return _instance;
             }
         }
@@ -54,7 +65,8 @@ namespace TitanAscent.Audio
         private int oneShotPoolIndex = 0;
 
         private Player.PlayerController player;
-        private Grapple.RopeSimulator ropeSimulator;
+        private Grapple.RopeSimulator   ropeSimulator;
+        private float _nextReferenceSearchTime;
 
         private void Awake()
         {
@@ -112,11 +124,16 @@ namespace TitanAscent.Audio
 
         private void Update()
         {
-            // Reacquire references lost after scene changes or late initialization
-            if (player == null)
-                player = FindFirstObjectByType<Player.PlayerController>();
-            if (ropeSimulator == null)
-                ropeSimulator = FindFirstObjectByType<Grapple.RopeSimulator>();
+            // Reacquire references lost after scene changes — throttled to once per second
+            // to avoid paying FindFirstObjectByType cost every frame.
+            if ((player == null || ropeSimulator == null) && Time.time >= _nextReferenceSearchTime)
+            {
+                _nextReferenceSearchTime = Time.time + 1f;
+                if (player == null)
+                    player = FindFirstObjectByType<Player.PlayerController>();
+                if (ropeSimulator == null)
+                    ropeSimulator = FindFirstObjectByType<Grapple.RopeSimulator>();
+            }
 
             if (player != null)
                 UpdateAmbient(player.CurrentHeight);

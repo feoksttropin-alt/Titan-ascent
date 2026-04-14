@@ -42,11 +42,19 @@ namespace TitanAscent.UI
         private Player.ThrusterSystem thrusterSystem;
         private Systems.FallTracker fallTracker;
 
+        // Best-height pulse font sizes
+        private const float BestHeightFontSizeNormal = 18f;
+        private const float BestHeightFontSizePeak   = 22f;
+
         private float displayedHeight;
         private float displayedBestHeight;
         private Color defaultBestHeightColor;
         private Coroutine flashCoroutine;
         private Coroutine bestHeightPulseCoroutine;
+
+        // Timer display cache — only rebuild the string when the value changes
+        private int _lastTimerMinutes = -1;
+        private int _lastTimerSeconds = -1;
 
         private void Awake()
         {
@@ -144,10 +152,17 @@ namespace TitanAscent.UI
         {
             if (gameManager == null || runTimeText == null) return;
 
-            float seconds = gameManager.SessionTime;
-            int minutes = Mathf.FloorToInt(seconds / 60f);
-            int secs    = Mathf.FloorToInt(seconds % 60f);
-            runTimeText.text = $"{minutes:00}:{secs:00}";
+            float elapsed  = gameManager.SessionTime;
+            int minutes    = Mathf.FloorToInt(elapsed / 60f);
+            int secs       = Mathf.FloorToInt(elapsed % 60f);
+
+            // Only rebuild the string when the displayed value changes (once per second)
+            if (minutes != _lastTimerMinutes || secs != _lastTimerSeconds)
+            {
+                _lastTimerMinutes  = minutes;
+                _lastTimerSeconds  = secs;
+                runTimeText.text   = $"{minutes:00}:{secs:00}";
+            }
         }
 
         private void HandleFallCompleted(Systems.FallData data)
@@ -204,14 +219,14 @@ namespace TitanAscent.UI
             {
                 float t = elapsed / bestHeightPulseDuration;
                 float pulse = Mathf.Sin(t * Mathf.PI);
-                bestHeightText.color = Color.Lerp(defaultBestHeightColor, bestHeightPulseColor, pulse);
-                bestHeightText.fontSize = Mathf.Lerp(18f, 22f, pulse);
+                bestHeightText.color    = Color.Lerp(defaultBestHeightColor, bestHeightPulseColor, pulse);
+                bestHeightText.fontSize = Mathf.Lerp(BestHeightFontSizeNormal, BestHeightFontSizePeak, pulse);
                 elapsed += Time.deltaTime;
                 yield return null;
             }
 
-            bestHeightText.color = defaultBestHeightColor;
-            bestHeightText.fontSize = 18f;
+            bestHeightText.color    = defaultBestHeightColor;
+            bestHeightText.fontSize = BestHeightFontSizeNormal;
         }
 
         private string FormatHeight(float height)

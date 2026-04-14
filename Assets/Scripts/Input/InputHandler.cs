@@ -7,7 +7,9 @@ namespace TitanAscent.Input
     /// Centralised input abstraction for Titan Ascent. Wraps all player input behind a clean API
     /// so the rest of the game never touches InputSystem directly.
     /// Singleton — persists across scenes.
+    /// Runs before all gameplay scripts (order -50) so input properties are ready on frame 1.
     /// </summary>
+    [DefaultExecutionOrder(-50)]
     public class InputHandler : MonoBehaviour
     {
         public static InputHandler Instance { get; private set; }

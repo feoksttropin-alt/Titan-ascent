@@ -134,17 +134,25 @@ namespace TitanAscent.Physics
         }
 
         /// <summary>
-        /// Returns the velocity vector recorded at a specific time offset (approximate).
+        /// Returns the velocity vector recorded approximately <paramref name="framesBack"/> samples ago.
+        /// Uses a reusable buffer to avoid per-call heap allocation.
         /// </summary>
         public Vector3 GetVelocityAtOffset(int framesBack)
         {
-            if (velocityHistory.Count == 0) return Vector3.zero;
+            int count = velocityHistory.Count;
+            if (count == 0) return Vector3.zero;
 
-            Vector3[] arr = new Vector3[velocityHistory.Count];
-            velocityHistory.CopyTo(arr, 0);
-            int index = Mathf.Max(0, arr.Length - 1 - framesBack);
-            return arr[index];
+            // Grow the reuse buffer only when the history queue has expanded
+            if (_velocityBuffer == null || _velocityBuffer.Length < count)
+                _velocityBuffer = new Vector3[count];
+
+            velocityHistory.CopyTo(_velocityBuffer, 0);
+            int index = Mathf.Max(0, count - 1 - framesBack);
+            return _velocityBuffer[index];
         }
+
+        // Reusable buffer — re-allocated only when queue grows (rare)
+        private Vector3[] _velocityBuffer;
 
         private void OnCollisionEnter(Collision collision)
         {

@@ -88,21 +88,25 @@ namespace TitanAscent.Systems
     /// <summary>
     /// Lightweight type-safe event bus. Static, no MonoBehaviour.
     /// Thread-safe: copies handler list before invocation.
+    /// Duplicate subscriptions are rejected in O(1) via a parallel HashSet.
     /// </summary>
     public static class EventBus
     {
-        private static readonly Dictionary<Type, List<Delegate>> handlers =
+        // Ordered list for deterministic invocation; HashSet for O(1) duplicate guard.
+        private static readonly Dictionary<Type, List<Delegate>>    handlers =
             new Dictionary<Type, List<Delegate>>();
+        private static readonly Dictionary<Type, HashSet<Delegate>> handlerSets =
+            new Dictionary<Type, HashSet<Delegate>>();
 
         private static readonly object lockObject = new object();
 
         /// <summary>
         /// Subscribe a handler for event type T.
+        /// Duplicate subscriptions are silently ignored in O(1).
         /// </summary>
         public static void Subscribe<T>(Action<T> handler)
         {
-            if (handler == null)
-                return;
+            if (handler == null) return;
 
             Type key = typeof(T);
             lock (lockObject)
@@ -110,10 +114,12 @@ namespace TitanAscent.Systems
                 if (!handlers.TryGetValue(key, out List<Delegate> list))
                 {
                     list = new List<Delegate>();
-                    handlers[key] = list;
+                    handlers[key]    = list;
+                    handlerSets[key] = new HashSet<Delegate>();
                 }
 
-                if (!list.Contains(handler))
+                // O(1) duplicate check via HashSet
+                if (handlerSets[key].Add(handler))
                     list.Add(handler);
             }
         }
@@ -123,20 +129,23 @@ namespace TitanAscent.Systems
         /// </summary>
         public static void Unsubscribe<T>(Action<T> handler)
         {
-            if (handler == null)
-                return;
+            if (handler == null) return;
 
             Type key = typeof(T);
             lock (lockObject)
             {
-                if (handlers.TryGetValue(key, out List<Delegate> list))
+                if (handlers.TryGetValue(key, out List<Delegate> list)
+                    && handlerSets.TryGetValue(key, out HashSet<Delegate> set)
+                    && set.Remove(handler))
+                {
                     list.Remove(handler);
+                }
             }
         }
 
         /// <summary>
         /// Publish an event to all subscribers of type T.
-        /// Handler list is copied before invocation for thread safety.
+        /// Handler list is snapshot-copied before invocation for thread safety.
         /// </summary>
         public static void Publish<T>(T evt)
         {
@@ -164,25 +173,24 @@ namespace TitanAscent.Systems
             }
         }
 
-        /// <summary>
-        /// Remove all subscribers for all event types. Useful on scene reload.
-        /// </summary>
+        /// <summary>Remove all subscribers for all event types. Call on scene reload.</summary>
         public static void Clear()
         {
             lock (lockObject)
             {
                 handlers.Clear();
+                handlerSets.Clear();
             }
         }
 
-        /// <summary>
-        /// Remove all subscribers for a specific event type.
-        /// </summary>
+        /// <summary>Remove all subscribers for a specific event type.</summary>
         public static void Clear<T>()
         {
+            Type key = typeof(T);
             lock (lockObject)
             {
-                handlers.Remove(typeof(T));
+                handlers.Remove(key);
+                handlerSets.Remove(key);
             }
         }
     }
