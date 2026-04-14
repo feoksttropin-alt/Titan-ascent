@@ -41,7 +41,7 @@ jobs:
           UNITY_SERIAL:   ${{ secrets.UNITY_SERIAL }}
         with:
           unityVersion:     auto
-          targetPlatform:   StandaloneLinux64
+          targetPlatform:   NoTarget
           buildMethod:      ValidationBuild.Validate
           allowDirtyBuild:  true
           customParameters: -nographics -batchmode
