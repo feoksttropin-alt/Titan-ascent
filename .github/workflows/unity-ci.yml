@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# Opt in to the Node 24 runner now so the deprecation warning never fires
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 1: Validate that all scripts compile
@@ -35,14 +39,15 @@ jobs:
       - name: Run script validation
         uses: game-ci/unity-builder@v4
         env:
+          UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL:   ${{ secrets.UNITY_SERIAL }}
         with:
-          unityVersion:    auto
-          targetPlatform:  StandaloneLinux64
-          buildMethod:     ValidationBuild.Validate
-          allowDirtyBuild: true
+          unityVersion:     6000.0.26f1
+          targetPlatform:   StandaloneLinux64
+          buildMethod:      ValidationBuild.Validate
+          allowDirtyBuild:  true
+          customParameters: -nographics -batchmode
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2: Build — Windows Standalone (only on pushes to main or dev branches)
@@ -72,14 +77,16 @@ jobs:
       - name: Build project
         uses: game-ci/unity-builder@v4
         env:
+          UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL:   ${{ secrets.UNITY_SERIAL }}
         with:
-          unityVersion:   auto
-          targetPlatform: StandaloneWindows64
-          buildsPath:     build
-          buildName:      TitanAscent
+          unityVersion:     6000.0.26f1
+          targetPlatform:   StandaloneWindows64
+          buildsPath:       build
+          buildName:        TitanAscent
+          allowDirtyBuild:  true
+          customParameters: -nographics -batchmode
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
