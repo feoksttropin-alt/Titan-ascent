@@ -101,7 +101,7 @@ Assets/Scripts/
 
 ### Prerequisites
 
-- **Unity** 6000.0.26f1 (LTS)
+- **Unity** 6000.4.2f1 (LTS)
 - **Git** for cloning the repository
 
 ### Quick Start
@@ -112,7 +112,7 @@ Assets/Scripts/
    cd Titan-ascent
    ```
 
-2. Open in Unity 6000.0.26f1 (LTS)
+2. Open in Unity 6000.4.2f1 (LTS)
 
 3. When prompted, import **TextMeshPro Essentials**
 

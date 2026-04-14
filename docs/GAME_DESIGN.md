@@ -1,7 +1,7 @@
 # Titan Ascent — Game Design Document
 
 **Version:** 1.0  
-**Engine:** Unity 6 LTS (6000.0.26f1)  
+**Engine:** Unity 6 LTS (6000.4.2f1)  
 **Platform:** PC (Steam)  
 **Genre:** Physics-based rage climber / platformer  
 
