@@ -302,6 +302,7 @@ namespace TitanAscent.Grapple
                 attachedAnchor.SetAttached(true);
 
             OnGrappleAttached?.Invoke();
+            TitanAscent.Input.GamepadRumble.Instance?.Play(TitanAscent.Input.GamepadRumble.Profile.GrappleAttach);
         }
 
         public void ReleaseGrapple()
@@ -327,6 +328,7 @@ namespace TitanAscent.Grapple
             currentState = GrappleState.Idle;
 
             OnGrappleReleased?.Invoke();
+            TitanAscent.Input.GamepadRumble.Instance?.Play(TitanAscent.Input.GamepadRumble.Profile.GrappleRelease);
         }
 
         private void ApplySwingForce()

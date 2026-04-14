@@ -38,9 +38,13 @@ namespace TitanAscent.UI
         [SerializeField] private float pitchMin = -40f;
         [SerializeField] private float pitchMax = 80f;
 
+        [Header("Controller Look")]
+        [SerializeField] private float gamepadLookSensitivity = 180f;   // degrees/second at full deflection
+
         private Camera cam;
         private Player.PlayerController playerController;
         private Systems.FallTracker fallTracker;
+        private SettingsManager _settings;
 
         private float currentFOV;
         private float targetFOV;
@@ -67,6 +71,7 @@ namespace TitanAscent.UI
             cam = GetComponent<Camera>();
             playerController = FindFirstObjectByType<Player.PlayerController>();
             fallTracker = FindFirstObjectByType<Systems.FallTracker>();
+            _settings = FindFirstObjectByType<SettingsManager>();
 
             currentFOV = normalFOV;
             targetFOV = normalFOV;
@@ -130,17 +135,30 @@ namespace TitanAscent.UI
 
         private void HandleMouseLook()
         {
-            // Use InputHandler.MouseDelta (New Input System pixel delta) scaled to match
-            // legacy Input.GetAxis("Mouse X/Y") magnitude (~pixels / 20).
             TitanAscent.Input.InputHandler ih = TitanAscent.Input.InputHandler.Instance;
-            Vector2 delta = ih != null ? ih.MouseDelta * 0.05f : Vector2.zero;
 
-            float mouseX = delta.x * mouseSensitivity;
-            float mouseY = delta.y * mouseSensitivity;
+            float sensitivityScale = _settings != null ? _settings.MouseSensitivity : 1f;
+            bool  invertY          = _settings != null && _settings.InvertY;
 
-            yaw += mouseX;
-            pitch -= mouseY;
-            pitch = Mathf.Clamp(pitch, pitchMin, pitchMax);
+            Vector2 lookDelta;
+            if (ih != null && ih.IsGamepadActive && ih.GamepadLookDelta.sqrMagnitude > 0.001f)
+            {
+                // Right-stick: magnitude preserved (0–1), scale to degrees/second
+                lookDelta = ih.GamepadLookDelta * (gamepadLookSensitivity * Time.deltaTime);
+            }
+            else
+            {
+                // Mouse: pixel delta scaled to match legacy Input.GetAxis magnitude (~pixels / 20)
+                lookDelta = ih != null ? ih.MouseDelta * 0.05f : Vector2.zero;
+            }
+
+            float deltaX = lookDelta.x * mouseSensitivity * sensitivityScale;
+            float deltaY = lookDelta.y * mouseSensitivity * sensitivityScale;
+            if (invertY) deltaY = -deltaY;
+
+            yaw   += deltaX;
+            pitch -= deltaY;
+            pitch  = Mathf.Clamp(pitch, pitchMin, pitchMax);
         }
 
         private void FollowTarget()

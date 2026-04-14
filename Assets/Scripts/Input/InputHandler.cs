@@ -71,9 +71,37 @@ namespace TitanAscent.Input
 
         /// <summary>
         /// Raw mouse delta in screen pixels per frame, suitable for camera look.
-        /// On gamepad this stays zero — use AimDirection for analogue look instead.
+        /// On gamepad this stays zero — use <see cref="GamepadLookDelta"/> instead.
         /// </summary>
         public Vector2 MouseDelta { get; private set; }
+
+        /// <summary>
+        /// Right-stick value with magnitude preserved (0–1 range).
+        /// Use for gamepad camera look; scale by sensitivity × Time.deltaTime in the camera script.
+        /// Zero when no gamepad is connected or stick is in dead zone.
+        /// </summary>
+        public Vector2 GamepadLookDelta { get; private set; }
+
+        /// <summary>
+        /// True during any frame in which a gamepad provided at least one non-zero input.
+        /// Useful for switching between mouse-look and stick-look modes dynamically.
+        /// </summary>
+        public bool IsGamepadActive { get; private set; }
+
+        // UI navigation — driven by D-pad (primary) and left stick (fallback).
+        // Fire once per press to avoid held-down repeat issues in menus.
+        /// <summary>D-pad up / left-stick up (one-shot per press).</summary>
+        public bool UINavigateUp    { get; private set; }
+        /// <summary>D-pad down / left-stick down (one-shot per press).</summary>
+        public bool UINavigateDown  { get; private set; }
+        /// <summary>D-pad left / left-stick left (one-shot per press).</summary>
+        public bool UINavigateLeft  { get; private set; }
+        /// <summary>D-pad right / left-stick right (one-shot per press).</summary>
+        public bool UINavigateRight { get; private set; }
+        /// <summary>A / South button — confirm / select in menus.</summary>
+        public bool UIConfirm       { get; private set; }
+        /// <summary>B / East button — cancel / back in menus.</summary>
+        public bool UICancel        { get; private set; }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         /// <summary>Backtick key — editor / dev builds only.</summary>
@@ -192,14 +220,23 @@ namespace TitanAscent.Input
 
         private void ReadGamepad()
         {
-            // Gamepad.current is null when no controller is connected — keyboard/mouse values are preserved.
+            // Reset per-frame gamepad-only properties so they don't linger when no pad is connected.
+            GamepadLookDelta = Vector2.zero;
+            IsGamepadActive  = false;
+            UINavigateUp = UINavigateDown = UINavigateLeft = UINavigateRight = false;
+            UIConfirm    = UICancel = false;
+
             Gamepad gamepad = Gamepad.current;
             if (gamepad == null) return;
 
-            // --- Aim direction (right stick) ---
+            // --- Aim direction + look delta (right stick) ---
             Vector2 rightStick = gamepad.rightStick.ReadValue();
             if (rightStick.sqrMagnitude > 0.01f)
-                AimDirection = rightStick.normalized;
+            {
+                AimDirection     = rightStick.normalized;
+                GamepadLookDelta = rightStick;   // magnitude preserved for sensitivity scaling
+                IsGamepadActive  = true;
+            }
 
             // --- Grapple (RightTrigger) — override keyboard/mouse values when gamepad is active ---
             GrappleFire    = gamepad.rightTrigger.wasPressedThisFrame;
@@ -212,6 +249,17 @@ namespace TitanAscent.Input
             ThrusterDown  = leftStick.y < -0.2f;
             ThrusterLeft  = leftStick.x < -0.2f;
             ThrusterRight = leftStick.x >  0.2f;
+            if (leftStick.sqrMagnitude > 0.04f) IsGamepadActive = true;
+
+            // --- UI navigation (D-pad primary, left stick fallback) ---
+            // D-pad
+            UINavigateUp    = gamepad.dpad.up.wasPressedThisFrame;
+            UINavigateDown  = gamepad.dpad.down.wasPressedThisFrame;
+            UINavigateLeft  = gamepad.dpad.left.wasPressedThisFrame;
+            UINavigateRight = gamepad.dpad.right.wasPressedThisFrame;
+            // Confirm / Cancel
+            UIConfirm = gamepad.buttonSouth.wasPressedThisFrame;
+            UICancel  = gamepad.buttonEast.wasPressedThisFrame;
 
             // --- Secondary grapple (LeftShoulder on gamepad) ---
             SecondaryGrappleFire = SecondaryGrappleFire || gamepad.leftShoulder.wasPressedThisFrame;

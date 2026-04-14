@@ -136,6 +136,10 @@ namespace TitanAscent.Player
                 velocityBeforeLanding = velocityLastFrame;
                 OnLanded?.Invoke();
                 lastGroundedTime = Time.time;
+
+                // Haptic feedback on hard landings (impact speed > 8 m/s)
+                if (velocityBeforeLanding.magnitude > 8f)
+                    TitanAscent.Input.GamepadRumble.Instance?.Play(TitanAscent.Input.GamepadRumble.Profile.HardLanding);
             }
             else if (wasGrounded && !isGrounded)
             {

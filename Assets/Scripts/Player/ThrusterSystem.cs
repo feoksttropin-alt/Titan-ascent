@@ -140,6 +140,9 @@ namespace TitanAscent.Player
             // Apply physics impulse
             rb.AddForce(direction.normalized * thrustForce, ForceMode.Impulse);
 
+            // Haptic feedback
+            TitanAscent.Input.GamepadRumble.Instance?.Play(TitanAscent.Input.GamepadRumble.Profile.ThrustBurst);
+
             // Fire event
             OnThrust?.Invoke(direction);
 
