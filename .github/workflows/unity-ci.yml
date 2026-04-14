@@ -2,13 +2,15 @@ name: Unity CI
 
 on:
   push:
-    branches: [ "main", "claude/titan-ascent-development-ewfJA" ]
+    branches:
+      - main
+      - "claude/**"
   pull_request:
     branches: [ "main" ]
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
-  # Job 1: Validate that all scripts compile (no Unity license required)
+  # Job 1: Validate that all scripts compile
   # ─────────────────────────────────────────────────────────────────────────────
   validate:
     name: Script Validation
@@ -36,15 +38,16 @@ jobs:
           UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL:   ${{ secrets.UNITY_SERIAL }}
         with:
-          unityVersion:     6000.4.2f1
+          unityVersion:     auto
           targetPlatform:   StandaloneLinux64
           buildMethod:      ValidationBuild.Validate
           allowDirtyBuild:  true
           customParameters: -nographics -batchmode
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # Job 2: Build — Windows Standalone (only on pushes to main or dev branch)
+  # Job 2: Build — Windows Standalone (only on pushes to main or dev branches)
   # ─────────────────────────────────────────────────────────────────────────────
   build-windows:
     name: Build (Windows Standalone)
@@ -74,11 +77,12 @@ jobs:
           UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL:   ${{ secrets.UNITY_SERIAL }}
         with:
-          unityVersion:    6000.4.2f1
-          targetPlatform:  StandaloneWindows64
-          buildsPath:      build
-          buildName:       TitanAscent
+          unityVersion:   auto
+          targetPlatform: StandaloneWindows64
+          buildsPath:     build
+          buildName:      TitanAscent
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
