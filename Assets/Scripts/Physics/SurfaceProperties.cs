@@ -9,7 +9,8 @@ namespace TitanAscent.Environment
         BoneRidge,
         CrystalSurface,
         MuscleSkin,
-        WingMembrane
+        WingMembrane,
+        None
     }
 
     [CreateAssetMenu(fileName = "SurfaceProperties", menuName = "TitanAscent/Surface Properties")]
