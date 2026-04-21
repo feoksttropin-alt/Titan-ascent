@@ -55,6 +55,19 @@ namespace TitanAscent.UI
             }
         }
 
+        public void SetFontSize(float size)
+        {
+            fontSize = size;
+            if (subtitleText != null)
+                subtitleText.fontSize = size;
+        }
+
+        public void SetBackgroundVisible(bool visible)
+        {
+            if (backgroundPanel != null)
+                backgroundPanel.enabled = visible;
+        }
+
         public void ClearQueue()
         {
             messageQueue.Clear();

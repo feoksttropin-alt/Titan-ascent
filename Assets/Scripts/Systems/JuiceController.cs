@@ -25,6 +25,7 @@ namespace TitanAscent.Systems
         private float shakeTimer = 0f;
         private Vector3 cameraOriginOffset;
         private float originalFOV;
+        private bool reduceMotion = false;
 
         private void Awake()
         {
@@ -48,6 +49,8 @@ namespace TitanAscent.Systems
         }
 
         // ── Public API ─────────────────────────────────────────────────
+
+        public void SetReduceMotionEnabled(bool enabled) => reduceMotion = enabled;
 
         public void TriggerGrappleImpact()
         {
@@ -102,7 +105,7 @@ namespace TitanAscent.Systems
 
         private void StartShake(float magnitude, float duration)
         {
-            if (mainCamera == null) return;
+            if (mainCamera == null || reduceMotion) return;
             cameraOriginOffset = mainCamera.transform.localPosition;
             shakeIntensity = magnitude;
             shakeDuration = duration;
