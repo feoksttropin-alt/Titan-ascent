@@ -270,7 +270,7 @@ namespace TitanAscent.Scene
             CheckRequired<Systems.NarrationSystem>(missing, "NarrationSystem");
             CheckRequired<Systems.JuiceController>(missing, "JuiceController");
             CheckRequired<Systems.SaveManager>(missing, "SaveManager");
-            CheckRequired<Systems.ZoneManager>(missing, "ZoneManager");
+            CheckRequired<Environment.ZoneManager>(missing, "ZoneManager");
             CheckRequired<Environment.WindSystem>(missing, "WindSystem");
             CheckRequired<Environment.AtmosphereController>(missing, "AtmosphereController");
             CheckRequired<SceneBootstrapper>(missing, "SceneBootstrapper");
