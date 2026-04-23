@@ -6,6 +6,8 @@ using TitanAscent.Systems;
 using TitanAscent.Player;
 using TitanAscent.Audio;
 using TitanAscent.UI;
+using TitanAscent.Input;
+using TitanAscent.Physics;
 
 namespace TitanAscent.Scene
 {

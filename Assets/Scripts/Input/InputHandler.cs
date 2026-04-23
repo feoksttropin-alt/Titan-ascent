@@ -214,13 +214,13 @@ namespace TitanAscent.Input
             // --- Secondary grapple (LeftShoulder on gamepad) ---
             SecondaryGrappleFire = SecondaryGrappleFire || gamepad.leftShoulder.wasPressedThisFrame;
 
-            // --- Grip (RightBumper) ---
-            GripDown     = GripDown     || gamepad.rightBumper.wasPressedThisFrame;
-            GripHeld     = GripHeld     || gamepad.rightBumper.isPressed;
-            GripReleased = GripReleased || gamepad.rightBumper.wasReleasedThisFrame;
+            // --- Grip (RightShoulder) ---
+            GripDown     = GripDown     || gamepad.rightShoulder.wasPressedThisFrame;
+            GripHeld     = GripHeld     || gamepad.rightShoulder.isPressed;
+            GripReleased = GripReleased || gamepad.rightShoulder.wasReleasedThisFrame;
 
             // --- Rope length ---
-            RetractRope = gamepad.leftBumper.isPressed;
+            RetractRope = gamepad.leftShoulder.isPressed;
             ExtendRope  = gamepad.leftTrigger.IsActuated(0.15f);
 
             // --- Pause (Start / Menu button) ---

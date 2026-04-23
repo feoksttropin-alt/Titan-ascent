@@ -162,7 +162,7 @@ namespace TitanAscent.Systems
         private void TrackParticles()
         {
             int total = 0;
-            ParticleSystem[] systems = FindObjectsOfType<ParticleSystem>();
+            ParticleSystem[] systems = FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None);
             foreach (var ps in systems)
                 total += ps.particleCount;
 

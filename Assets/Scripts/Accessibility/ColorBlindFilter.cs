@@ -76,7 +76,7 @@ namespace TitanAscent.Accessibility
         private void RefreshAnchorCache()
         {
             anchorCache.Clear();
-            SurfaceAnchorPoint[] found = FindObjectsOfType<SurfaceAnchorPoint>();
+            SurfaceAnchorPoint[] found = FindObjectsByType<SurfaceAnchorPoint>(FindObjectsSortMode.None);
             anchorCache.AddRange(found);
         }
 

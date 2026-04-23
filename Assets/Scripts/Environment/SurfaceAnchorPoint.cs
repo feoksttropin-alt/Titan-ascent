@@ -74,6 +74,23 @@ namespace TitanAscent.Environment
             holdStrength = Mathf.Clamp01(strength);
         }
 
+        public void SetHighContrastMode(bool enabled)
+        {
+            if (enabled)
+            {
+                idleColor      = new Color(0.50f, 0.50f, 0.50f, 0.70f);
+                highlightColor = new Color(1.00f, 1.00f, 0.00f, 1.00f);
+                attachedColor  = new Color(0.00f, 1.00f, 1.00f, 1.00f);
+            }
+            else
+            {
+                idleColor      = new Color(0.50f, 0.50f, 1.00f, 0.50f);
+                highlightColor = new Color(0.00f, 1.00f, 0.50f, 0.80f);
+                attachedColor  = new Color(1.00f, 0.80f, 0.00f, 1.00f);
+            }
+            UpdateVisuals();
+        }
+
         public void SetHighlighted(bool highlighted)
         {
             isHighlighted = highlighted;

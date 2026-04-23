@@ -127,7 +127,7 @@ namespace TitanAscent.UI
                 ? playerTransform.position
                 : (mainCamera != null ? mainCamera.transform.position : Vector3.zero);
 
-            SurfaceAnchorPoint[] all = FindObjectsOfType<SurfaceAnchorPoint>();
+            SurfaceAnchorPoint[] all = FindObjectsByType<SurfaceAnchorPoint>(FindObjectsSortMode.None);
             foreach (SurfaceAnchorPoint anchor in all)
             {
                 float dist = Vector3.Distance(origin, anchor.transform.position);

@@ -132,7 +132,7 @@ namespace TitanAscent.Debug
 
         private void RefreshAnchors()
         {
-            anchors = FindObjectsOfType<SurfaceAnchorPoint>();
+            anchors = FindObjectsByType<SurfaceAnchorPoint>(FindObjectsSortMode.None);
             connectivityData = new AnchorConnectivity[anchors.Length];
 
             for (int i = 0; i < anchors.Length; i++)

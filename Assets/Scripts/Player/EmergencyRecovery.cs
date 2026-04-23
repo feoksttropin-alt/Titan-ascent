@@ -52,7 +52,7 @@ namespace TitanAscent.Player
         private void OnEnable()
         {
             if (fallTracker != null)
-                fallTracker.OnFallThresholdCrossed += HandleFallThreshold;
+                fallTracker.OnFallDistanceUpdate.AddListener(HandleFallThreshold);
 
             if (grappleController != null)
                 grappleController.OnGrappleAttached.AddListener(HandleGrappleUsed);
@@ -61,7 +61,7 @@ namespace TitanAscent.Player
         private void OnDisable()
         {
             if (fallTracker != null)
-                fallTracker.OnFallThresholdCrossed -= HandleFallThreshold;
+                fallTracker.OnFallDistanceUpdate.RemoveListener(HandleFallThreshold);
 
             if (grappleController != null)
                 grappleController.OnGrappleAttached.RemoveListener(HandleGrappleUsed);

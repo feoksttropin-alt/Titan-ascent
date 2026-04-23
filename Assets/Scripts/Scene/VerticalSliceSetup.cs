@@ -270,20 +270,20 @@ namespace TitanAscent.Scene
             CheckRequired<Systems.NarrationSystem>(missing, "NarrationSystem");
             CheckRequired<Systems.JuiceController>(missing, "JuiceController");
             CheckRequired<Systems.SaveManager>(missing, "SaveManager");
-            CheckRequired<Systems.ZoneManager>(missing, "ZoneManager");
+            CheckRequired<Environment.ZoneManager>(missing, "ZoneManager");
             CheckRequired<Environment.WindSystem>(missing, "WindSystem");
             CheckRequired<Environment.AtmosphereController>(missing, "AtmosphereController");
             CheckRequired<SceneBootstrapper>(missing, "SceneBootstrapper");
 
             // FallFunnel — at least 1
-            FallFunnel[] funnels = FindObjectsOfType<FallFunnel>();
+            FallFunnel[] funnels = FindObjectsByType<FallFunnel>(FindObjectsSortMode.None);
             if (funnels.Length == 0)
                 missing.Add("FallFunnel (at least 1 required)");
             else if (funnels.Length < 5)
                 warnings.Add($"Only {funnels.Length} FallFunnel(s) found; 1 per fall-risk section recommended (5+).");
 
             // LandmarkObject — at least 1
-            LandmarkObject[] landmarks = FindObjectsOfType<LandmarkObject>();
+            LandmarkObject[] landmarks = FindObjectsByType<LandmarkObject>(FindObjectsSortMode.None);
             if (landmarks.Length == 0)
                 missing.Add("LandmarkObject (at least 1 required)");
             else
@@ -297,7 +297,7 @@ namespace TitanAscent.Scene
             }
 
             // SurfaceAnchorPoints — validate density approximately
-            Environment.SurfaceAnchorPoint[] anchors = FindObjectsOfType<Environment.SurfaceAnchorPoint>();
+            Environment.SurfaceAnchorPoint[] anchors = FindObjectsByType<Environment.SurfaceAnchorPoint>(FindObjectsSortMode.None);
             int totalRequiredAnchors = 0;
             foreach (var s in SliceSections)
                 totalRequiredAnchors += Mathf.CeilToInt((s.heightEnd - s.heightStart) / 100f * s.anchorDensity);

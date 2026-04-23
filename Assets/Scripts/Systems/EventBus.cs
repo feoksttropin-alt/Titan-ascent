@@ -81,6 +81,31 @@ namespace TitanAscent.Systems
         public float duration;
     }
 
+    public struct PlayerDamagedEvent
+    {
+        public float damage;
+        public float healthRemaining;
+        public string source; // "fall", "impact", etc.
+    }
+
+    public struct PlayerDeathEvent
+    {
+        public float heightAtDeath;
+        public string cause;
+    }
+
+    public struct PlayerRespawnedEvent
+    {
+        public Vector3 respawnPosition;
+        public float healthRestored;
+    }
+
+    public struct CheckpointReachedEvent
+    {
+        public float checkpointHeight;
+        public int   checkpointIndex;
+    }
+
     // ---------------------------------------------------------------------------
     // Event Bus
     // ---------------------------------------------------------------------------

@@ -138,7 +138,7 @@ namespace TitanAscent.Grapple
         {
             // Initial conditions: player's current position and velocity
             Vector3 pos = playerRb != null ? playerRb.position : transform.position;
-            Vector3 vel = playerRb != null ? playerRb.velocity : Vector3.zero;
+            Vector3 vel = playerRb != null ? playerRb.linearVelocity : Vector3.zero;
 
             float ropeLength = Vector3.Distance(pos, anchor);
             ropeLength = Mathf.Max(ropeLength, 0.5f);

@@ -189,7 +189,7 @@ namespace TitanAscent.Systems
         [MenuItem("TitanAscent/Increment Build Version")]
         private static void IncrementBuildVersion()
         {
-            BuildVersionManager[] found = FindObjectsOfType<BuildVersionManager>();
+            BuildVersionManager[] found = FindObjectsByType<BuildVersionManager>(FindObjectsSortMode.None);
             BuildVersionManager target = found.Length > 0 ? found[0] : null;
 
             if (target == null)

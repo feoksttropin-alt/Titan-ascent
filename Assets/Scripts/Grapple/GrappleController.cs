@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
 using TitanAscent.Systems;
+using TitanAscent.Environment;
 
 namespace TitanAscent.Grapple
 {
