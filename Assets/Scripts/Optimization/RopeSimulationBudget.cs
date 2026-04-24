@@ -189,18 +189,8 @@ namespace TitanAscent.Optimization
 
         private void ApplySegmentCount(int count)
         {
-            // RopeSimulator does not expose a direct SetSegmentCount API because
-            // changing it at runtime requires re-initialising the segment arrays.
-            // We request the change via the component's SerializeField accessor
-            // through the available public API (SetLength triggers a re-distribution
-            // proportional to current length, which is the safest runtime operation).
-            // A proper SetSegmentCount method would be the preferred long-term approach.
-
-            // For now, record the desired count so external tools can read it, and
-            // log a request for the RopeSimulator to adapt. The RopeSimulator can
-            // be extended with a SetSegmentCount(int) method and called here.
-            UnityEngine.Debug.Log($"[RopeSimulationBudget] Requested segment count: {count}. " +
-                "Add RopeSimulator.SetSegmentCount(int) to apply dynamically.");
+            _ropeSimulator.SetSegmentCount(count);
+            UnityEngine.Debug.Log($"[RopeSimulationBudget] Applied segment count: {count}.");
         }
     }
 }

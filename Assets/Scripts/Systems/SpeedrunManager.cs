@@ -214,12 +214,13 @@ namespace TitanAscent.Systems
         public void EndSpeedrun(bool completed)
         {
             if (!isRunActive) return;
+            float finalTime = GetCurrentTime(); // capture before flag change
             isRunActive = false;
 
             if (completed)
             {
                 SaveBeatenPBs();
-                Debug.Log($"[SpeedrunManager] Run completed in {GetFormattedTime(GetCurrentTime())}");
+                Debug.Log($"[SpeedrunManager] Run completed in {GetFormattedTime(finalTime)}");
             }
             else
             {

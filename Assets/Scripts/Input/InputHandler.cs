@@ -224,9 +224,7 @@ namespace TitanAscent.Input
             ExtendRope  = gamepad.leftTrigger.IsActuated(0.15f);
 
             // --- Pause (Start / Menu button) ---
-            bool startCurrently = gamepad.startButton.isPressed;
-            if (startCurrently && !_pausePressedLastFrame) Pause = true;
-            _pausePressedLastFrame = startCurrently || _pausePressedLastFrame;
+            if (gamepad.startButton.wasPressedThisFrame) Pause = true;
         }
 
         // -----------------------------------------------------------------------

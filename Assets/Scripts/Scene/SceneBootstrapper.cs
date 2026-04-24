@@ -21,6 +21,9 @@ namespace TitanAscent.Scene
         [SerializeField] private GrappleController grapple;
         [SerializeField] private EmergencyRecovery emergencyRecovery;
 
+        private System.Action<FallData> _onFallCompletedJuice;
+        private System.Action<float>    _onNewHeightRecordJuice;
+
         private void Awake()
         {
             ResolveReferences();
@@ -75,8 +78,10 @@ namespace TitanAscent.Scene
 
             if (juice != null)
             {
-                fallTracker.OnFallCompleted.AddListener(data => juice.TriggerHardLanding(data.distance));
-                fallTracker.OnNewHeightRecord.AddListener(_ => juice.TriggerNewRecord());
+                _onFallCompletedJuice    = data => juice.TriggerHardLanding(data.distance);
+                _onNewHeightRecordJuice  = _    => juice.TriggerNewRecord();
+                fallTracker.OnFallCompleted.AddListener(_onFallCompletedJuice);
+                fallTracker.OnNewHeightRecord.AddListener(_onNewHeightRecordJuice);
             }
 
             if (emergencyRecovery != null)
@@ -94,8 +99,16 @@ namespace TitanAscent.Scene
             if (fallTracker == null) return;
             if (narration != null)
                 fallTracker.OnFallCompleted.RemoveListener(narration.TriggerForFall);
+            if (_onFallCompletedJuice != null)
+                fallTracker.OnFallCompleted.RemoveListener(_onFallCompletedJuice);
+            if (_onNewHeightRecordJuice != null)
+                fallTracker.OnNewHeightRecord.RemoveListener(_onNewHeightRecordJuice);
             if (emergencyRecovery != null)
                 fallTracker.OnEmergencyWindowOpen.RemoveListener(emergencyRecovery.ActivateWindow);
+            if (grapple != null && juice != null)
+                grapple.OnGrappleAttached.RemoveListener(juice.TriggerGrappleImpact);
+            if (gameManager != null && juice != null)
+                gameManager.OnVictory.RemoveListener(juice.TriggerVictory);
         }
 
         private void OnDestroy()

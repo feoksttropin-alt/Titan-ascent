@@ -82,7 +82,7 @@ namespace TitanAscent.Systems
         public ChallengeModifier GenerateDailyModifiers()
         {
             UnityEngine.Random.InitState(DailySeed);
-            int roll = UnityEngine.Random.Range(0, 7); // 0-6 maps to flag combinations
+            int roll = UnityEngine.Random.Range(0, 8); // 0-7 maps to all valid flag combinations
             IsDaily = true;
             return (ChallengeModifier)roll;
         }

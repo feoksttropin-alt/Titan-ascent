@@ -98,6 +98,12 @@ namespace TitanAscent.UI
 
         private void OnDestroy()
         {
+            if (victoryPlayAgainButton  != null) victoryPlayAgainButton.onClick.RemoveListener(OnPlayAgainClicked);
+            if (victoryMainMenuButton   != null) victoryMainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
+            if (victoryLeaderboardButton!= null) victoryLeaderboardButton.onClick.RemoveListener(OnLeaderboardClicked);
+            if (fallTryAgainButton      != null) fallTryAgainButton.onClick.RemoveListener(OnPlayAgainClicked);
+            if (fallMainMenuButton      != null) fallMainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
+
             if (gameManager != null)
             {
                 gameManager.OnVictory.RemoveListener(HandleVictory);
@@ -274,20 +280,17 @@ namespace TitanAscent.UI
             foreach (Transform child in panel.transform)
                 children.Add(child);
 
-            // Hide all children initially
+            // Hide all children initially; track dynamically added CanvasGroups for cleanup
+            var addedGroups = new List<CanvasGroup>();
             foreach (Transform child in children)
             {
                 CanvasGroup cg = child.GetComponent<CanvasGroup>();
-                if (cg != null)
+                if (cg == null)
                 {
-                    cg.alpha = 0f;
-                }
-                else
-                {
-                    // Add a temporary CanvasGroup
                     cg = child.gameObject.AddComponent<CanvasGroup>();
-                    cg.alpha = 0f;
+                    addedGroups.Add(cg);
                 }
+                cg.alpha = 0f;
             }
 
             // Special handling for the victory header — scale up dramatically
@@ -297,7 +300,6 @@ namespace TitanAscent.UI
             }
 
             // Reveal staggered
-            int index = 0;
             foreach (Transform child in children)
             {
                 yield return new WaitForSecondsRealtime(elementRevealDelay);
@@ -314,9 +316,11 @@ namespace TitanAscent.UI
                 {
                     yield return StartCoroutine(FadeInElement(cg));
                 }
-
-                index++;
             }
+
+            // Remove the CanvasGroups we added so they don't accumulate across multiple shows
+            foreach (CanvasGroup cg in addedGroups)
+                if (cg != null) Destroy(cg);
         }
 
         private IEnumerator ScaleInElement(Transform t, CanvasGroup cg)

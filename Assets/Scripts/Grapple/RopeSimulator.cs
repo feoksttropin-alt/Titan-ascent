@@ -213,6 +213,15 @@ namespace TitanAscent.Grapple
             return currentTension;
         }
 
+        public void SetSegmentCount(int count)
+        {
+            count = Mathf.Clamp(count, 2, 64);
+            if (count == segmentCount) return;
+            segmentCount = count;
+            InitializeSegments();
+            lineRenderer.positionCount = segmentCount;
+        }
+
         public void Detach()
         {
             isAttached = false;

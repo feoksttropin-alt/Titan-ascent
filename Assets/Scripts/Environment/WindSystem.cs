@@ -130,7 +130,7 @@ namespace TitanAscent.Environment
                 if (lateralDist <= zone.width)
                 {
                     float falloff = 1f - (lateralDist / zone.width);
-                    float noiseVal = Mathf.PerlinNoise(Time.time * 0.5f, zone.zoneName.GetHashCode() * 0.01f) * 2f - 1f;
+                    float noiseVal = Mathf.PerlinNoise(Time.time * 0.5f, GetZoneOffset(zone.zoneName)) * 2f - 1f;
                     float turbStrength = zone.strength * zone.turbulence * noiseVal;
                     total += zone.direction.normalized * (zone.strength + turbStrength) * falloff;
                 }
@@ -150,6 +150,14 @@ namespace TitanAscent.Environment
         public float GetWindStrengthAtAltitude(float altitude)
         {
             return CalculateGlobalWind(altitude).magnitude;
+        }
+
+        private static float GetZoneOffset(string zoneName)
+        {
+            int hash = 17;
+            foreach (char c in zoneName)
+                hash = hash * 31 + c;
+            return (hash & 0x7FFFFFFF) * 0.001f;
         }
 
         private void OnDrawGizmosSelected()

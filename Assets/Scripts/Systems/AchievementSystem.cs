@@ -135,6 +135,9 @@ namespace TitanAscent.Systems
             isSecret = true
         };
 
+        private static readonly SurfaceType[] AllSurfaceTypes =
+            (SurfaceType[])Enum.GetValues(typeof(SurfaceType));
+
         // ── Required event-driven achievements ──────────────────────────────────
         public static readonly Achievement A_SummitReached = new Achievement
         {
@@ -260,7 +263,7 @@ namespace TitanAscent.Systems
                 ft.OnFallCompleted.AddListener(HandleFallCompleted);
             }
 
-            eventsSubscribed = (gm != null || ft != null);
+            eventsSubscribed = (gm != null && ft != null);
         }
 
         private void UnsubscribeFromGameEvents()
@@ -441,7 +444,7 @@ namespace TitanAscent.Systems
             if (snapshot.surfacesGrappled != null)
             {
                 bool hasAll = true;
-                foreach (SurfaceType st in Enum.GetValues(typeof(SurfaceType)))
+                foreach (SurfaceType st in AllSurfaceTypes)
                 {
                     if (!snapshot.surfacesGrappled.Contains(st)) { hasAll = false; break; }
                 }
