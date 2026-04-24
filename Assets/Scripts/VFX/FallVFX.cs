@@ -114,9 +114,8 @@ namespace TitanAscent.VFX
 
         private void HandleFallDistanceUpdate(float distance)
         {
-            isFalling       = true;
+            isFalling           = true;
             currentFallDistance = distance;
-            fovPulseFired   = fovPulseFired && (distance >= fovPulseStartFall);
         }
 
         private void HandleFallCompleted(FallData data)
