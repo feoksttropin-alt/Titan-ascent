@@ -152,7 +152,7 @@ namespace TitanAscent.UI
 
         private void HandleFallCompleted(Systems.FallData data)
         {
-            if (fallFlashCoroutine != null) StopCoroutine(fallFlashCoroutine);
+            if (flashCoroutine != null) StopCoroutine(flashCoroutine);
             flashCoroutine = StartCoroutine(FlashFallOverlay());
         }
 
