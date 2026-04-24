@@ -71,6 +71,10 @@ namespace TitanAscent.Systems
         // Fall tracking for step 7
         private float fallStartHeight;
         private bool longFallActive;
+        private Coroutine _watchFallCoroutine;
+
+        // Cached player reference — avoids FindFirstObjectByType every Update frame
+        private Player.PlayerController _cachedPlayer;
 
         // ------------------------------------------------------------------
         // Lifecycle
@@ -78,7 +82,8 @@ namespace TitanAscent.Systems
 
         private void Awake()
         {
-            saveManager = FindFirstObjectByType<SaveManager>();
+            saveManager   = FindFirstObjectByType<SaveManager>();
+            _cachedPlayer = FindFirstObjectByType<Player.PlayerController>();
         }
 
         private void Start()
@@ -226,7 +231,7 @@ namespace TitanAscent.Systems
 
         private void CheckDismissCondition()
         {
-            Player.PlayerController player = FindFirstObjectByType<Player.PlayerController>();
+            Player.PlayerController player = _cachedPlayer;
             float height = player != null ? player.transform.position.y : 0f;
 
             switch ((TutorialStepId)currentStep)
@@ -338,8 +343,7 @@ namespace TitanAscent.Systems
 
             if (currentStep == (int)TutorialStepId.ReelIn && !stepActive)
             {
-                Player.PlayerController player = FindFirstObjectByType<Player.PlayerController>();
-                reelInStartPos = player != null ? player.transform.position : Vector3.zero;
+                reelInStartPos = _cachedPlayer != null ? _cachedPlayer.transform.position : Vector3.zero;
 
                 ShowStep("HOLD SHIFT TO REEL IN",
                          "Hold SHIFT to pull yourself toward the anchor.\nReel in at least 5 metres to continue.",
@@ -361,14 +365,21 @@ namespace TitanAscent.Systems
             isAirborne       = true;
             airborneStartTime = Time.time;
 
-            // Step 6: only trigger on fall > 50m
-            StartCoroutine(WatchForLongFall());
+            // Cancel any previous fall-watch coroutine before starting a new one
+            if (_watchFallCoroutine != null)
+                StopCoroutine(_watchFallCoroutine);
+            _watchFallCoroutine = StartCoroutine(WatchForLongFall());
         }
 
         private void OnFallEnded(FallEndedEvent evt)
         {
-            isAirborne      = false;
-            longFallActive  = false;
+            if (_watchFallCoroutine != null)
+            {
+                StopCoroutine(_watchFallCoroutine);
+                _watchFallCoroutine = null;
+            }
+            isAirborne     = false;
+            longFallActive = false;
 
             if (currentStep == (int)TutorialStepId.EmergencyReGrapple && stepActive)
                 DismissCurrentStep();
@@ -389,10 +400,9 @@ namespace TitanAscent.Systems
             // Keep watching to see if this turns into a 50m fall
             while (isAirborne)
             {
-                Player.PlayerController player = FindFirstObjectByType<Player.PlayerController>();
-                if (player != null)
+                if (_cachedPlayer != null)
                 {
-                    float fallen = fallStartHeight - player.transform.position.y;
+                    float fallen = fallStartHeight - _cachedPlayer.transform.position.y;
                     if (fallen >= 50f && !longFallActive)
                     {
                         longFallActive = true;

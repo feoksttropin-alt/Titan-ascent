@@ -29,6 +29,10 @@ namespace TitanAscent.Systems
         [SerializeField] private Player.PlayerHealth  playerHealth;
         [SerializeField] private CheckpointManager    checkpointManager;
 
+        [Header("Height Milestones")]
+        [SerializeField] private float nearSummitHeight = 9500f;
+        [SerializeField] private float summitHeight     = 10000f;
+
         [Header("Events")]
         public UnityEvent<GameState> OnGameStateChanged;
         public UnityEvent OnClimbStarted;
@@ -101,15 +105,13 @@ namespace TitanAscent.Systems
             if (fallTracker != null)
                 currentHeight = fallTracker.transform.position.y;
 
-            // Near summit trigger (within 500m of 10000m)
-            if (!nearSummitNotified && currentHeight >= 9500f)
+            if (!nearSummitNotified && currentHeight >= nearSummitHeight)
             {
                 nearSummitNotified = true;
                 narration?.TriggerNearSummit();
             }
 
-            // Victory check
-            if (currentHeight >= 10000f)
+            if (currentHeight >= summitHeight)
                 TriggerVictory();
         }
 
@@ -199,10 +201,7 @@ namespace TitanAscent.Systems
             {
                 var stats = saveManager.CurrentData;
                 if (data.distance > stats.longestFall)
-                {
                     stats.longestFall = data.distance;
-                    saveManager.Save();
-                }
                 stats.totalFalls++;
                 saveManager.Save();
             }

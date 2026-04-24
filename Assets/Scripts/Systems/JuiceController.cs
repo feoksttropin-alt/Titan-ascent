@@ -25,12 +25,14 @@ namespace TitanAscent.Systems
         private float shakeTimer = 0f;
         private Vector3 cameraOriginOffset;
         private float originalFOV;
+        private float defaultFixedDeltaTime;
         private bool reduceMotion = false;
 
         private void Awake()
         {
             if (mainCamera == null) mainCamera = Camera.main;
             if (mainCamera != null) originalFOV = mainCamera.fieldOfView;
+            defaultFixedDeltaTime = Time.fixedDeltaTime;
         }
 
         private void LateUpdate()
@@ -112,7 +114,7 @@ namespace TitanAscent.Systems
             shakeTimer = duration;
         }
 
-        private IEnumerator FreezFrame(int frames)
+        private IEnumerator FreezeFrame(int frames)
         {
             Time.timeScale = 0f;
             for (int i = 0; i < frames; i++)
@@ -185,23 +187,21 @@ namespace TitanAscent.Systems
 
         private IEnumerator SlowMotionRamp(float targetScale, float fromScale, float holdDuration, float rampOutDuration = 0.5f)
         {
-            // Instantly snap to slow-mo scale
             Time.timeScale = targetScale;
-            Time.fixedDeltaTime = 0.02f * targetScale;
+            Time.fixedDeltaTime = defaultFixedDeltaTime * targetScale;
 
             yield return new WaitForSecondsRealtime(holdDuration);
 
-            // Lerp back to normal over rampOutDuration
             float t = 0f;
             while (t < rampOutDuration)
             {
                 t += Time.unscaledDeltaTime;
                 Time.timeScale = Mathf.Lerp(targetScale, 1f, t / rampOutDuration);
-                Time.fixedDeltaTime = 0.02f * Time.timeScale;
+                Time.fixedDeltaTime = defaultFixedDeltaTime * Time.timeScale;
                 yield return null;
             }
             Time.timeScale = 1f;
-            Time.fixedDeltaTime = 0.02f;
+            Time.fixedDeltaTime = defaultFixedDeltaTime;
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using TitanAscent.Environment;
@@ -46,6 +47,7 @@ namespace TitanAscent.Player
         private SurfaceProperties currentSurface;
         private bool isOnClimbableSurface;
         private Vector3 surfaceNormal;
+        private readonly HashSet<Collider> activeContacts = new HashSet<Collider>();
 
         public GripState CurrentGripState => currentGripState;
         public float CurrentGrip => currentGrip;
@@ -188,6 +190,7 @@ namespace TitanAscent.Player
 
         private void OnCollisionEnter(Collision collision)
         {
+            activeContacts.Add(collision.collider);
             EvaluateSurface(collision);
         }
 
@@ -198,14 +201,13 @@ namespace TitanAscent.Player
 
         private void OnCollisionExit(Collision collision)
         {
-            // Check if we're still in contact with anything
-            // In a real implementation you'd track multiple contacts;
-            // simplified: assume leaving any collision removes surface contact
-            isOnClimbableSurface = false;
-            currentSurface = null;
-
-            if (IsGripping)
-                ReleaseGrip();
+            activeContacts.Remove(collision.collider);
+            if (activeContacts.Count == 0)
+            {
+                isOnClimbableSurface = false;
+                currentSurface = null;
+                if (IsGripping) ReleaseGrip();
+            }
         }
 
         private void EvaluateSurface(Collision collision)

@@ -245,17 +245,7 @@ namespace TitanAscent.Player
         private void ExecuteBufferedGrappleFire()
         {
             if (grappleController == null) return;
-
-            // The GrappleController's TryFireGrapple is private.
-            // We trigger it by simulating a grapple-fire event through the
-            // public ReleaseGrapple path (if attached) or via the GrappleController's
-            // public event flow. The cleanest integration is a dedicated public method.
-            // Until GrappleController exposes FireGrapple(), we log the intent.
-            Debug.Log("[CoyoteTimeSystem] Buffered grapple fire triggered on landing contact.");
-
-            // -- Integration point --
-            // grappleController.FireGrapple();
-            // Add this public method to GrappleController to complete the buffer execution.
+            grappleController.FireGrapple();
         }
     }
 }

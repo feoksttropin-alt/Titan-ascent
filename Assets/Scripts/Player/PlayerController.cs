@@ -45,6 +45,7 @@ namespace TitanAscent.Player
         private Grapple.GrappleController grappleController;
         private ThrusterSystem thrusterSystem;
         private GripSystem gripSystem;
+        private Camera mainCamera;
 
         private Rigidbody rb;
         private PlayerState currentState = PlayerState.Airborne;
@@ -88,6 +89,7 @@ namespace TitanAscent.Player
             grappleController = GetComponent<Grapple.GrappleController>();
             thrusterSystem = GetComponent<ThrusterSystem>();
             gripSystem = GetComponent<GripSystem>();
+            mainCamera = Camera.main;
 
             startHeight = transform.position.y;
             currentHeight = startHeight;
@@ -228,11 +230,12 @@ namespace TitanAscent.Player
                 v = Input.GetAxis("Vertical");
             }
 
-            Vector3 camForward = Camera.main != null
-                ? Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up).normalized
+            if (mainCamera == null) mainCamera = Camera.main;
+            Vector3 camForward = mainCamera != null
+                ? Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized
                 : transform.forward;
-            Vector3 camRight = Camera.main != null
-                ? Vector3.ProjectOnPlane(Camera.main.transform.right, Vector3.up).normalized
+            Vector3 camRight = mainCamera != null
+                ? Vector3.ProjectOnPlane(mainCamera.transform.right, Vector3.up).normalized
                 : transform.right;
 
             return (camForward * v + camRight * h).normalized;

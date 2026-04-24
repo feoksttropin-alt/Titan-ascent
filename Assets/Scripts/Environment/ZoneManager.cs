@@ -32,6 +32,8 @@ namespace TitanAscent.Environment
         private TitanZone currentZone;
         private Player.PlayerController player;
         private Systems.NarrationSystem narrationSystem;
+        private float _playerSearchTimer;
+        private const float PlayerSearchInterval = 0.5f;
 
         public TitanZone CurrentZone => currentZone;
         public int CurrentZoneIndex => zones.IndexOf(currentZone);
@@ -63,7 +65,12 @@ namespace TitanAscent.Environment
         {
             if (player == null)
             {
-                player = FindFirstObjectByType<Player.PlayerController>();
+                _playerSearchTimer -= Time.deltaTime;
+                if (_playerSearchTimer <= 0f)
+                {
+                    player = FindFirstObjectByType<Player.PlayerController>();
+                    _playerSearchTimer = PlayerSearchInterval;
+                }
                 return;
             }
 

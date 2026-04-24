@@ -15,6 +15,8 @@ namespace TitanAscent.Grapple
         [Header("Layers")]
         [SerializeField] private LayerMask anchorLayerMask = ~0;
 
+        private static readonly Collider[] OverlapBuffer = new Collider[64];
+
         private Camera mainCamera;
         private SurfaceAnchorPoint currentBestTarget;
         private SurfaceAnchorPoint lastHighlightedTarget;
@@ -58,10 +60,11 @@ namespace TitanAscent.Grapple
 
             candidateTargets.Clear();
 
-            // Find all anchor points in range
-            Collider[] nearbyColliders = Physics.OverlapSphere(aimOrigin, detectionRadius, anchorLayerMask);
-            foreach (Collider col in nearbyColliders)
+            // Non-allocating overlap sphere — reuses the static buffer
+            int hitCount = Physics.OverlapSphereNonAlloc(aimOrigin, detectionRadius, OverlapBuffer, anchorLayerMask);
+            for (int i = 0; i < hitCount; i++)
             {
+                Collider col = OverlapBuffer[i];
                 SurfaceAnchorPoint anchor = col.GetComponent<SurfaceAnchorPoint>();
                 if (anchor == null) continue;
                 if (!anchor.IsGrappleable) continue;

@@ -421,6 +421,17 @@ namespace TitanAscent.Grapple
         /// <summary>Sets rope retraction speed at runtime. Used by MovementTuner.</summary>
         public void SetRetractionSpeed(float value) => retractionSpeed = Mathf.Max(0.1f, value);
 
+        /// <summary>
+        /// Programmatic grapple fire — mirrors the player-input path.
+        /// Used by CoyoteTimeSystem's input buffer to fire on landing contact.
+        /// </summary>
+        public void FireGrapple()
+        {
+            if (Time.time - lastFireTime <= GetAdjustedFireRate()) return;
+            if (currentState == GrappleState.Idle || currentState == GrappleState.Flying)
+                TryFireGrapple();
+        }
+
         private void OnDrawGizmosSelected()
         {
             if (firePoint == null) return;

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 namespace TitanAscent.Systems
@@ -40,7 +39,7 @@ namespace TitanAscent.Systems
 
         /// <summary>Fixed path used for the most-recent ghost file.</summary>
         public static string LastGhostPath =>
-            Path.Combine(Application.persistentDataPath, "ghost_last.dat");
+            Path.Combine(Application.persistentDataPath, "ghost_last.json");
 
         [Header("References")]
         [SerializeField] private Transform playerTransform;
@@ -172,7 +171,7 @@ namespace TitanAscent.Systems
             WriteRecordingToFile(currentRecording, LastGhostPath);
 
             // Also persist a session-specific copy for run-history lookup.
-            string sessionFileName = $"ghost_{currentSessionId}.dat";
+            string sessionFileName = $"ghost_{currentSessionId}.json";
             string sessionFilePath = Path.Combine(Application.persistentDataPath, sessionFileName);
             WriteRecordingToFile(currentRecording, sessionFilePath);
         }
@@ -181,9 +180,8 @@ namespace TitanAscent.Systems
         {
             try
             {
-                using FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
-                BinaryFormatter bf  = new BinaryFormatter();
-                bf.Serialize(fs, recording);
+                string json = JsonUtility.ToJson(recording, prettyPrint: false);
+                File.WriteAllText(filePath, json);
                 Debug.Log($"[GhostSystem] Ghost saved: {filePath}");
             }
             catch (Exception e)
@@ -202,9 +200,8 @@ namespace TitanAscent.Systems
 
             try
             {
-                using FileStream fs  = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                BinaryFormatter bf   = new BinaryFormatter();
-                loadedRecording = (GhostRecording)bf.Deserialize(fs);
+                string json = File.ReadAllText(filePath);
+                loadedRecording = JsonUtility.FromJson<GhostRecording>(json);
                 Debug.Log($"[GhostSystem] Ghost loaded: {loadedRecording.frames.Count} frames, label={loadedRecording.label}");
                 return true;
             }

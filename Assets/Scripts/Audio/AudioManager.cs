@@ -55,6 +55,8 @@ namespace TitanAscent.Audio
 
         private Player.PlayerController player;
         private Grapple.RopeSimulator ropeSimulator;
+        private float _reacquireTimer;
+        private const float ReacquireInterval = 0.5f;
 
         private void Awake()
         {
@@ -112,11 +114,19 @@ namespace TitanAscent.Audio
 
         private void Update()
         {
-            // Reacquire references lost after scene changes or late initialization
-            if (player == null)
-                player = FindFirstObjectByType<Player.PlayerController>();
-            if (ropeSimulator == null)
-                ropeSimulator = FindFirstObjectByType<Grapple.RopeSimulator>();
+            // Reacquire references lost after scene changes — throttled to avoid per-frame search
+            if (player == null || ropeSimulator == null)
+            {
+                _reacquireTimer -= Time.deltaTime;
+                if (_reacquireTimer <= 0f)
+                {
+                    if (player == null)
+                        player = FindFirstObjectByType<Player.PlayerController>();
+                    if (ropeSimulator == null)
+                        ropeSimulator = FindFirstObjectByType<Grapple.RopeSimulator>();
+                    _reacquireTimer = ReacquireInterval;
+                }
+            }
 
             if (player != null)
                 UpdateAmbient(player.CurrentHeight);

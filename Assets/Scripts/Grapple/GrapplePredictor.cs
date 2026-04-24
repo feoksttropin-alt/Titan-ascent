@@ -56,6 +56,13 @@ namespace TitanAscent.Grapple
         private float   cachedApexY;
         private int     cachedApexIndex;
 
+        // Gradient cache — avoids per-frame heap allocation
+        private Gradient             cachedGradient;
+        private GradientColorKey[]   cachedColorKeys = new GradientColorKey[2];
+        private GradientAlphaKey[]   cachedAlphaKeys = new GradientAlphaKey[16];
+        private Color                lastBuiltColor;
+        private float                lastBuiltAlpha = -1f;
+
         // ── Lifecycle ─────────────────────────────────────────────────────────────
 
         private void Awake()
@@ -83,6 +90,8 @@ namespace TitanAscent.Grapple
 
             if (apexLabel != null)
                 apexLabel.enabled = false;
+
+            cachedGradient = new Gradient();
         }
 
         private void Update()
@@ -213,30 +222,25 @@ namespace TitanAscent.Grapple
             arcLineRenderer.positionCount = ArcPoints;
             arcLineRenderer.SetPositions(arcBuffer);
 
-            // Alternate alpha for dotted appearance
-            // Unity LineRenderer does not natively support per-point alpha, but we can
-            // simulate a dotted look using a gradient with alternating alpha bands.
-            // Here we set the gradient to two-tone with the color tinted by alpha.
-            Color highAlpha = new Color(cachedArcColor.r, cachedArcColor.g, cachedArcColor.b, cachedArcColor.a * alpha * 0.8f);
-            Color lowAlpha  = new Color(cachedArcColor.r, cachedArcColor.g, cachedArcColor.b, cachedArcColor.a * alpha * 0.2f);
+            // Rebuild the cached gradient only when color or alpha changes
+            if (cachedArcColor != lastBuiltColor || !Mathf.Approximately(alpha, lastBuiltAlpha))
+            {
+                lastBuiltColor = cachedArcColor;
+                lastBuiltAlpha = alpha;
 
-            // Build a repeating gradient with 8 bands to create dotted effect
-            var gradient = new Gradient();
-            var colorKeys = new GradientColorKey[]
-            {
-                new GradientColorKey(cachedArcColor, 0f),
-                new GradientColorKey(cachedArcColor, 1f)
-            };
-            var alphaKeys = new GradientAlphaKey[16];
-            for (int i = 0; i < 8; i++)
-            {
-                float t0 = (float)(i * 2)     / 16f;
-                float t1 = (float)(i * 2 + 1) / 16f;
-                alphaKeys[i * 2]     = new GradientAlphaKey(highAlpha.a, t0);
-                alphaKeys[i * 2 + 1] = new GradientAlphaKey(lowAlpha.a,  t1);
+                float highA = cachedArcColor.a * alpha * 0.8f;
+                float lowA  = cachedArcColor.a * alpha * 0.2f;
+
+                cachedColorKeys[0] = new GradientColorKey(cachedArcColor, 0f);
+                cachedColorKeys[1] = new GradientColorKey(cachedArcColor, 1f);
+                for (int i = 0; i < 8; i++)
+                {
+                    cachedAlphaKeys[i * 2]     = new GradientAlphaKey(highA, (float)(i * 2)     / 16f);
+                    cachedAlphaKeys[i * 2 + 1] = new GradientAlphaKey(lowA,  (float)(i * 2 + 1) / 16f);
+                }
+                cachedGradient.SetKeys(cachedColorKeys, cachedAlphaKeys);
             }
-            gradient.SetKeys(colorKeys, alphaKeys);
-            arcLineRenderer.colorGradient = gradient;
+            arcLineRenderer.colorGradient = cachedGradient;
 
             // Apex label
             if (apexLabel != null)

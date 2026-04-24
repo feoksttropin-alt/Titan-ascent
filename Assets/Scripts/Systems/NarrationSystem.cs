@@ -203,6 +203,8 @@ namespace TitanAscent.Systems
         private void Awake()
         {
             narrationUI = FindFirstObjectByType<UI.NarrationUI>();
+            if (narrationUI == null)
+                Debug.LogWarning("[NarrationSystem] NarrationUI not found in scene. All narration will be silent.");
         }
 
         public void TriggerClimbStart() => TryNarrate("ClimbStart", ClimbStartLines, true);
