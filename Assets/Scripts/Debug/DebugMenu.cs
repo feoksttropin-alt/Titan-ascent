@@ -32,6 +32,7 @@ namespace TitanAscent.Debug
         private string teleportHeightInput = "0";
         private float windMultiplier = 1f;
         private AnchorValidator anchorValidator;
+        private ZoneManager _zoneManager;
 
         private static readonly float[] ZoneHeights = { 0f, 800f, 1800f, 3000f, 4200f, 5500f, 6500f, 7800f, 9000f };
         private static readonly string[] ZoneNames  = { "Z1 Tail", "Z2 Spires", "Z3 Leg", "Z4 Wing", "Z5 Spine", "Z6 Grave", "Z7 Storm", "Z8 Neck", "Z9 Crown" };
@@ -42,6 +43,7 @@ namespace TitanAscent.Debug
         private void Awake()
         {
             anchorValidator = FindFirstObjectByType<AnchorValidator>();
+            _zoneManager    = FindFirstObjectByType<ZoneManager>();
         }
 
         private void Update()
@@ -110,9 +112,9 @@ namespace TitanAscent.Debug
                 GUILayout.Label($"Grip:     {gripSystem.CurrentGrip:F0} / {gripSystem.MaxGrip:F0}");
 
             // Current zone
-            ZoneManager zm = FindFirstObjectByType<ZoneManager>();
-            if (zm != null && zm.CurrentZone != null)
-                GUILayout.Label($"Zone:     {zm.CurrentZone.name}");
+            if (_zoneManager == null) _zoneManager = FindFirstObjectByType<ZoneManager>();
+            if (_zoneManager != null && _zoneManager.CurrentZone != null)
+                GUILayout.Label($"Zone:     {_zoneManager.CurrentZone.name}");
         }
 
         // ── TELEPORT ────────────────────────────────────────────────────────
