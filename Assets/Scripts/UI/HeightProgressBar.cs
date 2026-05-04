@@ -39,7 +39,8 @@ namespace TitanAscent.UI
 
         private List<float> worstFalls = new List<float>();
         private List<RectTransform> skullObjects = new List<RectTransform>();
-        private bool pulsing = false;
+        private Coroutine _pulseDotCoroutine;
+        private System.Action<float> _onNewHeightRecord;
 
         private void Awake()
         {
@@ -55,7 +56,22 @@ namespace TitanAscent.UI
             if (fallTracker != null)
             {
                 fallTracker.OnFallCompleted.AddListener(OnFallRecorded);
-                fallTracker.OnNewHeightRecord.AddListener(_ => StartCoroutine(PulseDot(playerDot)));
+                _onNewHeightRecord = _ =>
+                {
+                    if (_pulseDotCoroutine != null) StopCoroutine(_pulseDotCoroutine);
+                    _pulseDotCoroutine = StartCoroutine(PulseDot(playerDot));
+                };
+                fallTracker.OnNewHeightRecord.AddListener(_onNewHeightRecord);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (fallTracker != null)
+            {
+                fallTracker.OnFallCompleted.RemoveListener(OnFallRecorded);
+                if (_onNewHeightRecord != null)
+                    fallTracker.OnNewHeightRecord.RemoveListener(_onNewHeightRecord);
             }
         }
 
@@ -135,8 +151,7 @@ namespace TitanAscent.UI
 
         private IEnumerator PulseDot(RectTransform dot)
         {
-            if (dot == null || pulsing) yield break;
-            pulsing = true;
+            if (dot == null) yield break;
             Vector3 original = dot.localScale;
             float dur = 0.4f;
             float t = 0f;
@@ -148,7 +163,7 @@ namespace TitanAscent.UI
                 yield return null;
             }
             dot.localScale = original;
-            pulsing = false;
+            _pulseDotCoroutine = null;
         }
     }
 }
