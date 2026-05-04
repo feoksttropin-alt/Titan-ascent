@@ -96,9 +96,17 @@ namespace TitanAscent.Systems
         // Grapple forgiveness override
         private bool forgivenessActive;
 
+        // Cached player reference
+        private Player.PlayerController _cachedPlayer;
+
         // ------------------------------------------------------------------
         // Lifecycle
         // ------------------------------------------------------------------
+
+        private void Awake()
+        {
+            _cachedPlayer = FindFirstObjectByType<Player.PlayerController>();
+        }
 
         private void OnEnable()
         {
@@ -112,6 +120,12 @@ namespace TitanAscent.Systems
             EventBus.Unsubscribe<FallEndedEvent>(OnFallEnded);
             EventBus.Unsubscribe<ClimbStartedEvent>(OnClimbStarted);
             EventBus.Unsubscribe<GrappleAttachedEvent>(OnGrappleAttached);
+        }
+
+        private void OnDestroy()
+        {
+            if (stuckCoroutine != null)
+                StopCoroutine(stuckCoroutine);
         }
 
         private void Start()
@@ -333,8 +347,9 @@ namespace TitanAscent.Systems
 
         private float GetPlayerHeight()
         {
-            Player.PlayerController player = FindFirstObjectByType<Player.PlayerController>();
-            return player != null ? player.transform.position.y : 0f;
+            if (_cachedPlayer == null)
+                _cachedPlayer = FindFirstObjectByType<Player.PlayerController>();
+            return _cachedPlayer != null ? _cachedPlayer.transform.position.y : 0f;
         }
     }
 }

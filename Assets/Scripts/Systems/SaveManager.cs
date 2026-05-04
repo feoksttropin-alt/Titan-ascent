@@ -43,6 +43,12 @@ namespace TitanAscent.Systems
             {
                 string json = PlayerPrefs.GetString(SaveKey);
                 currentData = JsonUtility.FromJson<SaveData>(json);
+                if (currentData == null)
+                {
+                    Debug.LogWarning("[SaveManager] Deserialized save data was null. Starting fresh.");
+                    currentData = new SaveData();
+                    return;
+                }
                 MigrateIfNeeded();
             }
             catch (Exception e)

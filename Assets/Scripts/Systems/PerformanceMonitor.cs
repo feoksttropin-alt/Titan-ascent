@@ -65,6 +65,11 @@ namespace TitanAscent.Systems
         // Rope simulator reference
         private RopeSimulator _ropeSimulator;
 
+        // Particle system cache
+        private ParticleSystem[] _cachedParticleSystems;
+        private float _particleRescanTimer;
+        private const float ParticleRescanInterval = 0.5f;
+
         // IMGUI style (lazy initialised)
         private GUIStyle _boxStyle;
         private GUIStyle _labelStyle;
@@ -161,10 +166,16 @@ namespace TitanAscent.Systems
 
         private void TrackParticles()
         {
+            _particleRescanTimer += Time.deltaTime;
+            if (_cachedParticleSystems == null || _particleRescanTimer >= ParticleRescanInterval)
+            {
+                _cachedParticleSystems = FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None);
+                _particleRescanTimer   = 0f;
+            }
+
             int total = 0;
-            ParticleSystem[] systems = FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None);
-            foreach (var ps in systems)
-                total += ps.particleCount;
+            foreach (var ps in _cachedParticleSystems)
+                if (ps != null) total += ps.particleCount;
 
             RecordHistory(_particleHistory, ref _particleIndex, total);
         }

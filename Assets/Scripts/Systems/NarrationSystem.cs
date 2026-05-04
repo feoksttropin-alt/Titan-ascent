@@ -275,6 +275,10 @@ namespace TitanAscent.Systems
             if (lines.Length == 0) return string.Empty;
             if (lines.Length == 1) return lines[0];
 
+            // Prevent unbounded dictionary growth across long sessions
+            if (lastPlayedIndex.Count > 50)
+                lastPlayedIndex.Clear();
+
             lastPlayedIndex.TryGetValue(key, out int lastIndex);
             int newIndex;
             do { newIndex = Random.Range(0, lines.Length); }

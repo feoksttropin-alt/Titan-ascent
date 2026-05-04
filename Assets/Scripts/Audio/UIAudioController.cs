@@ -36,6 +36,7 @@ namespace TitanAscent.Audio
         // -----------------------------------------------------------------------
 
         private AudioSource _audioSource;
+        private SettingsManager _settingsManager;
 
         // -----------------------------------------------------------------------
         // Lifecycle
@@ -55,6 +56,8 @@ namespace TitanAscent.Audio
             _audioSource              = gameObject.AddComponent<AudioSource>();
             _audioSource.spatialBlend = 0f;
             _audioSource.playOnAwake  = false;
+
+            _settingsManager = FindFirstObjectByType<SettingsManager>();
         }
 
         // -----------------------------------------------------------------------
@@ -84,9 +87,10 @@ namespace TitanAscent.Audio
 
         private float GetVolume()
         {
-            SettingsManager sm = FindFirstObjectByType<SettingsManager>();
-            if (sm == null) return 1f;
-            return Mathf.Clamp01(sm.MasterVolume * sm.SFXVolume);
+            if (_settingsManager == null)
+                _settingsManager = FindFirstObjectByType<SettingsManager>();
+            if (_settingsManager == null) return 1f;
+            return Mathf.Clamp01(_settingsManager.MasterVolume * _settingsManager.SFXVolume);
         }
     }
 }

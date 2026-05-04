@@ -53,6 +53,10 @@ namespace TitanAscent.Physics
         public UnityEvent<int>   OnChainSwing;          // chain count
         public UnityEvent<float> OnMomentumSurge;       // peak speed (m/s)
 
+        // ── Event subscription guard ──────────────────────────────────────────
+
+        private bool _eventsSubscribed;
+
         // ── Tracked state ─────────────────────────────────────────────────────
 
         private Rigidbody _rb;
@@ -94,20 +98,24 @@ namespace TitanAscent.Physics
 
         private void OnEnable()
         {
+            if (_eventsSubscribed) return;
             if (grappleController != null)
             {
                 grappleController.OnGrappleAttached.AddListener(HandleAttach);
                 grappleController.OnGrappleReleased.AddListener(HandleRelease);
+                _eventsSubscribed = true;
             }
         }
 
         private void OnDisable()
         {
+            if (!_eventsSubscribed) return;
             if (grappleController != null)
             {
                 grappleController.OnGrappleAttached.RemoveListener(HandleAttach);
                 grappleController.OnGrappleReleased.RemoveListener(HandleRelease);
             }
+            _eventsSubscribed = false;
         }
 
         private void Update()

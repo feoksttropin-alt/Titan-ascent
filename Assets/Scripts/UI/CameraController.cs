@@ -60,6 +60,7 @@ namespace TitanAscent.UI
         // Fall speed tracking
         private float _prevFallDistance = 0f;
         private float _fallSpeed = 0f;
+        private Coroutine _snapFOVCoroutine;
 
         private void Awake()
         {
@@ -233,6 +234,11 @@ namespace TitanAscent.UI
             }
         }
 
+        private void OnDisable()
+        {
+            isSnappingFOVBack = false;
+        }
+
         private void HandleFallLanding(Systems.FallData data)
         {
             float fallProportion = Mathf.Clamp01(data.distance / fallZoomMaxDistance);
@@ -240,8 +246,8 @@ namespace TitanAscent.UI
             shakeTime = 0f;
 
             // Snap FOV back to baseFOV over ~0.5s
-            StopCoroutine("SnapFOVBackCoroutine");
-            StartCoroutine(SnapFOVBackCoroutine());
+            if (_snapFOVCoroutine != null) StopCoroutine(_snapFOVCoroutine);
+            _snapFOVCoroutine = StartCoroutine(SnapFOVBackCoroutine());
         }
 
         private void HandleNewHeightRecord(float newRecord)
@@ -275,9 +281,10 @@ namespace TitanAscent.UI
                 yield return null;
             }
 
-            currentFOV = baseFOV;
-            cam.fieldOfView = baseFOV;
+            currentFOV        = baseFOV;
+            cam.fieldOfView   = baseFOV;
             isSnappingFOVBack = false;
+            _snapFOVCoroutine = null;
         }
     }
 }

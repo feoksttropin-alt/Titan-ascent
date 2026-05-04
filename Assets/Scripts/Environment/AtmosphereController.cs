@@ -202,13 +202,14 @@ namespace TitanAscent.Environment
             bool inLightningZone = bandIndex >= LightningBandStart && bandIndex <= LightningBandEnd;
             if (inLightningZone && !_lightningRoutineRunning)
             {
-                _lightningCoroutine    = StartCoroutine(LightningRoutine());
                 _lightningRoutineRunning = true;
+                _lightningCoroutine      = StartCoroutine(LightningRoutine());
             }
             else if (!inLightningZone && _lightningRoutineRunning)
             {
                 if (_lightningCoroutine != null)
                     StopCoroutine(_lightningCoroutine);
+                _lightningCoroutine      = null;
                 _lightningRoutineRunning = false;
             }
         }

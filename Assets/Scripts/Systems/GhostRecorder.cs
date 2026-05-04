@@ -80,6 +80,7 @@ namespace TitanAscent.Systems
         // -----------------------------------------------------------------------
 
         private bool                _isRecording     = false;
+        private bool                _gmBound         = false;
         private List<RecorderFrame> _frames          = new List<RecorderFrame>();
         private Rigidbody           _rb;
         private float               _interval;
@@ -154,14 +155,14 @@ namespace TitanAscent.Systems
 
         private void OnEnable()
         {
-            if (GameManager.Instance != null)
+            if (GameManager.Instance != null && !_gmBound)
             {
                 GameManager.Instance.OnClimbStarted.AddListener(OnClimbStarted);
                 GameManager.Instance.OnVictory.AddListener(OnVictory);
+                _gmBound = true;
             }
-            else
+            else if (GameManager.Instance == null)
             {
-                // GameManager may not exist yet; defer binding to Start
                 Debug.LogWarning("[GhostRecorder] GameManager.Instance not available in OnEnable; will retry in Start.");
             }
 
@@ -170,17 +171,14 @@ namespace TitanAscent.Systems
 
         private void Start()
         {
-            // Re-bind GameManager events in case it wasn't available during OnEnable
-            if (GameManager.Instance != null)
+            // Bind GameManager events only if OnEnable couldn't (e.g. singleton not yet alive)
+            if (!_gmBound && GameManager.Instance != null)
             {
-                GameManager.Instance.OnClimbStarted.RemoveListener(OnClimbStarted);
                 GameManager.Instance.OnClimbStarted.AddListener(OnClimbStarted);
-
-                GameManager.Instance.OnVictory.RemoveListener(OnVictory);
                 GameManager.Instance.OnVictory.AddListener(OnVictory);
+                _gmBound = true;
             }
 
-            // Re-resolve FallTracker if it wasn't found yet
             if (fallTracker == null)
                 fallTracker = FindFirstObjectByType<FallTracker>();
 
@@ -189,11 +187,12 @@ namespace TitanAscent.Systems
 
         private void OnDisable()
         {
-            if (GameManager.Instance != null)
+            if (_gmBound && GameManager.Instance != null)
             {
                 GameManager.Instance.OnClimbStarted.RemoveListener(OnClimbStarted);
                 GameManager.Instance.OnVictory.RemoveListener(OnVictory);
             }
+            _gmBound = false;
 
             UnbindFallTracker();
         }

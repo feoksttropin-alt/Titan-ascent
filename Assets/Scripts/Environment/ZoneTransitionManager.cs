@@ -49,6 +49,7 @@ namespace TitanAscent.Environment
         private ZoneManager   _zoneManager;
         private WindSystem    _windSystem;
         private NarrationSystem _narration;
+        private Player.PlayerController _cachedPlayer;
 
         private Coroutine _ambientFadeCoroutine;
         private Coroutine _fogFadeCoroutine;
@@ -67,9 +68,10 @@ namespace TitanAscent.Environment
 
         private void Awake()
         {
-            _zoneManager = FindFirstObjectByType<ZoneManager>();
-            _windSystem  = FindFirstObjectByType<WindSystem>();
-            _narration   = FindFirstObjectByType<NarrationSystem>();
+            _zoneManager  = FindFirstObjectByType<ZoneManager>();
+            _windSystem   = FindFirstObjectByType<WindSystem>();
+            _narration    = FindFirstObjectByType<NarrationSystem>();
+            _cachedPlayer = FindFirstObjectByType<Player.PlayerController>();
 
             if (_zoneManager != null)
                 _zoneManager.OnZoneChanged.AddListener(OnZoneChanged);
@@ -86,6 +88,10 @@ namespace TitanAscent.Environment
         {
             if (_zoneManager != null)
                 _zoneManager.OnZoneChanged.RemoveListener(OnZoneChanged);
+            if (_ambientFadeCoroutine != null) StopCoroutine(_ambientFadeCoroutine);
+            if (_fogFadeCoroutine     != null) StopCoroutine(_fogFadeCoroutine);
+            if (_windFadeCoroutine    != null) StopCoroutine(_windFadeCoroutine);
+            if (_zoneNameCoroutine   != null) StopCoroutine(_zoneNameCoroutine);
         }
 
         private void Update()
@@ -140,9 +146,10 @@ namespace TitanAscent.Environment
 
         private void TrackAltitude()
         {
-            var player = FindFirstObjectByType<Player.PlayerController>();
-            if (player != null)
-                _currentAltitude = player.CurrentHeight;
+            if (_cachedPlayer == null)
+                _cachedPlayer = FindFirstObjectByType<Player.PlayerController>();
+            if (_cachedPlayer != null)
+                _currentAltitude = _cachedPlayer.CurrentHeight;
         }
 
         private void ApplyAltitudeEffects()

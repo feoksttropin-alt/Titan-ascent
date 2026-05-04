@@ -65,8 +65,9 @@ namespace TitanAscent.VFX
         private float[] swayPhaseOffsets;
         private float[] swayFrequencyMultipliers;
 
-        // Cached segment positions used for scatter scatter starting points
+        // Cached segment positions used for scatter starting points and sway reuse
         private Vector3[] cachedPositions;
+        private Vector3[] _swayPositionsBuffer;
 
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
@@ -160,9 +161,11 @@ namespace TitanAscent.VFX
             int count = lineRenderer.positionCount;
             EnsureSwayArrays(count);
 
-            // Get current segment world positions from the LineRenderer (already set by RopeSimulator)
-            Vector3[] positions = new Vector3[count];
-            lineRenderer.GetPositions(positions);
+            // Reuse cached buffer to avoid per-frame heap allocation
+            if (_swayPositionsBuffer == null || _swayPositionsBuffer.Length != count)
+                _swayPositionsBuffer = new Vector3[count];
+            lineRenderer.GetPositions(_swayPositionsBuffer);
+            Vector3[] positions = _swayPositionsBuffer;
 
             for (int i = 1; i < count - 1; i++) // don't touch anchor or player end
             {

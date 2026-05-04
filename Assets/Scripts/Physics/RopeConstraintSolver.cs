@@ -51,7 +51,6 @@ namespace TitanAscent.Physics
         private float   _segmentLength = 0.5f;
 
         private Vector3[] _positions;
-        private Vector3[] _oldPositions;
 
         // Last measured tension (0–1)
         private float _tension;
@@ -178,16 +177,12 @@ namespace TitanAscent.Physics
 
         private void Reallocate()
         {
-            _positions    = new Vector3[_segmentCount];
-            _oldPositions = new Vector3[_segmentCount];
+            _positions = new Vector3[_segmentCount];
 
             // Distribute segments in a straight downward line from origin
             Vector3 origin = grappleOrigin != null ? grappleOrigin.position : transform.position;
             for (int i = 0; i < _segmentCount; i++)
-            {
-                _positions[i]    = origin + Vector3.down * i * _segmentLength;
-                _oldPositions[i] = _positions[i];
-            }
+                _positions[i] = origin + Vector3.down * i * _segmentLength;
 
             _tension     = 0f;
             _initialized = true;

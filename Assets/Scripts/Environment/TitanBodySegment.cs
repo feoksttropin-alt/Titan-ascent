@@ -70,6 +70,11 @@ namespace TitanAscent.Environment
 
         private void OnDisable()
         {
+            if (_movementCoroutine != null)
+            {
+                StopCoroutine(_movementCoroutine);
+                _movementCoroutine = null;
+            }
             if (_titanMovement != null)
                 _titanMovement.OnTitanMovementEvent.RemoveListener(OnMovementEvent);
         }

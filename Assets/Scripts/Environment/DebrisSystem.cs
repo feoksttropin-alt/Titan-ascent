@@ -140,6 +140,7 @@ namespace TitanAscent.Environment
         private Player.PlayerController _player;
         private DebrisItem[] _allItems;
         private float _distantTimer;
+        private Coroutine _batchUpdateCoroutine;
 
         // ------------------------------------------------------------------
         // Lifecycle
@@ -216,7 +217,8 @@ namespace TitanAscent.Environment
             if (_distantTimer >= distantUpdateInterval)
             {
                 _distantTimer = 0f;
-                StartCoroutine(BatchUpdateDistant(playerPos, windDir, windStrength));
+                if (_batchUpdateCoroutine != null) StopCoroutine(_batchUpdateCoroutine);
+                _batchUpdateCoroutine = StartCoroutine(BatchUpdateDistant(playerPos, windDir, windStrength));
             }
         }
 
