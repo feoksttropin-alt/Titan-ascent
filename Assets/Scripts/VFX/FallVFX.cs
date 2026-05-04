@@ -46,6 +46,7 @@ namespace TitanAscent.VFX
 
         private FallTracker fallTracker;
         private Camera      mainCamera;
+        private Rigidbody   _rb;
 
         private Image[] speedLineImages;         // cached children of speedLinesContainer
         private float   defaultFov = 60f;
@@ -65,6 +66,10 @@ namespace TitanAscent.VFX
             fallTracker = GetComponent<FallTracker>();
             if (fallTracker == null)
                 fallTracker = GetComponentInParent<FallTracker>();
+
+            _rb = GetComponent<Rigidbody>();
+            if (_rb == null)
+                _rb = GetComponentInParent<Rigidbody>();
 
             mainCamera = Camera.main;
             if (mainCamera != null)
@@ -100,10 +105,8 @@ namespace TitanAscent.VFX
         {
             if (!isFalling) return;
 
-            // Sample current vertical speed from Rigidbody if available
-            Rigidbody rb = GetComponent<Rigidbody>();
-            if (rb != null)
-                currentFallSpeed = Mathf.Abs(Mathf.Min(0f, rb.linearVelocity.y));
+            if (_rb != null)
+                currentFallSpeed = Mathf.Abs(Mathf.Min(0f, _rb.linearVelocity.y));
 
             UpdateSpeedLines();
             UpdateCatastrophicVignette();

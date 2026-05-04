@@ -193,6 +193,7 @@ namespace TitanAscent.UI
             Color clear = fallFlashColor;
             clear.a = 0f;
             fallFlashOverlay.color = clear;
+            flashCoroutine = null;
         }
 
         private IEnumerator PulseBestHeightText()
@@ -212,6 +213,7 @@ namespace TitanAscent.UI
 
             bestHeightText.color = defaultBestHeightColor;
             bestHeightText.fontSize = 18f;
+            bestHeightPulseCoroutine = null;
         }
 
         private string FormatHeight(float height)

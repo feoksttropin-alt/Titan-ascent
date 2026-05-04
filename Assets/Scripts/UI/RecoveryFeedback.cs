@@ -91,6 +91,7 @@ namespace TitanAscent.UI
             yield return FadeOutText(recoveryText, 0.4f);
 
             SetTextVisible(recoveryText, false);
+            recoveryAnim = null;
         }
 
         private IEnumerator ShowComboText()
@@ -108,6 +109,7 @@ namespace TitanAscent.UI
             yield return FadeOutText(comboText, 0.5f);
 
             SetTextVisible(comboText, false);
+            comboAnim = null;
         }
 
         // -----------------------------------------------------------------------

@@ -74,6 +74,7 @@ namespace TitanAscent.Audio
         private Coroutine _crossfadeRoutine;
 
         private ZoneAmbientConfig[] _configs;
+        private ZoneManager _zm;
 
         private float _perlinOffsetVolume;
         private float _perlinOffsetPitch;
@@ -94,16 +95,16 @@ namespace TitanAscent.Audio
 
         private void Start()
         {
-            ZoneManager zm = FindFirstObjectByType<ZoneManager>();
-            if (zm != null)
-                zm.OnZoneChanged.AddListener(OnZoneChanged);
+            _zm = FindFirstObjectByType<ZoneManager>();
+            if (_zm != null)
+                _zm.OnZoneChanged.AddListener(OnZoneChanged);
         }
 
         private void OnDestroy()
         {
-            ZoneManager zm = FindFirstObjectByType<ZoneManager>();
-            if (zm != null)
-                zm.OnZoneChanged.RemoveListener(OnZoneChanged);
+            if (_crossfadeRoutine != null) StopCoroutine(_crossfadeRoutine);
+            if (_zm != null)
+                _zm.OnZoneChanged.RemoveListener(OnZoneChanged);
         }
 
         private void Update()
@@ -117,8 +118,7 @@ namespace TitanAscent.Audio
 
         private void OnZoneChanged(TitanZone previous, TitanZone newZone)
         {
-            ZoneManager zm = FindFirstObjectByType<ZoneManager>();
-            int newIndex = zm != null ? zm.CurrentZoneIndex : 0;
+            int newIndex = _zm != null ? _zm.CurrentZoneIndex : 0;
             newIndex = Mathf.Clamp(newIndex, 0, _configs.Length - 1);
 
             if (newIndex == _currentZoneIndex) return;

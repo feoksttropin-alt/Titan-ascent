@@ -47,6 +47,13 @@ namespace TitanAscent.Audio
 
         // ── Unity Lifecycle ──────────────────────────────────────────────────
 
+        private void OnDestroy()
+        {
+            if (whooshFadeCoroutine  != null) StopCoroutine(whooshFadeCoroutine);
+            if (duckCoroutine        != null) StopCoroutine(duckCoroutine);
+            if (heartbeatCoroutine   != null) StopCoroutine(heartbeatCoroutine);
+        }
+
         private void Awake()
         {
             whooshSource    = CreateSource("Fall_Whoosh",    true,  whooshLoopClip, 0f);

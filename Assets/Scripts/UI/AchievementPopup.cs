@@ -39,6 +39,8 @@ namespace TitanAscent.UI
         // ── Private state ────────────────────────────────────────────────────────
         private readonly Queue<Achievement> pendingQueue = new Queue<Achievement>();
         private bool isShowing = false;
+        private Coroutine _queueCoroutine;
+        private readonly Dictionary<string, Sprite> _iconCache = new Dictionary<string, Sprite>();
 
         // Panel is positioned offscreen to the right
         private float offscreenX;
@@ -74,6 +76,8 @@ namespace TitanAscent.UI
         {
             if (achievementSystem != null)
                 achievementSystem.OnAchievementUnlocked.RemoveListener(EnqueueAchievement);
+            if (_queueCoroutine != null)
+                StopCoroutine(_queueCoroutine);
         }
 
         // ── Public entry point ────────────────────────────────────────────────────
@@ -82,7 +86,7 @@ namespace TitanAscent.UI
         {
             pendingQueue.Enqueue(achievement);
             if (!isShowing)
-                StartCoroutine(ProcessQueue());
+                _queueCoroutine = StartCoroutine(ProcessQueue());
         }
 
         // ── Coroutine pipeline ────────────────────────────────────────────────────
@@ -102,6 +106,7 @@ namespace TitanAscent.UI
             }
 
             isShowing = false;
+            _queueCoroutine = null;
         }
 
         private IEnumerator ShowAchievement(Achievement achievement)
@@ -225,7 +230,10 @@ namespace TitanAscent.UI
         private Sprite LoadIcon(string iconName)
         {
             if (string.IsNullOrEmpty(iconName)) return null;
-            return Resources.Load<Sprite>($"{iconResourceFolder}/{iconName}");
+            if (_iconCache.TryGetValue(iconName, out Sprite cached)) return cached;
+            Sprite icon = Resources.Load<Sprite>($"{iconResourceFolder}/{iconName}");
+            if (icon != null) _iconCache[iconName] = icon;
+            return icon;
         }
     }
 }

@@ -91,6 +91,7 @@ namespace TitanAscent.UI
             }
 
             isDisplaying = false;
+            displayCoroutine = null;
         }
 
         private IEnumerator ShowSingleLine(string line)

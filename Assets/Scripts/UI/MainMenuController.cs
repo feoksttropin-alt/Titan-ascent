@@ -368,6 +368,8 @@ namespace TitanAscent.UI
                 }
                 to.alpha = 1f;
             }
+
+            _fadeCoroutine = null;
         }
 
         private static void SetInstant(CanvasGroup cg, bool visible)

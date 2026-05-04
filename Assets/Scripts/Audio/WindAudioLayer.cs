@@ -59,6 +59,12 @@ namespace TitanAscent.Audio
             gustCoroutine = StartCoroutine(GustRoutine());
         }
 
+        private void OnDisable()
+        {
+            if (gustCoroutine          != null) { StopCoroutine(gustCoroutine);          gustCoroutine          = null; }
+            if (zoneTransitionCoroutine != null) { StopCoroutine(zoneTransitionCoroutine); zoneTransitionCoroutine = null; }
+        }
+
         private void OnDestroy()
         {
             if (zoneManager != null)

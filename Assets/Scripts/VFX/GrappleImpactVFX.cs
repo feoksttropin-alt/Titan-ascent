@@ -45,6 +45,8 @@ namespace TitanAscent.VFX
         private Vector3 lastAttachPoint;
         private Vector3 playerFireOrigin;
 
+        private readonly Collider[] _overlapBuffer = new Collider[8];
+
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
         private void Awake()
@@ -259,15 +261,14 @@ namespace TitanAscent.VFX
 
         private SurfaceType ResolveSurfaceType(Vector3 worldPosition)
         {
-            // Small overlap sphere at impact point to find a SurfaceAnchorPoint
-            Collider[] hits = Physics.OverlapSphere(worldPosition, 0.5f);
-            foreach (Collider col in hits)
+            int count = Physics.OverlapSphereNonAlloc(worldPosition, 0.5f, _overlapBuffer);
+            for (int i = 0; i < count; i++)
             {
-                SurfaceAnchorPoint anchor = col.GetComponent<SurfaceAnchorPoint>();
+                SurfaceAnchorPoint anchor = _overlapBuffer[i].GetComponent<SurfaceAnchorPoint>();
                 if (anchor != null)
                     return anchor.AnchorSurfaceType;
 
-                SurfaceProperties sp = col.GetComponent<SurfaceProperties>();
+                SurfaceProperties sp = _overlapBuffer[i].GetComponent<SurfaceProperties>();
                 if (sp != null)
                     return sp.Type;
             }

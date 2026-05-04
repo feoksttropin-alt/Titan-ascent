@@ -82,8 +82,9 @@ namespace TitanAscent.VFX
                 thrusterSystem.OnEnergyRestored.RemoveListener(HandleEnergyRestored);
             }
 
-            // Ensure stream is off if this component is disabled
             StopStream();
+            if (rechargeCoroutine  != null) { StopCoroutine(rechargeCoroutine);  rechargeCoroutine  = null; }
+            if (vignetteCoroutine  != null) { StopCoroutine(vignetteCoroutine);  vignetteCoroutine  = null; }
         }
 
         private void Update()

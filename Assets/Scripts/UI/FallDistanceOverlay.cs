@@ -40,6 +40,18 @@ namespace TitanAscent.UI
                 fallTracker.OnFallCompleted.AddListener(OnFallLanded);
         }
 
+        private void OnDisable()
+        {
+            if (fadeRoutine        != null) { StopCoroutine(fadeRoutine);        fadeRoutine        = null; }
+            if (landingFlashRoutine != null) { StopCoroutine(landingFlashRoutine); landingFlashRoutine = null; }
+        }
+
+        private void OnDestroy()
+        {
+            if (fallTracker != null)
+                fallTracker.OnFallCompleted.RemoveListener(OnFallLanded);
+        }
+
         private void Update()
         {
             if (fallTracker == null) return;
