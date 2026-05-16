@@ -415,6 +415,17 @@ namespace TitanAscent.Grapple
             return transform.forward;
         }
 
+        /// <summary>
+        /// Fires the grapple programmatically, bypassing the fire-rate timer.
+        /// Used by CoyoteTimeSystem to execute buffered inputs on landing.
+        /// </summary>
+        public void FireGrapple()
+        {
+            if (currentState == GrappleState.Attached)
+                ReleaseGrapple();
+            TryFireGrapple();
+        }
+
         /// <summary>Sets maximum rope length at runtime. Used by MovementTuner.</summary>
         public void SetMaxRopeLength(float value) => maxRopeLength = Mathf.Max(minRopeLength + 1f, value);
 
